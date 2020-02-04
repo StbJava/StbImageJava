@@ -36,7 +36,7 @@ public class GifDecoder extends Decoder
 	private int cur_y;
 	private int line_size;
 
-	private GifDecoder(Stream stream) : base(stream)
+	private GifDecoder(InputStream stream) : base(stream)
 	{
 		pal = new byte[256 * 4];
 		lpal = new byte[256 * 4];
@@ -117,7 +117,7 @@ public class GifDecoder extends Decoder
 		byte lzw_cs = 0;
 		var len = 0;
 		var init_code = 0;
-		uint first = 0;
+		long first = 0;
 		var codesize = 0;
 		var codemask = 0;
 		var avail = 0;
@@ -369,7 +369,7 @@ public class GifDecoder extends Decoder
 
 /*		private void* stbi__load_gif_main(int** delays, int* x, int* y, int* z, int* comp, int req_comp)
 		{
-			if ((IsGif(Stream)))
+			if ((IsGif(InputStream)))
 			{
 				int layers = (int)(0);
 				byte* u = null;
@@ -421,7 +421,7 @@ public class GifDecoder extends Decoder
 				CRuntime.free(history);
 				CRuntime.free(background);
 				if (((req_comp) != 0) && (req_comp != 4))
-					_out_ = stbi__convert_format(_out_, (int)(4), (int)(req_comp), (uint)(layers * w), (uint)(h));
+					_out_ = stbi__convert_format(_out_, (int)(4), (int)(req_comp), (long)(layers * w), (long)(h));
 				*z = (int)(layers);
 				return _out_;
 			}
@@ -439,7 +439,7 @@ public class GifDecoder extends Decoder
 		if (u == null) throw new Exception("could not decode gif");
 
 		if (requiredComponents != null && requiredComponents.Value != ColorComponents.RedGreenBlueAlpha)
-			u = Conversion.stbi__convert_format(u, 4, (int)requiredComponents.Value, (uint)w, (uint)h);
+			u = Conversion.stbi__convert_format(u, 4, (int)requiredComponents.Value, (long)w, (long)h);
 
 		return new ImageResult
 		{
@@ -452,7 +452,7 @@ public class GifDecoder extends Decoder
 		};
 	}
 
-	private static bool InternalTest(Stream stream)
+	private static boolean InternalTest(InputStream stream)
 	{
 		var sz = 0;
 		if (stream.stbi__get8() != 'G' || stream.stbi__get8() != 'I' || stream.stbi__get8() != 'F' ||
@@ -466,14 +466,14 @@ public class GifDecoder extends Decoder
 		return true;
 	}
 
-	public static bool Test(Stream stream)
+	public static boolean Test(InputStream stream)
 	{
 		var result = InternalTest(stream);
 		stream.Rewind();
 		return result;
 	}
 
-	public static ImageInfo? Info(Stream stream)
+	public static ImageInfo? Info(InputStream stream)
 	{
 		var decoder = new GifDecoder(stream);
 
@@ -491,7 +491,7 @@ public class GifDecoder extends Decoder
 		};
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
 	{
 		var decoder = new GifDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

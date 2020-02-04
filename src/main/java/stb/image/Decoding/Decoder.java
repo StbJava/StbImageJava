@@ -1,9 +1,11 @@
 ﻿package stb.image.Decoding;
 
-import java.util.stream.Stream;
+import stb.image.Utility.IOUtils;
 
-public class Decoder
-{
+import java.io.IOException;
+import java.io.InputStream;
+
+public class Decoder {
 	private final int STBI__SCAN_load = 0;
 	private final int STBI__SCAN_type = 1;
 	private final int STBI__SCAN_header = 2;
@@ -11,57 +13,51 @@ public class Decoder
 	protected int img_y = 0;
 	protected int img_n = 0;
 
-	protected java.util.stream.Stream Stream;
+	protected InputStream InputStream;
 
-	protected Decoder(Stream stream)
-	{
-		Stream = stream ?? throw new ArgumentNullException(nameof(stream));
+	protected Decoder(java.io.InputStream stream) {
+		if (stream == null) {
+			throw new NullPointerException("stream");
+		}
+
+		InputStream = stream;
 	}
 
-	protected uint stbi__get32be()
-	{
-		return Stream.stbi__get32be();
+	protected long stbi__get32be() throws Exception {
+		return IOUtils.stbi__get32be(InputStream);
 	}
 
-	protected int stbi__get16be()
-	{
-		return Stream.stbi__get16be();
+	protected int stbi__get16be() throws Exception {
+		return IOUtils.stbi__get16be(InputStream);
 	}
 
-	protected uint stbi__get32le()
-	{
-		return Stream.stbi__get32le();
+	protected long stbi__get32le() throws Exception {
+		return IOUtils.stbi__get32le(InputStream);
 	}
 
-	protected int stbi__get16le()
-	{
-		return Stream.stbi__get16le();
+	protected int stbi__get16le() throws Exception {
+		return IOUtils.stbi__get16le(InputStream);
 	}
 
-	protected byte stbi__get8()
-	{
-		return Stream.stbi__get8();
+	protected byte stbi__get8() throws Exception {
+		return IOUtils.stbi__get8(InputStream);
 	}
 
-	protected bool stbi__getn(byte[] buffer, int offset, int count)
-	{
-		var read = Stream.Read(buffer, offset, count);
+	protected boolean stbi__getn(byte[] buffer, int offset, int count) throws IOException {
+		var read = InputStream.read(buffer, offset, count);
 
 		return read == count;
 	}
 
-	protected void stbi__skip(int count)
-	{
-		Stream.stbi__skip(count);
+	protected void stbi__skip(int count) throws IOException {
+		InputStream.skip(count);
 	}
 
-	protected bool stbi__at_eof()
-	{
-		return Stream.Position == Stream.Length;
+	protected boolean stbi__at_eof() throws IOException {
+		return InputStream.available() == 0;
 	}
 
-	internal static void stbi__err(string message)
-	{
+	static void stbi__err(String message) throws Exception {
 		throw new Exception(message);
 	}
 }

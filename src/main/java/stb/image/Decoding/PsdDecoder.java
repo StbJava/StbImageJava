@@ -2,7 +2,7 @@
 
 public class PsdDecoder extends Decoder
 {
-	private PsdDecoder(Stream stream) : base(stream)
+	private PsdDecoder(InputStream stream) : base(stream)
 	{
 	}
 
@@ -189,9 +189,9 @@ public class PsdDecoder extends Decoder
 		if (req_comp != 0 && req_comp != 4)
 		{
 			if (bits_per_channel == 16)
-				_out_ = Conversion.stbi__convert_format16(_out_, 4, req_comp, (uint)w, (uint)h);
+				_out_ = Conversion.stbi__convert_format16(_out_, 4, req_comp, (long)w, (long)h);
 			else
-				_out_ = Conversion.stbi__convert_format(_out_, 4, req_comp, (uint)w, (uint)h);
+				_out_ = Conversion.stbi__convert_format(_out_, 4, req_comp, (long)w, (long)h);
 		}
 
 		return new ImageResult
@@ -207,7 +207,7 @@ public class PsdDecoder extends Decoder
 		};
 	}
 
-	public static bool Test(Stream stream)
+	public static boolean Test(InputStream stream)
 	{
 		var r = stream.stbi__get32be() == 0x38425053;
 		stream.Rewind();
@@ -215,7 +215,7 @@ public class PsdDecoder extends Decoder
 		return r;
 	}
 
-	public static ImageInfo? Info(Stream stream)
+	public static ImageInfo? Info(InputStream stream)
 	{
 		try
 		{
@@ -248,7 +248,7 @@ public class PsdDecoder extends Decoder
 		}
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents? requiredComponents = null, int bpc = 8)
+	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null, int bpc = 8)
 	{
 		var decoder = new PsdDecoder(stream);
 		return decoder.InternalDecode(requiredComponents, bpc);

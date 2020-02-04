@@ -16,7 +16,7 @@ class MathExtensions
 		return (int)(stbi__bitreverse16((int)(v)) >> (16 - bits));
 	}
 
-	public static uint _lrotl(uint x, int y)
+	public static long _lrotl(long x, int y)
 	{
 		return (x << y) | (x >> (32 - y));
 	}

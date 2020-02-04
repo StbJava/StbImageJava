@@ -1,86 +1,43 @@
 ﻿package stb.image.Utility;
 
-class FakePtr<T> where T: new()
-{
-	public static FakePtr<T> Null = new FakePtr<T>(null);
+import java.util.Arrays;
 
-	private final T[] _array;
+public class FakePtr<T>
+{
+	private T[] _array;
 
 	public int Offset;
 
-	public bool IsNull
-	{
-		get
-		{
-			return _array == null;
-		}
-	}
-
-	public T this[int index]
-	{
-		get
-		{
-			return _array[Offset + index];
-		}
-
-		set
-		{
-			_array[Offset + index] = value;
-		}
-	}
-
-	public T this[long index]
-	{
-		get
-		{
-			return _array[Offset + index];
-		}
-
-		set
-		{
-			_array[Offset + index] = value;
-		}
-	}
-
-	public T Value
-	{
-		get
-		{
-			return this[0];
-		}
-
-		set
-		{
-			this[0] = value;
-		}
-	}
-
 	public FakePtr(FakePtr<T> ptr, int offset)
 	{
-		Offset = ptr.Offset + offset;
 		_array = ptr._array;
+		Offset = ptr.Offset + offset;
 	}
 
 	public FakePtr(T[] data, int offset)
 	{
-		Offset = offset;
 		_array = data;
+		Offset = offset;
 	}
 
-	public FakePtr(T[] data): this(data, 0)
+	public FakePtr(T[] data)
 	{
-	}
-
-	public FakePtr(T value)
-	{
-		Offset = 0;
-		_array = new T[1];
-		_array[0] = value;
+		this(data, 0);
 	}
 
 	public void Clear(int count)
 	{
-		Array.Clear(_array, Offset, count);
+		Arrays.fill(_array, Offset, Offset + count, 0);
+	}
+
+	public T GetAt(int offset)
+	{
+		return _array[Offset + offset];
+	}
+
+	public void SetAt(int offset, T value)
+	{
+		_array[Offset + offset] = value;
 	}
 
 	public T GetAndIncrease()
@@ -102,39 +59,9 @@ class FakePtr<T> where T: new()
 		_array[Offset] = value;
 	}
 
-	public static FakePtr<T> operator +(FakePtr<T> p, int offset)
+	public FakePtr<T> CloneAdd(int offset)
 	{
-		return new FakePtr<T>(p._array) { Offset = p.Offset + offset };
-	}
-
-	public static FakePtr<T> operator -(FakePtr<T> p, int offset)
-	{
-		return p + -offset;
-	}
-
-	public static FakePtr<T> operator +(FakePtr<T> p, uint offset)
-	{
-		return p + (int)offset;
-	}
-
-	public static FakePtr<T> operator -(FakePtr<T> p, uint offset)
-	{
-		return p - (int)offset;
-	}
-
-	public static FakePtr<T> operator +(FakePtr<T> p, long offset)
-	{
-		return p + (int)offset;
-	}
-
-	public static FakePtr<T> operator -(FakePtr<T> p, long offset)
-	{
-		return p - (int)offset;
-	}
-
-	public static FakePtr<T> operator ++(FakePtr<T> p)
-	{
-		return p + 1;
+		return new FakePtr<T>(_array, Offset + offset );
 	}
 
 	public static FakePtr<T> CreateWithSize(int size)

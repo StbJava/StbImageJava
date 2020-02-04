@@ -12,7 +12,7 @@ class Conversion
 		return (ushort)(((r * 77) + (g * 150) + (29 * b)) >> 8);
 	}
 
-	public static byte[] stbi__convert_format16(byte[] data, int img_n, int req_comp, uint x, uint y)
+	public static byte[] stbi__convert_format16(byte[] data, int img_n, int req_comp, long x, long y)
 	{
 		throw new NotImplementedException();
 /*			int i = 0;
@@ -120,7 +120,7 @@ class Conversion
 		return good;*/
 	}
 
-	public static byte[] stbi__convert_format(byte[] data, int img_n, int req_comp, uint x, uint y)
+	public static byte[] stbi__convert_format(byte[] data, int img_n, int req_comp, long x, long y)
 	{
 		int i = 0;
 		int j = 0;

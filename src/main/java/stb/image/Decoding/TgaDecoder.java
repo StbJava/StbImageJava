@@ -2,7 +2,7 @@
 
 public class TgaDecoder extends Decoder
 {
-	private TgaDecoder(Stream stream) : base(stream)
+	private TgaDecoder(InputStream stream) : base(stream)
 	{
 	}
 
@@ -187,8 +187,8 @@ public class TgaDecoder extends Decoder
 
 		var req_comp = requiredComponents.ToReqComp();
 		if (req_comp != 0 && req_comp != tga_comp)
-			tga_data = Conversion.stbi__convert_format(tga_data, tga_comp, req_comp, (uint)tga_width,
-				(uint)tga_height);
+			tga_data = Conversion.stbi__convert_format(tga_data, tga_comp, req_comp, (long)tga_width,
+				(long)tga_height);
 		tga_palette_start = tga_palette_len = tga_palette_bits = tga_x_origin = tga_y_origin = 0;
 
 		return new ImageResult
@@ -202,7 +202,7 @@ public class TgaDecoder extends Decoder
 		};
 	}
 
-	public static bool Test(Stream stream)
+	public static boolean Test(InputStream stream)
 	{
 		try
 		{
@@ -246,7 +246,7 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	public static ImageInfo? Info(Stream stream)
+	public static ImageInfo? Info(InputStream stream)
 	{
 		try
 		{
@@ -316,7 +316,7 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
 	{
 		var decoder = new TgaDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

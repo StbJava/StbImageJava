@@ -48,7 +48,7 @@ class ZLib
 	private static final byte[] length_dezigzag =
 		{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
-	private uint code_buffer;
+	private long code_buffer;
 	private int num_bits;
 	private final stbi__zhuffman z_distance = new stbi__zhuffman();
 	private int z_expandable;
@@ -71,17 +71,17 @@ class ZLib
 	{
 		do
 		{
-			code_buffer |= (uint)stbi__zget8() << num_bits;
+			code_buffer |= (long)stbi__zget8() << num_bits;
 			num_bits += 8;
 		} while (num_bits <= 24);
 	}
 
-	private uint stbi__zreceive(int n)
+	private long stbi__zreceive(int n)
 	{
-		uint k = 0;
+		long k = 0;
 		if (num_bits < n)
 			stbi__fill_bits();
-		k = (uint)(code_buffer & ((1 << n) - 1));
+		k = (long)(code_buffer & ((1 << n) - 1));
 		code_buffer >>= n;
 		num_bits -= n;
 		return k;

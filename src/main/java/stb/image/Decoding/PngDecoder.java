@@ -5,8 +5,8 @@ public class PngDecoder extends Decoder
 	[StructLayout(LayoutKind.Sequential)]
 	public struct stbi__pngchunk
 	{
-		public uint length;
-		public uint type;
+		public long length;
+		public long type;
 	}
 
 	private final int STBI__F_none = 0;
@@ -34,7 +34,7 @@ public class PngDecoder extends Decoder
 	private byte[] _out_;
 	private int depth;
 
-	private PngDecoder(Stream stream) : base(stream)
+	private PngDecoder(InputStream stream) : base(stream)
 	{
 	}
 
@@ -46,7 +46,7 @@ public class PngDecoder extends Decoder
 		return c;
 	}
 
-	private static bool stbi__check_png_header(Stream input)
+	private static boolean stbi__check_png_header(InputStream input)
 	{
 		var i = 0;
 		for (i = 0; i < 8; ++i)
@@ -69,26 +69,26 @@ public class PngDecoder extends Decoder
 		return c;
 	}
 
-	private int stbi__create_png_image_raw(FakePtr<byte> raw, uint raw_len, int out_n, uint x, uint y, int depth,
+	private int stbi__create_png_image_raw(FakePtr<byte> raw, long raw_len, int out_n, long x, long y, int depth,
 		int color)
 	{
 		var bytes = depth == 16 ? 2 : 1;
-		uint i = 0;
-		uint j = 0;
-		var stride = (uint)(x * out_n * bytes);
-		uint img_len = 0;
-		uint img_width_bytes = 0;
+		long i = 0;
+		long j = 0;
+		var stride = (long)(x * out_n * bytes);
+		long img_len = 0;
+		long img_width_bytes = 0;
 		var k = 0;
 		var output_bytes = out_n * bytes;
 		var filter_bytes = img_n * bytes;
 		var width = (int)x;
 		_out_ = new byte[x * y * output_bytes];
-		img_width_bytes = (uint)((img_n * x * depth + 7) >> 3);
+		img_width_bytes = (long)((img_n * x * depth + 7) >> 3);
 		img_len = (img_width_bytes + 1) * y;
 		if (raw_len < img_len)
 			stbi__err("not enough pixels");
 		var ptr = new FakePtr<byte>(_out_);
-		for (j = (uint)0; j < y; ++j)
+		for (j = (long)0; j < y; ++j)
 		{
 			var cur = ptr + stride * j;
 			FakePtr<byte> prior;
@@ -259,13 +259,13 @@ public class PngDecoder extends Decoder
 				if (depth == 16)
 				{
 					cur = ptr + stride * j;
-					for (i = (uint)0; i < x; ++i, cur += output_bytes) cur[filter_bytes + 1] = 255;
+					for (i = (long)0; i < x; ++i, cur += output_bytes) cur[filter_bytes + 1] = 255;
 				}
 			}
 		}
 
 		if (depth < 8)
-			for (j = (uint)0; j < y; ++j)
+			for (j = (long)0; j < y; ++j)
 			{
 				var cur = ptr + stride * j;
 				var _in_ = ptr + stride * j + x * out_n - img_width_bytes;
@@ -352,7 +352,7 @@ public class PngDecoder extends Decoder
 			throw new NotImplementedException();
 		/*				FakePtr<byte> cur = ptr;
 						ushort* cur16 = (ushort*)(cur);
-						for (i = (uint)(0); (i) < (x * y * out_n); ++i, cur16++, cur += 2)
+						for (i = (long)(0); (i) < (x * y * out_n); ++i, cur16++, cur += 2)
 						{
 							*cur16 = (ushort)((cur[0] << 8) | cur[1]);
 						}*/
@@ -360,14 +360,14 @@ public class PngDecoder extends Decoder
 		return 1;
 	}
 
-	private int stbi__create_png_image(FakePtr<byte> image_data, uint image_data_len, int out_n, int depth,
+	private int stbi__create_png_image(FakePtr<byte> image_data, long image_data_len, int out_n, int depth,
 		int color, int interlaced)
 	{
 		var bytes = depth == 16 ? 2 : 1;
 		var out_bytes = out_n * bytes;
 		var p = 0;
 		if (interlaced == 0)
-			return stbi__create_png_image_raw(image_data, image_data_len, out_n, (uint)img_x, (uint)img_y, depth,
+			return stbi__create_png_image_raw(image_data, image_data_len, out_n, (long)img_x, (long)img_y, depth,
 				color);
 		var final = new byte[img_x * img_y * out_bytes];
 		var xorig = new int[7];
@@ -416,8 +416,8 @@ public class PngDecoder extends Decoder
 			y = (img_y - yorig[p] + yspc[p] - 1) / yspc[p];
 			if (x != 0 && y != 0)
 			{
-				var img_len = (uint)((((img_n * x * depth + 7) >> 3) + 1) * y);
-				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, (uint)x, (uint)y, depth,
+				var img_len = (long)((((img_n * x * depth + 7) >> 3) + 1) * y);
+				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, (long)x, (long)y, depth,
 						color) == 0) return 0;
 
 				var finalPtr = new FakePtr<byte>(final);
@@ -443,17 +443,17 @@ public class PngDecoder extends Decoder
 
 	private int stbi__compute_transparency(byte[] tc, int out_n)
 	{
-		uint i = 0;
-		var pixel_count = (uint)(img_x * img_y);
+		long i = 0;
+		var pixel_count = (long)(img_x * img_y);
 		var p = new FakePtr<byte>(_out_);
 		if (out_n == 2)
-			for (i = (uint)0; i < pixel_count; ++i)
+			for (i = (long)0; i < pixel_count; ++i)
 			{
 				p[1] = (byte)(p[0] == tc[0] ? 0 : 255);
 				p += 2;
 			}
 		else
-			for (i = (uint)0; i < pixel_count; ++i)
+			for (i = (long)0; i < pixel_count; ++i)
 			{
 				if (p[0] == tc[0] && p[1] == tc[1] && p[2] == tc[2])
 					p[3] = 0;
@@ -467,12 +467,12 @@ public class PngDecoder extends Decoder
 	{
 		throw new NotImplementedException();
 
-		/*			uint i = 0;
-					uint pixel_count = (uint)(img_x * img_y);
+		/*			long i = 0;
+					long pixel_count = (long)(img_x * img_y);
 					FakePtr<ushort> p = new FakePtr<ushort>(_out_);
 					if ((out_n) == (2))
 					{
-						for (i = (uint)(0); (i) < (pixel_count); ++i)
+						for (i = (long)(0); (i) < (pixel_count); ++i)
 						{
 							p[1] = (ushort)((p[0]) == (tc[0]) ? 0 : 65535);
 							p += 2;
@@ -480,7 +480,7 @@ public class PngDecoder extends Decoder
 					}
 					else
 					{
-						for (i = (uint)(0); (i) < (pixel_count); ++i)
+						for (i = (long)(0); (i) < (pixel_count); ++i)
 						{
 							if ((((p[0]) == (tc[0])) && ((p[1]) == (tc[1]))) && ((p[2]) == (tc[2])))
 								p[3] = (ushort)(0);
@@ -493,13 +493,13 @@ public class PngDecoder extends Decoder
 
 	private int stbi__expand_png_palette(byte[] palette, int len, int pal_img_n)
 	{
-		uint i = 0;
-		var pixel_count = (uint)(img_x * img_y);
+		long i = 0;
+		var pixel_count = (long)(img_x * img_y);
 		var orig = _out_;
 		_out_ = new byte[pixel_count * pal_img_n];
 		var p = new FakePtr<byte>(_out_);
 		if (pal_img_n == 3)
-			for (i = (uint)0; i < pixel_count; ++i)
+			for (i = (long)0; i < pixel_count; ++i)
 			{
 				var n = orig[i] * 4;
 				p[0] = palette[n];
@@ -508,7 +508,7 @@ public class PngDecoder extends Decoder
 				p += 3;
 			}
 		else
-			for (i = (uint)0; i < pixel_count; ++i)
+			for (i = (long)0; i < pixel_count; ++i)
 			{
 				var n = orig[i] * 4;
 				p[0] = palette[n];
@@ -533,12 +533,12 @@ public class PngDecoder extends Decoder
 
 	private void stbi__de_iphone()
 	{
-		uint i = 0;
-		var pixel_count = (uint)(img_x * img_y);
+		long i = 0;
+		var pixel_count = (long)(img_x * img_y);
 		var p = new FakePtr<byte>(_out_);
 		if (img_out_n == 3)
 		{
-			for (i = (uint)0; i < pixel_count; ++i)
+			for (i = (long)0; i < pixel_count; ++i)
 			{
 				var t = p[0];
 				p[0] = p[2];
@@ -549,7 +549,7 @@ public class PngDecoder extends Decoder
 		else
 		{
 			if (stbi__unpremultiply_on_load != 0)
-				for (i = (uint)0; i < pixel_count; ++i)
+				for (i = (long)0; i < pixel_count; ++i)
 				{
 					var a = p[3];
 					var t = p[0];
@@ -569,7 +569,7 @@ public class PngDecoder extends Decoder
 					p += 4;
 				}
 			else
-				for (i = (uint)0; i < pixel_count; ++i)
+				for (i = (long)0; i < pixel_count; ++i)
 				{
 					var t = p[0];
 					p[0] = p[2];
@@ -590,8 +590,8 @@ public class PngDecoder extends Decoder
 		var tc16 = new ushort[3];
 		var ioff = 0;
 		var idata_limit = 0;
-		uint i = 0;
-		var pal_len = (uint)0;
+		long i = 0;
+		var pal_len = (long)0;
 		var first = 1;
 		var k = 0;
 		var interlace = 0;
@@ -600,7 +600,7 @@ public class PngDecoder extends Decoder
 		expanded = null;
 		idata = null;
 		_out_ = null;
-		if (!stbi__check_png_header(Stream))
+		if (!stbi__check_png_header(InputStream))
 			return 0;
 		if (scan == STBI__SCAN_type)
 			return 1;
@@ -609,11 +609,11 @@ public class PngDecoder extends Decoder
 			var c = stbi__get_chunk_header();
 			switch (c.type)
 			{
-				case ((uint)'C' << 24) + ((uint)'g' << 16) + ((uint)'B' << 8) + 'I':
+				case ((long)'C' << 24) + ((long)'g' << 16) + ((long)'B' << 8) + 'I':
 					is_iphone = 1;
 					stbi__skip((int)c.length);
 					break;
-				case ((uint)'I' << 24) + ((uint)'H' << 16) + ((uint)'D' << 8) + 'R':
+				case ((long)'I' << 24) + ((long)'H' << 16) + ((long)'D' << 8) + 'R':
 				{
 					var comp = 0;
 					var filter = 0;
@@ -668,7 +668,7 @@ public class PngDecoder extends Decoder
 
 					break;
 				}
-				case ((uint)'P' << 24) + ((uint)'L' << 16) + ((uint)'T' << 8) + 'E':
+				case ((long)'P' << 24) + ((long)'L' << 16) + ((long)'T' << 8) + 'E':
 				{
 					if (first != 0)
 						stbi__err("first not IHDR");
@@ -677,7 +677,7 @@ public class PngDecoder extends Decoder
 					pal_len = c.length / 3;
 					if (pal_len * 3 != c.length)
 						stbi__err("invalid PLTE");
-					for (i = (uint)0; i < pal_len; ++i)
+					for (i = (long)0; i < pal_len; ++i)
 					{
 						palette[i * 4 + 0] = stbi__get8();
 						palette[i * 4 + 1] = stbi__get8();
@@ -687,7 +687,7 @@ public class PngDecoder extends Decoder
 
 					break;
 				}
-				case ((uint)'t' << 24) + ((uint)'R' << 16) + ((uint)'N' << 8) + 'S':
+				case ((long)'t' << 24) + ((long)'R' << 16) + ((long)'N' << 8) + 'S':
 				{
 					if (first != 0)
 						stbi__err("first not IHDR");
@@ -706,13 +706,13 @@ public class PngDecoder extends Decoder
 						if (c.length > pal_len)
 							stbi__err("bad tRNS len");
 						pal_img_n = 4;
-						for (i = (uint)0; i < c.length; ++i) palette[i * 4 + 3] = stbi__get8();
+						for (i = (long)0; i < c.length; ++i) palette[i * 4 + 3] = stbi__get8();
 					}
 					else
 					{
 						if ((img_n & 1) == 0)
 							stbi__err("tRNS with alpha");
-						if (c.length != (uint)img_n * 2)
+						if (c.length != (long)img_n * 2)
 							stbi__err("bad tRNS len");
 						has_trans = 1;
 						if (depth == 16)
@@ -725,7 +725,7 @@ public class PngDecoder extends Decoder
 
 					break;
 				}
-				case ((uint)'I' << 24) + ((uint)'D' << 16) + ((uint)'A' << 8) + 'T':
+				case ((long)'I' << 24) + ((long)'D' << 16) + ((long)'A' << 8) + 'T':
 				{
 					if (first != 0)
 						stbi__err("first not IHDR");
@@ -741,7 +741,7 @@ public class PngDecoder extends Decoder
 						return 0;
 					if (ioff + c.length > idata_limit)
 					{
-						var idata_limit_old = (uint)idata_limit;
+						var idata_limit_old = (long)idata_limit;
 						if (idata_limit == 0)
 							idata_limit = (int)(c.length > 4096 ? c.length : 4096);
 						while (ioff + c.length > idata_limit) idata_limit *= 2;
@@ -754,17 +754,17 @@ public class PngDecoder extends Decoder
 					ioff += (int)c.length;
 					break;
 				}
-				case ((uint)'I' << 24) + ((uint)'E' << 16) + ((uint)'N' << 8) + 'D':
+				case ((long)'I' << 24) + ((long)'E' << 16) + ((long)'N' << 8) + 'D':
 				{
 					var raw_len = 0;
-					uint bpl = 0;
+					long bpl = 0;
 					if (first != 0)
 						stbi__err("first not IHDR");
 					if (scan != STBI__SCAN_load)
 						return 1;
 					if (idata == null)
 						stbi__err("no IDAT");
-					bpl = (uint)((img_x * depth + 7) / 8);
+					bpl = (long)((img_x * depth + 7) / 8);
 					raw_len = (int)(bpl * img_y * img_n + img_y);
 					expanded = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, out raw_len,
 						is_iphone != 0 ? 0 : 1);
@@ -775,7 +775,7 @@ public class PngDecoder extends Decoder
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtr<byte>(expanded), (uint)raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new FakePtr<byte>(expanded), (long)raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0)
@@ -848,11 +848,11 @@ public class PngDecoder extends Decoder
 			if (req_comp != 0 && req_comp != img_out_n)
 			{
 				if (bits_per_channel == 8)
-					result = Conversion.stbi__convert_format(result, img_out_n, req_comp, (uint)img_x,
-						(uint)img_y);
+					result = Conversion.stbi__convert_format(result, img_out_n, req_comp, (long)img_x,
+						(long)img_y);
 				else
-					result = Conversion.stbi__convert_format16(result, img_out_n, req_comp, (uint)img_x,
-						(uint)img_y);
+					result = Conversion.stbi__convert_format16(result, img_out_n, req_comp, (long)img_x,
+						(long)img_y);
 				img_out_n = req_comp;
 			}
 
@@ -874,7 +874,7 @@ public class PngDecoder extends Decoder
 		}
 	}
 
-	public static bool Test(Stream stream)
+	public static boolean Test(InputStream stream)
 	{
 		var r = stbi__check_png_header(stream);
 		stream.Rewind();
@@ -882,7 +882,7 @@ public class PngDecoder extends Decoder
 		return r;
 	}
 
-	public static ImageInfo? Info(Stream stream)
+	public static ImageInfo? Info(InputStream stream)
 	{
 		var decoder = new PngDecoder(stream);
 		var r = decoder.stbi__parse_png_file(STBI__SCAN_header, 0);
@@ -899,7 +899,7 @@ public class PngDecoder extends Decoder
 		};
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
 	{
 		var decoder = new PngDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

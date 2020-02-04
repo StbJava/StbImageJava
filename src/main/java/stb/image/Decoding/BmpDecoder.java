@@ -1,27 +1,34 @@
 ﻿package stb.image.Decoding;
 
+import stb.image.ColorComponents;
+import stb.image.ImageResult;
+import stb.image.Utility.Conversion;
+import stb.image.Utility.FakePtr;
+
+import java.io.InputStream;
+
 public class BmpDecoder extends Decoder {
-	public struct stbi__bmp_data
+	public static class stbi__bmp_data
 	{
 		public int bpp;
 		public int offset;
 		public int hsz;
-		public uint mr;
-		public uint mg;
-		public uint mb;
-		public uint ma;
-		public uint all_a;
+		public long mr;
+		public long mg;
+		public long mb;
+		public long ma;
+		public long all_a;
 	}
 
-	private static final uint[] mul_table = {0, 0xff, 0x55, 0x49, 0x11, 0x21, 0x41, 0x81, 0x01};
-	private static final uint[] shift_table = {0, 0, 0, 1, 0, 2, 4, 6, 0};
+	private static final long[] mul_table = {0, 0xff, 0x55, 0x49, 0x11, 0x21, 0x41, 0x81, 0x01};
+	private static final long[] shift_table = {0, 0, 0, 1, 0, 2, 4, 6, 0};
 
-	private BmpDecoder(Stream stream) :
-
-	base(stream) {
+	private BmpDecoder(java.io.InputStream stream)
+	{
+		super(stream)
 	}
 
-	private static int stbi__high_bit(uint z) {
+	private static int stbi__high_bit(long z) {
 		var n = 0;
 		if (z == 0)
 			return -1;
@@ -53,7 +60,7 @@ public class BmpDecoder extends Decoder {
 		return n;
 	}
 
-	private static int stbi__bitcount(uint a) {
+	private static int stbi__bitcount(long a) {
 		a = (a & 0x55555555) + ((a >> 1) & 0x55555555);
 		a = (a & 0x33333333) + ((a >> 2) & 0x33333333);
 		a = (a + (a >> 4)) & 0x0f0f0f0f;
@@ -62,7 +69,7 @@ public class BmpDecoder extends Decoder {
 		return (int) (a & 0xff);
 	}
 
-	private static int stbi__shiftsigned(uint v, int shift, int bits) {
+	private static int stbi__shiftsigned(long v, int shift, int bits) {
 		if (shift < 0)
 			v <<= -shift;
 		else
@@ -71,7 +78,7 @@ public class BmpDecoder extends Decoder {
 		return (int) (v * (int) mul_table[bits]) >> (int) shift_table[bits];
 	}
 
-	private void stbi__bmp_parse_header(ref stbi__bmp_data info) {
+	private void stbi__bmp_parse_header(stbi__bmp_data info) throws Exception {
 		var hsz = 0;
 		if (stbi__get8() != 'B' || stbi__get8() != 'M')
 			stbi__err("not BMP");
@@ -114,15 +121,15 @@ public class BmpDecoder extends Decoder {
 				if (info.bpp == 16 || info.bpp == 32) {
 					if (compress == 0) {
 						if (info.bpp == 32) {
-							info.mr = 0xff u << 16;
-							info.mg = 0xff u << 8;
-							info.mb = 0xff u << 0;
-							info.ma = 0xff u << 24;
+							info.mr = 0xff << 16;
+							info.mg = 0xff << 8;
+							info.mb = 0xff << 0;
+							info.ma = 0xff << 24;
 							info.all_a = 0;
 						} else {
-							info.mr = 31 u << 10;
-							info.mg = 31 u << 5;
-							info.mb = 31 u << 0;
+							info.mr = 31 << 10;
+							info.mg = 31 << 5;
+							info.mb = 31 << 0;
 						}
 					} else if (compress == 3) {
 						info.mr = stbi__get32le();
@@ -153,13 +160,13 @@ public class BmpDecoder extends Decoder {
 		}
 	}
 
-	private ImageResult InternalDecode(ColorComponents?requiredComponents) {
+	private ImageResult InternalDecode(ColorComponents requiredComponents) throws  Exception {
 		byte[] _out_;
-		var mr = (uint) 0;
-		var mg = (uint) 0;
-		var mb = (uint) 0;
-		var ma = (uint) 0;
-		uint all_a = 0;
+		var mr = (long) 0;
+		var mg = (long) 0;
+		var mb = (long) 0;
+		var ma = (long) 0;
+		long all_a = 0;
 		var pal = new byte[256 * 4];
 		var psize = 0;
 		var i = 0;
@@ -170,9 +177,9 @@ public class BmpDecoder extends Decoder {
 		var target = 0;
 		var info = new stbi__bmp_data();
 		info.all_a = 255;
-		stbi__bmp_parse_header(ref info);
+		stbi__bmp_parse_header(info);
 		flip_vertically = img_y > 0 ? 1 : 0;
-		img_y = Math.Abs(img_y);
+		img_y = Math.abs(img_y);
 		mr = info.mr;
 		mg = info.mg;
 		mb = info.mb;
@@ -187,8 +194,8 @@ public class BmpDecoder extends Decoder {
 		}
 
 		img_n = ma != 0 ? 4 : 3;
-		if (requiredComponents != null && (int) requiredComponents.Value >= 3)
-			target = (int) requiredComponents.Value;
+		if (requiredComponents != null && (int) requiredComponents.value >= 3)
+			target = (int) requiredComponents.value;
 		else
 			target = img_n;
 		_out_ = new byte[target * img_x * img_y];
@@ -201,7 +208,7 @@ public class BmpDecoder extends Decoder {
 				pal[i * 4 + 0] = stbi__get8();
 				if (info.hsz != 12)
 					stbi__get8();
-				pal[i * 4 + 3] = 255;
+				pal[i * 4 + 3] = (byte)255;
 			}
 
 			stbi__skip(info.offset - 14 - info.hsz - psize * (info.hsz == 12 ? 3 : 4));
@@ -224,7 +231,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[color * 4 + 1];
 						_out_[z++] = pal[color * 4 + 2];
 						if (target == 4)
-							_out_[z++] = 255;
+							_out_[z++] = (byte)255;
 						if (i + 1 == img_x)
 							break;
 						if (--bit_offset < 0) {
@@ -249,7 +256,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[v * 4 + 1];
 						_out_[z++] = pal[v * 4 + 2];
 						if (target == 4)
-							_out_[z++] = 255;
+							_out_[z++] = (byte)255;
 						if (i + 1 == img_x)
 							break;
 						v = info.bpp == 8 ? stbi__get8() : v2;
@@ -257,7 +264,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[v * 4 + 1];
 						_out_[z++] = pal[v * 4 + 2];
 						if (target == 4)
-							_out_[z++] = 255;
+							_out_[z++] = (byte)255;
 					}
 
 					stbi__skip(pad);
@@ -314,12 +321,12 @@ public class BmpDecoder extends Decoder {
 				} else {
 					var bpp = info.bpp;
 					for (i = 0; i < img_x; ++i) {
-						var v = bpp == 16 ? (uint) stbi__get16le() : stbi__get32le();
-						uint a = 0;
+						var v = bpp == 16 ? (long) stbi__get16le() : stbi__get32le();
+						long a = 0;
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mr, rshift, rcount) & 255);
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mg, gshift, gcount) & 255);
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mb, bshift, bcount) & 255);
-						a = (uint) (ma != 0 ? stbi__shiftsigned(v & ma, ashift, acount) : 255);
+						a = (long) (ma != 0 ? stbi__shiftsigned(v & ma, ashift, acount) : 255);
 						all_a |= a;
 						if (target == 4)
 							_out_[z++] = (byte) (a & 255);
@@ -332,15 +339,16 @@ public class BmpDecoder extends Decoder {
 
 		if (target == 4 && all_a == 0)
 			for (i = 4 * img_x * img_y - 1; i >= 0; i -= 4)
-				_out_[i] = 255;
+				_out_[i] = (byte)255;
 		if (flip_vertically != 0) {
 			byte t = 0;
 			var ptr = new FakePtr<byte>(_out_);
 			for (j = 0; j < img_y >> 1; ++j) {
-				var p1 = ptr + j * img_x * target;
-				var p2 = ptr + (img_y - 1 - j) * img_x * target;
+				var p1 = ptr.CloneAdd(j * img_x * target);
+				var p2 = ptr.CloneAdd((img_y - 1 - j) * img_x * target);
 				for (i = 0; i < img_x * target; ++i) {
-					t = p1[i];
+					t = p1.GetAt(i);
+
 					p1[i] = p2[i];
 					p2[i] = t;
 				}
@@ -348,8 +356,8 @@ public class BmpDecoder extends Decoder {
 		}
 
 		if (requiredComponents != null && (int) requiredComponents.Value != target)
-			_out_ = Conversion.stbi__convert_format(_out_, target, (int) requiredComponents.Value, (uint) img_x,
-					(uint) img_y);
+			_out_ = Conversion.stbi__convert_format(_out_, target, (int) requiredComponents.Value, (long) img_x,
+					(long) img_y);
 
 		return new ImageResult
 		{
@@ -362,11 +370,11 @@ public class BmpDecoder extends Decoder {
 		} ;
 	}
 
-	private static bool TestInternal(Stream stream) {
+	private static boolean TestInternal(InputStream stream) throws Exception {
 		var sz = 0;
-		if (stream.ReadByte() != 'B')
+		if (stream.read() != 'B')
 			return false;
-		if (stream.ReadByte() != 'M')
+		if (stream.read() != 'M')
 			return false;
 
 		stream.stbi__get32le();
@@ -378,7 +386,7 @@ public class BmpDecoder extends Decoder {
 		return r;
 	}
 
-	public static bool Test(Stream stream) {
+	public static boolean Test(InputStream stream) {
 		var r = TestInternal(stream);
 		stream.Rewind();
 		return r;
@@ -386,7 +394,7 @@ public class BmpDecoder extends Decoder {
 
 	public static ImageInfo?
 
-	Info(Stream stream) {
+	Info(InputStream stream) {
 		var info = new stbi__bmp_data
 		{
 			all_a = 255
@@ -410,7 +418,7 @@ public class BmpDecoder extends Decoder {
 		} ;
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents?requiredComponents=null) {
+	public static ImageResult Decode(InputStream stream, ColorComponents?requiredComponents=null) {
 		var decoder = new BmpDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}

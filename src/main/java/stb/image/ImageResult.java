@@ -1,19 +1,21 @@
 ﻿package stb.image;
 
+import java.io.InputStream;
+
 public	class ImageResult
 {
-	public int Width { get; set; }
-	public int Height { get; set; }
-	public ColorComponents ColorComponents { get; set; }
-	public ColorComponents SourceComponents { get; set; }
+	public int Width;
+	public int Height;
+	public ColorComponents ColorComponents;
+	public ColorComponents SourceComponents;
 
 	/// <summary>
 	/// Either 8 or 16
 	/// </summary>
-	public int BitsPerChannel { get; set; }
-	public byte[] Data { get; set; }
+	public int BitsPerChannel;
+	public byte[] Data;
 
-	public static ImageResult FromStream(Stream stream, ColorComponents? requiredComponents = null, bool use8BitsPerChannel = true)
+	public static ImageResult FromInputStream(InputStream stream, ColorComponents? requiredComponents = null, boolean use8BitsPerChannel = true)
 	{
 		ImageResult result = null;
 		if (JpgDecoder.Test(stream))

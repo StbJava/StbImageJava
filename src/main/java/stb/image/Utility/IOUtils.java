@@ -1,17 +1,12 @@
 ﻿package stb.image.Utility;
 
-import java.util.stream.Stream;
+import java.io.InputStream;
 
-class IOUtils
+public class IOUtils
 {
-	public static void Rewind(SeekableStream stream)
+	public static byte stbi__get8(InputStream s) throws Exception
 	{
-		stream.Seek(0, SeekOrigin.Begin);
-	}
-
-	public static byte stbi__get8(Stream s)
-	{
-		int b = s.ReadByte();
+		int b = s.read();
 		if (b == -1)
 		{
 			throw new Exception("EOF");
@@ -20,32 +15,27 @@ class IOUtils
 		return (byte)b;
 	}
 
-	public static int stbi__get16be(Stream s)
+	public static int stbi__get16be(InputStream s) throws Exception
 	{
-		int z = s.stbi__get8();
-		return (z << 8) + s.stbi__get8();
+		int z = stbi__get8(s);
+		return (z << 8) + stbi__get8(s);
 	}
 
-	public static uint stbi__get32be(Stream s)
+	public static long stbi__get32be(InputStream s) throws Exception
 	{
-		uint z = (uint)stbi__get16be(s);
-		return (uint)((z << 16) + stbi__get16be(s));
+		long z = (long)stbi__get16be(s);
+		return (long)((z << 16) + stbi__get16be(s));
 	}
 
-	public static int stbi__get16le(Stream s)
+	public static int stbi__get16le(InputStream s) throws Exception
 	{
-		int z = s.stbi__get8();
-		return z + (s.stbi__get8() << 8);
+		int z = stbi__get8(s);
+		return z + (stbi__get8(s) << 8);
 	}
 
-	public static uint stbi__get32le(Stream s)
+	public static long stbi__get32le(InputStream s) throws Exception
 	{
-		uint z = (uint)(stbi__get16le(s));
-		return (uint)(z + (stbi__get16le(s) << 16));
-	}
-
-	public static void stbi__skip(Stream s, int skip)
-	{
-		s.Seek(skip, SeekOrigin.Current);
+		long z = (long)(stbi__get16le(s));
+		return (long)(z + (stbi__get16le(s) << 16));
 	}
 }

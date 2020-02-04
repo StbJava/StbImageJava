@@ -44,14 +44,14 @@ public class JpgDecoder extends Decoder
 		public final ushort[] code = new ushort[256];
 		public final int[] delta = new int[17];
 		public final byte[] fast = new byte[1 << 9];
-		public final uint[] maxcode = new uint[18];
+		public final long[] maxcode = new long[18];
 		public final byte[] size = new byte[257];
 		public final byte[] values = new byte[256];
 	}
 
 	private final int STBI__ZFAST_BITS = 9;
 
-	private static final uint[] stbi__bmask =
+	private static final long[] stbi__bmask =
 		{0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535};
 
 	private static final int[] stbi__jbias =
@@ -78,7 +78,7 @@ public class JpgDecoder extends Decoder
 	// definition of jpeg image component
 	private final img_comp[] img_comp = new img_comp[4];
 
-	private uint code_buffer; // jpeg entropy-coded buffer
+	private long code_buffer; // jpeg entropy-coded buffer
 	private int code_bits; // number of valid bits
 	private byte marker; // marker seen while filling entropy buffer
 	private int nomore; // flag if we saw a marker so must stop
@@ -102,7 +102,7 @@ public class JpgDecoder extends Decoder
 	private YCbCr_to_RGB_kernel YCbCr_to_RGB_kernel;
 	private Resampler resample_row_hv_2_kernel;
 
-	private JpgDecoder(Stream stream) : base(stream)
+	private JpgDecoder(InputStream stream) : base(stream)
 	{
 		for (var i = 0; i < 4; ++i)
 		{
@@ -124,7 +124,7 @@ public class JpgDecoder extends Decoder
 		var i = 0;
 		var j = 0;
 		var k = 0;
-		uint code = 0;
+		long code = 0;
 		for (i = 0; i < 16; ++i)
 			for (j = 0; j < count[i]; ++j)
 				h.size[k++] = (byte)(i + 1);
@@ -191,7 +191,7 @@ public class JpgDecoder extends Decoder
 	{
 		do
 		{
-			var b = (uint)(nomore != 0 ? 0 : stbi__get8());
+			var b = (long)(nomore != 0 ? 0 : stbi__get8());
 			if (b == 0xff)
 			{
 				var c = (int)stbi__get8();
@@ -211,7 +211,7 @@ public class JpgDecoder extends Decoder
 
 	private int stbi__jpeg_huff_decode(stbi__huffman h)
 	{
-		uint temp = 0;
+		long temp = 0;
 		var c = 0;
 		var k = 0;
 		if (code_bits < 16)
@@ -248,7 +248,7 @@ public class JpgDecoder extends Decoder
 
 	private int stbi__extend_receive(int n)
 	{
-		uint k = 0;
+		long k = 0;
 		var sgn = 0;
 		if (code_bits < n)
 			stbi__grow_buffer_unsafe();
@@ -262,7 +262,7 @@ public class JpgDecoder extends Decoder
 
 	private int stbi__jpeg_get_bits(int n)
 	{
-		uint k = 0;
+		long k = 0;
 		if (code_bits < n)
 			stbi__grow_buffer_unsafe();
 		k = MathExtensions._lrotl(code_buffer, n);
@@ -274,7 +274,7 @@ public class JpgDecoder extends Decoder
 
 	private int stbi__jpeg_get_bit()
 	{
-		uint k = 0;
+		long k = 0;
 		if (code_bits < 1)
 			stbi__grow_buffer_unsafe();
 		k = code_buffer;
@@ -304,7 +304,7 @@ public class JpgDecoder extends Decoder
 		k = 1;
 		do
 		{
-			uint zig = 0;
+			long zig = 0;
 			var c = 0;
 			var r = 0;
 			var s = 0;
@@ -390,7 +390,7 @@ public class JpgDecoder extends Decoder
 			k = spec_start;
 			do
 			{
-				uint zig = 0;
+				long zig = 0;
 				var c = 0;
 				var r = 0;
 				var s = 0;
@@ -524,7 +524,7 @@ public class JpgDecoder extends Decoder
 
 	private static byte stbi__clamp(int x)
 	{
-		if ((uint)x > 255)
+		if ((long)x > 255)
 		{
 			if (x < 0)
 				return 0;
@@ -1190,7 +1190,7 @@ public class JpgDecoder extends Decoder
 		return 1;
 	}
 
-	private bool stbi__decode_jpeg_header(int scan)
+	private boolean stbi__decode_jpeg_header(int scan)
 	{
 		var m = 0;
 		jfif = 0;
@@ -1261,7 +1261,7 @@ public class JpgDecoder extends Decoder
 			else if (m == 0xdc)
 			{
 				var Ld = stbi__get16be();
-				var NL = (uint)stbi__get16be();
+				var NL = (long)stbi__get16be();
 				if (Ld != 4)
 					stbi__err("bad DNL len");
 				if (NL != img_y)
@@ -1376,7 +1376,7 @@ public class JpgDecoder extends Decoder
 			r >>= 20;
 			g >>= 20;
 			b >>= 20;
-			if ((uint)r > 255)
+			if ((long)r > 255)
 			{
 				if (r < 0)
 					r = 0;
@@ -1384,7 +1384,7 @@ public class JpgDecoder extends Decoder
 					r = 255;
 			}
 
-			if ((uint)g > 255)
+			if ((long)g > 255)
 			{
 				if (g < 0)
 					g = 0;
@@ -1392,7 +1392,7 @@ public class JpgDecoder extends Decoder
 					g = 255;
 			}
 
-			if ((uint)b > 255)
+			if ((long)b > 255)
 			{
 				if (b < 0)
 					b = 0;
@@ -1422,7 +1422,7 @@ public class JpgDecoder extends Decoder
 
 	private static byte stbi__blinn_8x8(byte x, byte y)
 	{
-		var t = (uint)(x * y + 128);
+		var t = (long)(x * y + 128);
 		return (byte)((t + (t >> 8)) >> 8);
 	}
 
@@ -1450,8 +1450,8 @@ public class JpgDecoder extends Decoder
 			decode_n = img_n;
 		{
 			var k = 0;
-			uint i = 0;
-			uint j = 0;
+			long i = 0;
+			long j = 0;
 			byte[] output;
 			var coutput = new FakePtr<byte>[4];
 			coutput[0] = FakePtr<byte>.Null;
@@ -1485,7 +1485,7 @@ public class JpgDecoder extends Decoder
 
 			output = new byte[n * img_x * img_y];
 			var ptr = new FakePtr<byte>(output);
-			for (j = (uint)0; j < img_y; ++j)
+			for (j = (long)0; j < img_y; ++j)
 			{
 				var _out_ = ptr + n * img_x * j;
 				for (k = 0; k < decode_n; ++k)
@@ -1511,7 +1511,7 @@ public class JpgDecoder extends Decoder
 					if (img_n == 3)
 					{
 						if (is_rgb != 0)
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 							{
 								_out_[0] = y[i];
 								_out_[1] = coutput[1][i];
@@ -1526,7 +1526,7 @@ public class JpgDecoder extends Decoder
 					{
 						if (app14_color_transform == 0)
 						{
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 							{
 								var m = coutput[3][i];
 								_out_[0] = stbi__blinn_8x8(coutput[0][i], m);
@@ -1539,7 +1539,7 @@ public class JpgDecoder extends Decoder
 						else if (app14_color_transform == 2)
 						{
 							YCbCr_to_RGB_kernel(_out_, y, coutput[1], coutput[2], img_x, n);
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 							{
 								var m = coutput[3][i];
 								_out_[0] = stbi__blinn_8x8((byte)(255 - _out_[0]), m);
@@ -1555,7 +1555,7 @@ public class JpgDecoder extends Decoder
 					}
 					else
 					{
-						for (i = (uint)0; i < img_x; ++i)
+						for (i = (long)0; i < img_x; ++i)
 						{
 							_out_[0] = _out_[1] = _out_[2] = y[i];
 							_out_[3] = 255;
@@ -1568,14 +1568,14 @@ public class JpgDecoder extends Decoder
 					if (is_rgb != 0)
 					{
 						if (n == 1)
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 							{
 								_out_.Value =
 									Conversion.stbi__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
 								_out_++;
 							}
 						else
-							for (i = (uint)0; i < img_x; ++i, _out_ += 2)
+							for (i = (long)0; i < img_x; ++i, _out_ += 2)
 							{
 								_out_[0] = Conversion.stbi__compute_y(coutput[0][i], coutput[1][i], coutput[2][i]);
 								_out_[1] = 255;
@@ -1583,7 +1583,7 @@ public class JpgDecoder extends Decoder
 					}
 					else if (img_n == 4 && app14_color_transform == 0)
 					{
-						for (i = (uint)0; i < img_x; ++i)
+						for (i = (long)0; i < img_x; ++i)
 						{
 							var m = coutput[3][i];
 							var r = stbi__blinn_8x8(coutput[0][i], m);
@@ -1596,7 +1596,7 @@ public class JpgDecoder extends Decoder
 					}
 					else if (img_n == 4 && app14_color_transform == 2)
 					{
-						for (i = (uint)0; i < img_x; ++i)
+						for (i = (long)0; i < img_x; ++i)
 						{
 							_out_[0] = stbi__blinn_8x8((byte)(255 - coutput[0][i]), coutput[3][i]);
 							_out_[1] = 255;
@@ -1607,10 +1607,10 @@ public class JpgDecoder extends Decoder
 					{
 						var y = coutput[0];
 						if (n == 1)
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 								_out_[i] = y[i];
 						else
-							for (i = (uint)0; i < img_x; ++i)
+							for (i = (long)0; i < img_x; ++i)
 							{
 								_out_.Value = y[i];
 								_out_++;
@@ -1648,7 +1648,7 @@ public class JpgDecoder extends Decoder
 		};
 	}
 
-	public static bool Test(Stream stream)
+	public static boolean Test(InputStream stream)
 	{
 		var decoder = new JpgDecoder(stream);
 		decoder.stbi__setup_jpeg();
@@ -1658,7 +1658,7 @@ public class JpgDecoder extends Decoder
 		return r;
 	}
 
-	public static ImageInfo? Info(Stream stream)
+	public static ImageInfo? Info(InputStream stream)
 	{
 		var decoder = new JpgDecoder(stream);
 
@@ -1675,7 +1675,7 @@ public class JpgDecoder extends Decoder
 		};
 	}
 
-	public static ImageResult Decode(Stream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
 	{
 		var decoder = new JpgDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
