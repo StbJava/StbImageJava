@@ -1,5 +1,7 @@
 ﻿package stb.image.Decoding;
 
+import stb.image.Decoding.Utility.Conversion;
+
 public class TgaDecoder extends Decoder
 {
 	private TgaDecoder(InputStream stream) : base(stream)
@@ -27,10 +29,10 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	private void stbi__tga_read_rgb16(FakePtr<byte> _out_)
+	private void stbi__tga_read_rgb16(FakePtr<Byte> _out_)
 	{
-		var px = (ushort)stbi__get16le();
-		var fiveBitMask = (ushort)31;
+		var px = (int)stbi__get16le();
+		var fiveBitMask = (int)31;
 		var r = (px >> 10) & fiveBitMask;
 		var g = (px >> 5) & fiveBitMask;
 		var b = px & fiveBitMask;
@@ -39,7 +41,7 @@ public class TgaDecoder extends Decoder
 		_out_[2] = (byte)(b * 255 / 31);
 	}
 
-	private ImageResult InternalDecode(ColorComponents? requiredComponents)
+	private ImageResult InternalDecode(ColorComponents  requiredComponents)
 	{
 		var tga_offset = (int)stbi__get8();
 		var tga_indexed = (int)stbi__get8();
@@ -98,7 +100,7 @@ public class TgaDecoder extends Decoder
 				tga_palette = new byte[tga_palette_len * tga_comp];
 				if (tga_rgb16 != 0)
 				{
-					var pal_entry = new FakePtr<byte>(tga_palette);
+					var pal_entry = new FakePtr<Byte>(tga_palette);
 					for (i = 0; i < tga_palette_len; ++i)
 					{
 						stbi__tga_read_rgb16(pal_entry);
@@ -143,7 +145,7 @@ public class TgaDecoder extends Decoder
 					}
 					else if (tga_rgb16 != 0)
 					{
-						stbi__tga_read_rgb16(new FakePtr<byte>(raw_data));
+						stbi__tga_read_rgb16(new FakePtr<Byte>(raw_data));
 					}
 					else
 					{
@@ -175,7 +177,7 @@ public class TgaDecoder extends Decoder
 
 		if (tga_comp >= 3 && tga_rgb16 == 0)
 		{
-			var tga_pixel = new FakePtr<byte>(tga_data);
+			var tga_pixel = new FakePtr<Byte>(tga_data);
 			for (i = 0; i < tga_width * tga_height; ++i)
 			{
 				var temp = tga_pixel[0];
@@ -187,7 +189,7 @@ public class TgaDecoder extends Decoder
 
 		var req_comp = requiredComponents.ToReqComp();
 		if (req_comp != 0 && req_comp != tga_comp)
-			tga_data = Conversion.stbi__convert_format(tga_data, tga_comp, req_comp, (long)tga_width,
+			tga_data = Utility.stbi__convert_format(tga_data, tga_comp, req_comp, (long)tga_width,
 				(long)tga_height);
 		tga_palette_start = tga_palette_len = tga_palette_bits = tga_x_origin = tga_y_origin = 0;
 
@@ -228,9 +230,9 @@ public class TgaDecoder extends Decoder
 				stream.stbi__skip(9);
 			}
 
-			if (stream.stbi__get16le() < 1)
+			if (Utility.stbi__get16le(stream) < 1)
 				return false;
-			if (stream.stbi__get16le() < 1)
+			if (Utility.stbi__get16le(stream) < 1)
 				return false;
 			sz = stream.stbi__get8();
 			if (tga_color_type == 1 && sz != 8 && sz != 16)
@@ -246,7 +248,7 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	public static ImageInfo? Info(InputStream stream)
+	public static ImageInfo Info(InputStream stream)
 	{
 		try
 		{
@@ -280,10 +282,10 @@ public class TgaDecoder extends Decoder
 				tga_colormap_bpp = 0;
 			}
 
-			tga_w = stream.stbi__get16le();
+			tga_w = Utility.stbi__get16le(stream);
 			if (tga_w < 1) return null;
 
-			tga_h = stream.stbi__get16le();
+			tga_h = Utility.stbi__get16le(stream);
 			if (tga_h < 1) return null;
 
 			tga_bits_per_pixel = stream.stbi__get8();
@@ -316,7 +318,7 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents = null)
 	{
 		var decoder = new TgaDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

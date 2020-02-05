@@ -1,14 +1,13 @@
 ﻿package stb.image.Decoding;
 
-import stb.image.Utility.IOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 
 public class Decoder {
-	private final int STBI__SCAN_load = 0;
-	private final int STBI__SCAN_type = 1;
-	private final int STBI__SCAN_header = 2;
+	private static final int STBI__SCAN_load = 0;
+	private static final int STBI__SCAN_type = 1;
+	private static final int STBI__SCAN_header = 2;
+
 	protected int img_x = 0;
 	protected int img_y = 0;
 	protected int img_n = 0;

@@ -1,4 +1,4 @@
-﻿package stb.image.Utility;
+﻿package stb.image.Decoding;
 
 import java.util.Arrays;
 
@@ -25,22 +25,32 @@ public class FakePtr<T>
 		this(data, 0);
 	}
 
-	public void Clear(int count)
+	public void clear(int count)
 	{
 		Arrays.fill(_array, Offset, Offset + count, 0);
 	}
 
-	public T GetAt(int offset)
+	public T getAt(int offset)
 	{
 		return _array[Offset + offset];
 	}
 
-	public void SetAt(int offset, T value)
+	public void setAt(int offset, T value)
 	{
 		_array[Offset + offset] = value;
 	}
 
-	public T GetAndIncrease()
+	public void move(int offset)
+    {
+        Offset += offset;
+    }
+
+    public void increase()
+    {
+        move(1);
+    }
+
+	public T getAndIncrease()
 	{
 		var result = _array[Offset];
 		++Offset;
@@ -48,18 +58,18 @@ public class FakePtr<T>
 		return result;
 	}
 
-	public void SetAndIncrease(T value)
+	public void setAndIncrease(T value)
 	{
 		_array[Offset] = value;
 		++Offset;
 	}
 
-	public void Set(T value)
+	public void set(T value)
 	{
 		_array[Offset] = value;
 	}
 
-	public FakePtr<T> CloneAdd(int offset)
+	public FakePtr<T> cloneAdd(int offset)
 	{
 		return new FakePtr<T>(_array, Offset + offset );
 	}

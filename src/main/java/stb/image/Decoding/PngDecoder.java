@@ -1,21 +1,24 @@
 ﻿package stb.image.Decoding;
 
+import stb.image.Decoding.Utility.Conversion;
+
+import java.io.InputStream;
+
 public class PngDecoder extends Decoder
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct stbi__pngchunk
+	private static class stbi__pngchunk
 	{
 		public long length;
 		public long type;
 	}
 
-	private final int STBI__F_none = 0;
-	private final int STBI__F_sub = 1;
-	private final int STBI__F_up = 2;
-	private final int STBI__F_avg = 3;
-	private final int STBI__F_paeth = 4;
-	private final int STBI__F_avg_first = 5;
-	private final int STBI__F_paeth_first = 6;
+	private static final int STBI__F_none = 0;
+	private static final int STBI__F_sub = 1;
+	private static final int STBI__F_up = 2;
+	private static final int STBI__F_avg = 3;
+	private static final int STBI__F_paeth = 4;
+	private static final int STBI__F_avg_first = 5;
+	private static final int STBI__F_paeth_first = 6;
 
 	private static final byte[] first_row_filter =
 		{STBI__F_none, STBI__F_sub, STBI__F_none, STBI__F_avg_first, STBI__F_paeth_first};
@@ -34,8 +37,9 @@ public class PngDecoder extends Decoder
 	private byte[] _out_;
 	private int depth;
 
-	private PngDecoder(InputStream stream) : base(stream)
+	private PngDecoder(InputStream stream)
 	{
+		super(stream);
 	}
 
 	private stbi__pngchunk stbi__get_chunk_header()
@@ -69,7 +73,7 @@ public class PngDecoder extends Decoder
 		return c;
 	}
 
-	private int stbi__create_png_image_raw(FakePtr<byte> raw, long raw_len, int out_n, long x, long y, int depth,
+	private int stbi__create_png_image_raw(FakePtr<Byte> raw, long raw_len, int out_n, long x, long y, int depth,
 		int color)
 	{
 		var bytes = depth == 16 ? 2 : 1;
@@ -87,11 +91,11 @@ public class PngDecoder extends Decoder
 		img_len = (img_width_bytes + 1) * y;
 		if (raw_len < img_len)
 			stbi__err("not enough pixels");
-		var ptr = new FakePtr<byte>(_out_);
+		var ptr = new FakePtr<Byte>(_out_);
 		for (j = (long)0; j < y; ++j)
 		{
 			var cur = ptr + stride * j;
-			FakePtr<byte> prior;
+			FakePtr<Byte> prior;
 			var filter = (int)raw.Value;
 			raw++;
 			if (filter > 4)
@@ -165,7 +169,7 @@ public class PngDecoder extends Decoder
 				switch (filter)
 				{
 					case STBI__F_none:
-						FakePtr<byte>.memcpy(cur, raw, nk);
+						FakePtr<Byte>.memcpy(cur, raw, nk);
 						break;
 					case STBI__F_sub:
 						for (k = 0; k < nk; ++k) cur[k] = (byte)((raw[k] + cur[k - filter_bytes]) & 255);
@@ -349,18 +353,18 @@ public class PngDecoder extends Decoder
 				}
 			}
 		else if (depth == 16)
-			throw new NotImplementedException();
-		/*				FakePtr<byte> cur = ptr;
-						ushort* cur16 = (ushort*)(cur);
+			throw new UnsupportedOperationException();
+		/*				FakePtr<Byte> cur = ptr;
+						int* cur16 = (int*)(cur);
 						for (i = (long)(0); (i) < (x * y * out_n); ++i, cur16++, cur += 2)
 						{
-							*cur16 = (ushort)((cur[0] << 8) | cur[1]);
+							*cur16 = (int)((cur[0] << 8) | cur[1]);
 						}*/
 
 		return 1;
 	}
 
-	private int stbi__create_png_image(FakePtr<byte> image_data, long image_data_len, int out_n, int depth,
+	private int stbi__create_png_image(FakePtr<Byte> image_data, long image_data_len, int out_n, int depth,
 		int color, int interlaced)
 	{
 		var bytes = depth == 16 ? 2 : 1;
@@ -420,14 +424,14 @@ public class PngDecoder extends Decoder
 				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, (long)x, (long)y, depth,
 						color) == 0) return 0;
 
-				var finalPtr = new FakePtr<byte>(final);
-				var outPtr = new FakePtr<byte>(_out_);
+				var finalPtr = new FakePtr<Byte>(final);
+				var outPtr = new FakePtr<Byte>(_out_);
 				for (j = 0; j < y; ++j)
 					for (i = 0; i < x; ++i)
 					{
 						var out_y = j * yspc[p] + yorig[p];
 						var out_x = i * xspc[p] + xorig[p];
-						FakePtr<byte>.memcpy(finalPtr + out_y * img_x * out_bytes + out_x * out_bytes,
+						FakePtr<Byte>.memcpy(finalPtr + out_y * img_x * out_bytes + out_x * out_bytes,
 							outPtr + (j * x + i) * out_bytes,
 							out_bytes);
 					}
@@ -445,7 +449,7 @@ public class PngDecoder extends Decoder
 	{
 		long i = 0;
 		var pixel_count = (long)(img_x * img_y);
-		var p = new FakePtr<byte>(_out_);
+		var p = new FakePtr<Byte>(_out_);
 		if (out_n == 2)
 			for (i = (long)0; i < pixel_count; ++i)
 			{
@@ -463,18 +467,18 @@ public class PngDecoder extends Decoder
 		return 1;
 	}
 
-	private int stbi__compute_transparency16(ushort[] tc, int out_n)
+	private int stbi__compute_transparency16(int[] tc, int out_n)
 	{
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 
 		/*			long i = 0;
 					long pixel_count = (long)(img_x * img_y);
-					FakePtr<ushort> p = new FakePtr<ushort>(_out_);
+					FakePtr<int> p = new FakePtr<int>(_out_);
 					if ((out_n) == (2))
 					{
 						for (i = (long)(0); (i) < (pixel_count); ++i)
 						{
-							p[1] = (ushort)((p[0]) == (tc[0]) ? 0 : 65535);
+							p[1] = (int)((p[0]) == (tc[0]) ? 0 : 65535);
 							p += 2;
 						}
 					}
@@ -483,7 +487,7 @@ public class PngDecoder extends Decoder
 						for (i = (long)(0); (i) < (pixel_count); ++i)
 						{
 							if ((((p[0]) == (tc[0])) && ((p[1]) == (tc[1]))) && ((p[2]) == (tc[2])))
-								p[3] = (ushort)(0);
+								p[3] = (int)(0);
 							p += 4;
 						}
 					}
@@ -497,7 +501,7 @@ public class PngDecoder extends Decoder
 		var pixel_count = (long)(img_x * img_y);
 		var orig = _out_;
 		_out_ = new byte[pixel_count * pal_img_n];
-		var p = new FakePtr<byte>(_out_);
+		var p = new FakePtr<Byte>(_out_);
 		if (pal_img_n == 3)
 			for (i = (long)0; i < pixel_count; ++i)
 			{
@@ -535,7 +539,7 @@ public class PngDecoder extends Decoder
 	{
 		long i = 0;
 		var pixel_count = (long)(img_x * img_y);
-		var p = new FakePtr<byte>(_out_);
+		var p = new FakePtr<Byte>(_out_);
 		if (img_out_n == 3)
 		{
 			for (i = (long)0; i < pixel_count; ++i)
@@ -587,7 +591,7 @@ public class PngDecoder extends Decoder
 		var tc = new byte[3];
 		tc[0] = 0;
 
-		var tc16 = new ushort[3];
+		var tc16 = new int[3];
 		var ioff = 0;
 		var idata_limit = 0;
 		long i = 0;
@@ -717,7 +721,7 @@ public class PngDecoder extends Decoder
 						has_trans = 1;
 						if (depth == 16)
 							for (k = 0; k < img_n; ++k)
-								tc16[k] = (ushort)stbi__get16be();
+								tc16[k] = (int)stbi__get16be();
 						else
 							for (k = 0; k < img_n; ++k)
 								tc[k] = (byte)((byte)(stbi__get16be() & 255) * stbi__depth_scale_table[depth]);
@@ -775,7 +779,7 @@ public class PngDecoder extends Decoder
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtr<byte>(expanded), (long)raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new FakePtr<Byte>(expanded), (long)raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0)
@@ -828,7 +832,7 @@ public class PngDecoder extends Decoder
 		}
 	}
 
-	private ImageResult InternalDecode(ColorComponents? requiredComponents)
+	private ImageResult InternalDecode(ColorComponents  requiredComponents)
 	{
 		var req_comp = requiredComponents.ToReqComp();
 		if (req_comp < 0 || req_comp > 4)
@@ -848,10 +852,10 @@ public class PngDecoder extends Decoder
 			if (req_comp != 0 && req_comp != img_out_n)
 			{
 				if (bits_per_channel == 8)
-					result = Conversion.stbi__convert_format(result, img_out_n, req_comp, (long)img_x,
+					result = Utility.stbi__convert_format(result, img_out_n, req_comp, (long)img_x,
 						(long)img_y);
 				else
-					result = Conversion.stbi__convert_format16(result, img_out_n, req_comp, (long)img_x,
+					result = Utility.stbi__convert_format16(result, img_out_n, req_comp, (long)img_x,
 						(long)img_y);
 				img_out_n = req_comp;
 			}
@@ -882,7 +886,7 @@ public class PngDecoder extends Decoder
 		return r;
 	}
 
-	public static ImageInfo? Info(InputStream stream)
+	public static ImageInfo Info(InputStream stream)
 	{
 		var decoder = new PngDecoder(stream);
 		var r = decoder.stbi__parse_png_file(STBI__SCAN_header, 0);
@@ -899,7 +903,7 @@ public class PngDecoder extends Decoder
 		};
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents = null)
 	{
 		var decoder = new PngDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

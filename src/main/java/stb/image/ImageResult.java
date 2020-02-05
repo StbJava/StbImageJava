@@ -15,7 +15,7 @@ public	class ImageResult
 	public int BitsPerChannel;
 	public byte[] Data;
 
-	public static ImageResult FromInputStream(InputStream stream, ColorComponents? requiredComponents = null, boolean use8BitsPerChannel = true)
+	public static ImageResult FromInputStream(InputStream stream, ColorComponents  requiredComponents = null, boolean use8BitsPerChannel = true)
 	{
 		ImageResult result = null;
 		if (JpgDecoder.Test(stream))

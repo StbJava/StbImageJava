@@ -1,12 +1,14 @@
 ﻿package stb.image.Decoding;
 
+import stb.image.Decoding.Utility.Conversion;
+
 public class PsdDecoder extends Decoder
 {
 	private PsdDecoder(InputStream stream) : base(stream)
 	{
 	}
 
-	private int stbi__psd_decode_rle(FakePtr<byte> p, int pixelCount)
+	private int stbi__psd_decode_rle(FakePtr<Byte> p, int pixelCount)
 	{
 		var count = 0;
 		var nleft = 0;
@@ -51,7 +53,7 @@ public class PsdDecoder extends Decoder
 		return 1;
 	}
 
-	private ImageResult InternalDecode(ColorComponents? requiredComponents, int bpc)
+	private ImageResult InternalDecode(ColorComponents  requiredComponents, int bpc)
 	{
 		var pixelCount = 0;
 		var channelCount = 0;
@@ -97,17 +99,17 @@ public class PsdDecoder extends Decoder
 
 		pixelCount = w * h;
 
-		var ptr = new FakePtr<byte>(_out_);
+		var ptr = new FakePtr<Byte>(_out_);
 		if (compression != 0)
 		{
 			stbi__skip(h * channelCount * 2);
 			for (channel = 0; channel < 4; channel++)
 			{
-				FakePtr<byte> p;
+				FakePtr<Byte> p;
 				p = ptr + channel;
 				if (channel >= channelCount)
 				{
-					for (i = 0; i < pixelCount; i++, p += 4) p.Set((byte)(channel == 3 ? 255 : 0));
+					for (i = 0; i < pixelCount; i++, p += 4) p.set((byte)(channel == 3 ? 255 : 0));
 				}
 				else
 				{
@@ -121,53 +123,53 @@ public class PsdDecoder extends Decoder
 				if (channel >= channelCount)
 				{
 					if (bitdepth == 16 && bpc == 16)
-						throw new NotImplementedException();
-					/*							ushort* q = ((ushort*)(ptr)) + channel;
-												ushort val = (ushort)((channel) == (3) ? 65535 : 0);
+						throw new UnsupportedOperationException();
+					/*							int* q = ((int*)(ptr)) + channel;
+												int val = (int)((channel) == (3) ? 65535 : 0);
 												for (i = (int)(0); (i) < (pixelCount); i++, q += 4)
 												{
-													*q = (ushort)(val);
+													*q = (int)(val);
 												}*/
 
 					var p = ptr + channel;
 					var val = (byte)(channel == 3 ? 255 : 0);
-					for (i = 0; i < pixelCount; i++, p += 4) p.Set(val);
+					for (i = 0; i < pixelCount; i++, p += 4) p.set(val);
 				}
 				else
 				{
 					if (bits_per_channel == 16)
-						throw new NotImplementedException();
-					/*							ushort* q = ((ushort*)(ptr)) + channel;
+						throw new UnsupportedOperationException();
+					/*							int* q = ((int*)(ptr)) + channel;
 												for (i = (int)(0); (i) < (pixelCount); i++, q += 4)
 												{
-													*q = ((ushort)(stbi__get16be()));
+													*q = ((int)(stbi__get16be()));
 												}*/
 
 					var p = ptr + channel;
 					if (bitdepth == 16)
 						for (i = 0; i < pixelCount; i++, p += 4)
-							p.Set((byte)(stbi__get16be() >> 8));
+							p.set((byte)(stbi__get16be() >> 8));
 					else
 						for (i = 0; i < pixelCount; i++, p += 4)
-							p.Set(stbi__get8());
+							p.set(stbi__get8());
 				}
 		}
 
 		if (channelCount >= 4)
 		{
 			if (bits_per_channel == 16)
-				throw new NotImplementedException();
+				throw new UnsupportedOperationException();
 			/*					for (i = (int)(0); (i) < (w * h); ++i)
 								{
-									ushort* pixel = (ushort*)(ptr) + 4 * i;
+									int* pixel = (int*)(ptr) + 4 * i;
 									if ((pixel[3] != 0) && (pixel[3] != 65535))
 									{
 										float a = (float)(pixel[3] / 65535.0f);
 										float ra = (float)(1.0f / a);
 										float inv_a = (float)(65535.0f * (1 - ra));
-										pixel[0] = ((ushort)(pixel[0] * ra + inv_a));
-										pixel[1] = ((ushort)(pixel[1] * ra + inv_a));
-										pixel[2] = ((ushort)(pixel[2] * ra + inv_a));
+										pixel[0] = ((int)(pixel[0] * ra + inv_a));
+										pixel[1] = ((int)(pixel[1] * ra + inv_a));
+										pixel[2] = ((int)(pixel[2] * ra + inv_a));
 									}
 								}*/
 			for (i = 0; i < w * h; ++i)
@@ -189,9 +191,9 @@ public class PsdDecoder extends Decoder
 		if (req_comp != 0 && req_comp != 4)
 		{
 			if (bits_per_channel == 16)
-				_out_ = Conversion.stbi__convert_format16(_out_, 4, req_comp, (long)w, (long)h);
+				_out_ = Utility.stbi__convert_format16(_out_, 4, req_comp, (long)w, (long)h);
 			else
-				_out_ = Conversion.stbi__convert_format(_out_, 4, req_comp, (long)w, (long)h);
+				_out_ = Utility.stbi__convert_format(_out_, 4, req_comp, (long)w, (long)h);
 		}
 
 		return new ImageResult
@@ -215,7 +217,7 @@ public class PsdDecoder extends Decoder
 		return r;
 	}
 
-	public static ImageInfo? Info(InputStream stream)
+	public static ImageInfo Info(InputStream stream)
 	{
 		try
 		{
@@ -248,7 +250,7 @@ public class PsdDecoder extends Decoder
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null, int bpc = 8)
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents = null, int bpc = 8)
 	{
 		var decoder = new PsdDecoder(stream);
 		return decoder.InternalDecode(requiredComponents, bpc);

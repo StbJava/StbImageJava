@@ -4,12 +4,12 @@ class ZLib
 {
 	private static class stbi__zhuffman
 	{
-		public final ushort[] fast = new ushort[1 << 9];
-		public final ushort[] firstcode = new ushort[16];
-		public final ushort[] firstsymbol = new ushort[16];
+		public final int[] fast = new int[1 << 9];
+		public final int[] firstcode = new int[16];
+		public final int[] firstsymbol = new int[16];
 		public final int[] maxcode = new int[17];
 		public final byte[] size = new byte[288];
-		public final ushort[] value = new ushort[288];
+		public final int[] value = new int[288];
 	}
 
 	private static final int[] stbi__zlength_base =
@@ -54,10 +54,10 @@ class ZLib
 	private int z_expandable;
 	private final stbi__zhuffman z_length = new stbi__zhuffman();
 
-	private FakePtr<byte> zbuffer;
-	private FakePtr<byte> zbuffer_end;
-	private FakePtr<byte> zout;
-	private FakePtr<byte> zout_end;
+	private FakePtr<Byte> zbuffer;
+	private FakePtr<Byte> zbuffer_end;
+	private FakePtr<Byte> zout;
+	private FakePtr<Byte> zout_end;
 	private byte[] zout_start;
 
 	private byte stbi__zget8()
@@ -122,7 +122,7 @@ class ZLib
 		return stbi__zhuffman_decode_slowpath(z);
 	}
 
-	private int stbi__zexpand(FakePtr<byte> zout, int n)
+	private int stbi__zexpand(FakePtr<Byte> zout, int n)
 	{
 		var cur = 0;
 		var limit = 0;
@@ -135,8 +135,8 @@ class ZLib
 		while (cur + n > limit) limit *= 2;
 
 		Array.Resize(ref zout_start, limit);
-		this.zout = new FakePtr<byte>(zout_start, cur);
-		zout_end = new FakePtr<byte>(zout_start, limit);
+		this.zout = new FakePtr<Byte>(zout_start, cur);
+		zout_end = new FakePtr<Byte>(zout_start, limit);
 		return 1;
 	}
 
@@ -188,7 +188,7 @@ class ZLib
 					zout = this.zout;
 				}
 
-				var p = new FakePtr<byte>(zout, -dist);
+				var p = new FakePtr<Byte>(zout, -dist);
 				if (dist == 1)
 				{
 					var v = p.Value;
@@ -210,7 +210,7 @@ class ZLib
 		}
 	}
 
-	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<byte> sizelist, int num)
+	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<Byte> sizelist, int num)
 	{
 		var i = 0;
 		var k = 0;
@@ -228,8 +228,8 @@ class ZLib
 		for (i = 1; i < 16; ++i)
 		{
 			next_code[i] = code;
-			z.firstcode[i] = (ushort)code;
-			z.firstsymbol[i] = (ushort)k;
+			z.firstcode[i] = (int)code;
+			z.firstsymbol[i] = (int)k;
 			code = code + sizes[i];
 			if (sizes[i] != 0)
 				if (code - 1 >= 1 << i)
@@ -246,9 +246,9 @@ class ZLib
 			if (s != 0)
 			{
 				var c = next_code[s] - z.firstcode[s] + z.firstsymbol[s];
-				var fastv = (ushort)((s << 9) | i);
+				var fastv = (int)((s << 9) | i);
 				z.size[c] = (byte)s;
-				z.value[c] = (ushort)i;
+				z.value[c] = (int)i;
 				if (s <= 9)
 				{
 					var j = MathExtensions.stbi__bit_reverse(next_code[s], s);
@@ -284,7 +284,7 @@ class ZLib
 			codelength_sizes[length_dezigzag[i]] = (byte)s;
 		}
 
-		if (stbi__zbuild_huffman(z_codelength, new FakePtr<byte>(codelength_sizes), 19) == 0)
+		if (stbi__zbuild_huffman(z_codelength, new FakePtr<Byte>(codelength_sizes), 19) == 0)
 			return 0;
 		n = 0;
 		while (n < ntot)
@@ -317,16 +317,16 @@ class ZLib
 
 				if (ntot - n < c)
 					Decoder.stbi__err("bad codelengths");
-				lencodes.Set(n, c, fill);
+				lencodes.set(n, c, fill);
 				n += c;
 			}
 		}
 
 		if (n != ntot)
 			Decoder.stbi__err("bad codelengths");
-		if (stbi__zbuild_huffman(z_length, new FakePtr<byte>(lencodes), hlit) == 0)
+		if (stbi__zbuild_huffman(z_length, new FakePtr<Byte>(lencodes), hlit) == 0)
 			return 0;
-		if (stbi__zbuild_huffman(z_distance, new FakePtr<byte>(lencodes, hlit), hdist) == 0)
+		if (stbi__zbuild_huffman(z_distance, new FakePtr<Byte>(lencodes, hlit), hdist) == 0)
 			return 0;
 		return 1;
 	}
@@ -403,9 +403,9 @@ class ZLib
 			{
 				if (type == 1)
 				{
-					if (stbi__zbuild_huffman(z_length, new FakePtr<byte>(stbi__zdefault_length), 288) == 0)
+					if (stbi__zbuild_huffman(z_length, new FakePtr<Byte>(stbi__zdefault_length), 288) == 0)
 						return 0;
-					if (stbi__zbuild_huffman(z_distance, new FakePtr<byte>(stbi__zdefault_distance), 32) == 0)
+					if (stbi__zbuild_huffman(z_distance, new FakePtr<Byte>(stbi__zdefault_distance), 32) == 0)
 						return 0;
 				}
 				else
@@ -425,8 +425,8 @@ class ZLib
 	private int stbi__do_zlib(byte[] obuf, int olen, int exp, int parse_header)
 	{
 		zout_start = obuf;
-		zout = new FakePtr<byte>(obuf);
-		zout_end = new FakePtr<byte>(obuf, olen);
+		zout = new FakePtr<Byte>(obuf);
+		zout_end = new FakePtr<Byte>(obuf, olen);
 		z_expandable = exp;
 		return stbi__parse_zlib(parse_header);
 	}
@@ -437,8 +437,8 @@ class ZLib
 		outlen = 0;
 		var a = new ZLib();
 		var p = new byte[initial_size];
-		a.zbuffer = new FakePtr<byte>(buffer);
-		a.zbuffer_end = new FakePtr<byte>(buffer, +len);
+		a.zbuffer = new FakePtr<Byte>(buffer);
+		a.zbuffer_end = new FakePtr<Byte>(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0)
 		{
 			outlen = a.zout.Offset;

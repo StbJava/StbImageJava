@@ -1,14 +1,14 @@
 ﻿package stb.image.Decoding;
 
 import stb.image.ColorComponents;
+import stb.image.ImageInfo;
 import stb.image.ImageResult;
-import stb.image.Utility.Conversion;
-import stb.image.Utility.FakePtr;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class BmpDecoder extends Decoder {
-	public static class stbi__bmp_data
+	private static class stbi__bmp_data
 	{
 		public int bpp;
 		public int offset;
@@ -25,7 +25,7 @@ public class BmpDecoder extends Decoder {
 
 	private BmpDecoder(java.io.InputStream stream)
 	{
-		super(stream)
+		super(stream);
 	}
 
 	private static int stbi__high_bit(long z) {
@@ -161,7 +161,7 @@ public class BmpDecoder extends Decoder {
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws  Exception {
-		byte[] _out_;
+		Byte[] _out_;
 		var mr = (long) 0;
 		var mg = (long) 0;
 		var mb = (long) 0;
@@ -194,11 +194,11 @@ public class BmpDecoder extends Decoder {
 		}
 
 		img_n = ma != 0 ? 4 : 3;
-		if (requiredComponents != null && (int) requiredComponents.value >= 3)
-			target = (int) requiredComponents.value;
+		if (requiredComponents != null && (int) requiredComponents.getValue() >= 3)
+			target = (int) requiredComponents.getValue();
 		else
 			target = img_n;
-		_out_ = new byte[target * img_x * img_y];
+		_out_ = new Byte[target * img_x * img_y];
 		if (info.bpp < 16) {
 			var z = 0;
 			if (psize == 0 || psize > 256) stbi__err("invalid");
@@ -342,32 +342,30 @@ public class BmpDecoder extends Decoder {
 				_out_[i] = (byte)255;
 		if (flip_vertically != 0) {
 			byte t = 0;
-			var ptr = new FakePtr<byte>(_out_);
+			var ptr = new FakePtr<>(_out_);
 			for (j = 0; j < img_y >> 1; ++j) {
-				var p1 = ptr.CloneAdd(j * img_x * target);
-				var p2 = ptr.CloneAdd((img_y - 1 - j) * img_x * target);
+				var p1 = ptr.cloneAdd(j * img_x * target);
+				var p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
 				for (i = 0; i < img_x * target; ++i) {
-					t = p1.GetAt(i);
-
-					p1[i] = p2[i];
-					p2[i] = t;
+					t = p1.getAt(i);
+					p1.setAt(i, p2.getAt(i));
+					p2.setAt(i, t);
 				}
 			}
 		}
 
-		if (requiredComponents != null && (int) requiredComponents.Value != target)
-			_out_ = Conversion.stbi__convert_format(_out_, target, (int) requiredComponents.Value, (long) img_x,
-					(long) img_y);
+		if (requiredComponents != null && (int) requiredComponents.getValue() != target)
+			_out_ = Utility.stbi__convert_format(_out_, target, requiredComponents.getValue(), img_x, img_y);
 
-		return new ImageResult
-		{
-			Width = img_x,
-					Height = img_y,
-					SourceComponents = (ColorComponents) img_n,
-					ColorComponents = requiredComponents != null ? requiredComponents.Value : (ColorComponents) img_n,
-					BitsPerChannel = 8,
-					Data = _out_
-		} ;
+		ImageResult result = new ImageResult();
+		result.Width = img_x;
+		result.Height = img_y;
+		result.SourceComponents = ColorComponents.fromInt(img_n);
+		result.ColorComponents = requiredComponents != null ? requiredComponents : result.SourceComponents;
+		result.BitsPerChannel = 8;
+		result.Data = Utility.toByteArray(_out_);
+
+		return result;
 	}
 
 	private static boolean TestInternal(InputStream stream) throws Exception {
@@ -377,49 +375,59 @@ public class BmpDecoder extends Decoder {
 		if (stream.read() != 'M')
 			return false;
 
-		stream.stbi__get32le();
-		stream.stbi__get16le();
-		stream.stbi__get16le();
-		stream.stbi__get32le();
-		sz = (int) stream.stbi__get32le();
+		Utility.stbi__get32le(stream);
+		Utility.stbi__get16le(stream);
+		Utility.stbi__get16le(stream);
+		Utility.stbi__get32le(stream);
+		sz = (int) Utility.stbi__get32le(stream);
 		var r = sz == 12 || sz == 40 || sz == 56 || sz == 108 || sz == 124;
 		return r;
 	}
 
-	public static boolean Test(InputStream stream) {
-		var r = TestInternal(stream);
-		stream.Rewind();
-		return r;
+	public static boolean Test(InputStream stream) throws IOException
+	{
+		try {
+			stream.mark(0);
+			var r = TestInternal(stream);
+			return r;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+		finally {
+			stream.reset();
+		}
 	}
 
-	public static ImageInfo?
-
-	Info(InputStream stream) {
-		var info = new stbi__bmp_data
-		{
-			all_a = 255
-		} ;
+	public static ImageInfo Info(InputStream stream) throws IOException {
+		var info = new stbi__bmp_data();
+		info.all_a = 255;
 
 		var decoder = new BmpDecoder(stream);
 		try {
-			decoder.stbi__bmp_parse_header(ref info);
-		} catch (Exception) {
+			stream.mark(0);
+			decoder.stbi__bmp_parse_header(info);
+		} catch (Exception ex) {
 			return null;
 		} finally {
-			stream.Rewind();
+			stream.reset();
 		}
 
-		return new ImageInfo
-		{
-			Width = decoder.img_x,
-					Height = decoder.img_y,
-					ColorComponents = info.ma != 0 ? ColorComponents.RedGreenBlueAlpha : ColorComponents.RedGreenBlue,
-					BitsPerChannel = 8
-		} ;
+		ImageInfo result = new ImageInfo();
+		result.Width = decoder.img_x;
+		result.Height = decoder.img_y;
+		result.ColorComponents = info.ma != 0 ? ColorComponents.RedGreenBlueAlpha : ColorComponents.RedGreenBlue;
+		result.BitsPerChannel = 8;
+
+		return result;
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents?requiredComponents=null) {
+	public static ImageResult Decode(InputStream stream, ColorComponents requiredComponents) throws Exception {
 		var decoder = new BmpDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
+	}
+
+	public static ImageResult Decode(InputStream stream) throws Exception {
+		return Decode(stream, null);
 	}
 }

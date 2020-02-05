@@ -7,10 +7,19 @@ public enum ColorComponents
 	RedGreenBlue(3),
 	RedGreenBlueAlpha(4);
 
-	public int value;
+	private int value;
 
-	private ColorComponents(int value)
+	ColorComponents(int value)
 	{
 		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public static ColorComponents fromInt(int value)
+	{
+		return values()[value];
 	}
 }

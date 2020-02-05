@@ -1,9 +1,13 @@
 ﻿package stb.image.Decoding;
 
+import stb.image.ColorComponents;
+import stb.image.Decoding.Utility.Conversion;
+
+import java.io.InputStream;
+
 public class GifDecoder extends Decoder
 {
-	[StructLayout(LayoutKind.Sequential)]
-	private struct stbi__gif_lzw
+	private static class stbi__gif_lzw
 	{
 		public short prefix;
 		public byte first;
@@ -36,13 +40,14 @@ public class GifDecoder extends Decoder
 	private int cur_y;
 	private int line_size;
 
-	private GifDecoder(InputStream stream) : base(stream)
+	private GifDecoder(InputStream stream)
 	{
+		super(stream);
 		pal = new byte[256 * 4];
 		lpal = new byte[256 * 4];
 	}
 
-	private void stbi__gif_parse_colortable(byte[] pal, int num_entries, int transp)
+	private void stbi__gif_parse_colortable(byte[] pal, int num_entries, int transp) throws Exception
 	{
 		int i;
 		for (i = 0; i < num_entries; ++i)
@@ -54,7 +59,7 @@ public class GifDecoder extends Decoder
 		}
 	}
 
-	private int stbi__gif_header(out int comp, int is_info)
+	private int stbi__gif_header(out int comp, int is_info) throws Exception
 	{
 		byte version = 0;
 		if (stbi__get8() != 'G' || stbi__get8() != 'I' || stbi__get8() != 'F' || stbi__get8() != '8')
@@ -79,19 +84,19 @@ public class GifDecoder extends Decoder
 		return 1;
 	}
 
-	private void stbi__out_gif_code(ushort code)
+	private void stbi__out_gif_code(int code)
 	{
 		var idx = 0;
 		if (codes[code].prefix >= 0)
-			stbi__out_gif_code((ushort)codes[code].prefix);
+			stbi__out_gif_code((int)codes[code].prefix);
 		if (cur_y >= max_y)
 			return;
 		idx = cur_x + cur_y;
 		history[idx / 4] = 1;
-		var c = new FakePtr<byte>(color_table, codes[code].suffix * 4);
+		var c = new FakePtr<Byte>(color_table, codes[code].suffix * 4);
 		if (c[3] > 128)
 		{
-			var p = new FakePtr<byte>(_out_, idx);
+			var p = new FakePtr<Byte>(_out_, idx);
 			p[0] = c[2];
 			p[1] = c[1];
 			p[2] = c[0];
@@ -193,7 +198,7 @@ public class GifDecoder extends Decoder
 						stbi__err("illegal code in raster");
 					}
 
-					stbi__out_gif_code((ushort)code);
+					stbi__out_gif_code((int)code);
 					if ((avail & codemask) == 0 && avail <= 0x0FFF)
 					{
 						codesize++;
@@ -209,7 +214,7 @@ public class GifDecoder extends Decoder
 			}
 	}
 
-	private byte[] stbi__gif_load_next(out int comp, FakePtr<byte>? two_back)
+	private byte[] stbi__gif_load_next(out int comp, FakePtr<Byte>? two_back)
 	{
 		comp = 0;
 
@@ -224,16 +229,16 @@ public class GifDecoder extends Decoder
 				return null;
 			pcount = w * h;
 			_out_ = new byte[4 * pcount];
-			Array.Clear(_out_, 0, _out_.Length);
+			Array.Clear(_out_, 0, _out_.length);
 			background = new byte[4 * pcount];
-			Array.Clear(background, 0, background.Length);
+			Array.Clear(background, 0, background.length);
 			history = new byte[pcount];
-			Array.Clear(history, 0, history.Length);
+			Array.Clear(history, 0, history.length);
 			first_frame = 1;
 		}
 		else
 		{
-			var ptr = new FakePtr<byte>(_out_);
+			var ptr = new FakePtr<Byte>(_out_);
 			dispose = (eflags & 0x1C) >> 2;
 			pcount = w * h;
 			if (dispose == 3 && two_back == null) dispose = 2;
@@ -241,18 +246,18 @@ public class GifDecoder extends Decoder
 			{
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						FakePtr<byte>.memcpy(new FakePtr<byte>(ptr, pi * 4),
-							new FakePtr<byte>(two_back.Value, pi * 4), 4);
+						FakePtr<Byte>.memcpy(new FakePtr<Byte>(ptr, pi * 4),
+							new FakePtr<Byte>(two_back.Value, pi * 4), 4);
 			}
 			else if (dispose == 2)
 			{
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						FakePtr<byte>.memcpy(new FakePtr<byte>(ptr, pi * 4), new FakePtr<byte>(background, pi * 4),
+						FakePtr<Byte>.memcpy(new FakePtr<Byte>(ptr, pi * 4), new FakePtr<Byte>(background, pi * 4),
 							4);
 			}
 
-			FakePtr<byte>.memcpy(new FakePtr<byte>(background), ptr, 4 * w * h);
+			FakePtr<Byte>.memcpy(new FakePtr<Byte>(background), ptr, 4 * w * h);
 		}
 
 		Array.Clear(history, 0, w * h);
@@ -319,8 +324,8 @@ public class GifDecoder extends Decoder
 							if (history[pi] == 0)
 							{
 								pal[bgindex * 4 + 3] = 255;
-								FakePtr<byte>.memcpy(new FakePtr<byte>(_out_, pi * 4),
-									new FakePtr<byte>(pal, bgindex), 4);
+								FakePtr<Byte>.memcpy(new FakePtr<Byte>(_out_, pi * 4),
+									new FakePtr<Byte>(pal, bgindex), 4);
 							}
 
 					return o;
@@ -432,14 +437,14 @@ public class GifDecoder extends Decoder
 
 		}*/
 
-	private ImageResult InternalDecode(ColorComponents? requiredComponents)
+	private ImageResult InternalDecode(ColorComponents  requiredComponents)
 	{
 		int comp;
 		var u = stbi__gif_load_next(out comp, null);
 		if (u == null) throw new Exception("could not decode gif");
 
 		if (requiredComponents != null && requiredComponents.Value != ColorComponents.RedGreenBlueAlpha)
-			u = Conversion.stbi__convert_format(u, 4, (int)requiredComponents.Value, (long)w, (long)h);
+			u = Utility.stbi__convert_format(u, 4, (int)requiredComponents.Value, (long)w, (long)h);
 
 		return new ImageResult
 		{
@@ -473,7 +478,7 @@ public class GifDecoder extends Decoder
 		return result;
 	}
 
-	public static ImageInfo? Info(InputStream stream)
+	public static ImageInfo Info(InputStream stream)
 	{
 		var decoder = new GifDecoder(stream);
 
@@ -491,7 +496,7 @@ public class GifDecoder extends Decoder
 		};
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents? requiredComponents = null)
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents = null)
 	{
 		var decoder = new GifDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);

@@ -7,7 +7,7 @@ public class ImageInfo
 	public ColorComponents ColorComponents;
 	public int BitsPerChannel;
 
-	public static ImageInfo? FromInputStream(InputStream stream)
+	public static ImageInfo FromInputStream(InputStream stream)
 	{
 		var info = JpgDecoder.Info(stream);
 		if (info != null)
