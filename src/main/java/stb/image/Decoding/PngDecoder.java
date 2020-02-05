@@ -473,7 +473,7 @@ public class PngDecoder extends Decoder
 
 		/*			long i = 0;
 					long pixel_count = (long)(img_x * img_y);
-					FakePtr<int> p = new FakePtr<int>(_out_);
+					FakePtr<Integer> p = new FakePtr<Integer>(_out_);
 					if ((out_n) == (2))
 					{
 						for (i = (long)(0); (i) < (pixel_count); ++i)

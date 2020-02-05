@@ -74,6 +74,11 @@ public class FakePtr<T>
 		return new FakePtr<T>(_array, Offset + offset );
 	}
 
+	public void fill(T value, int count)
+	{
+		Arrays.fill(_array, Offset, Offset + count, value);
+	}
+
 	public static FakePtr<T> CreateWithSize(int size)
 	{
 		var result = new FakePtr<T>(new T[size]);

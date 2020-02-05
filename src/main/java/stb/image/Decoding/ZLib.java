@@ -92,7 +92,7 @@ class ZLib
 		var b = 0;
 		var s = 0;
 		var k = 0;
-		k = MathExtensions.stbi__bit_reverse((int)code_buffer, 16);
+		k = Utility.stbi__bit_reverse((int)code_buffer, 16);
 		for (s = 9 + 1; ; ++s)
 			if (k < z.maxcode[s])
 				break;
@@ -251,7 +251,7 @@ class ZLib
 				z.value[c] = (int)i;
 				if (s <= 9)
 				{
-					var j = MathExtensions.stbi__bit_reverse(next_code[s], s);
+					var j = Utility.stbi__bit_reverse(next_code[s], s);
 					while (j < 1 << 9)
 					{
 						z.fast[j] = fastv;

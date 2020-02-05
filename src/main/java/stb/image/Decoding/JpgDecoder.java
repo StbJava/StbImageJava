@@ -196,7 +196,7 @@ public class JpgDecoder extends Decoder
 		}
 	}
 
-	private void stbi__grow_buffer_unsafe()
+	private void stbi__grow_buffer_unsafe() throws Exception
 	{
 		do
 		{
@@ -218,7 +218,7 @@ public class JpgDecoder extends Decoder
 		} while (code_bits <= 24);
 	}
 
-	private int stbi__jpeg_huff_decode(stbi__huffman h)
+	private int stbi__jpeg_huff_decode(stbi__huffman h) throws Exception
 	{
 		long temp = 0;
 		var c = 0;
@@ -255,33 +255,33 @@ public class JpgDecoder extends Decoder
 		return h.values[c];
 	}
 
-	private int stbi__extend_receive(int n)
+	private int stbi__extend_receive(int n) throws Exception
 	{
 		long k = 0;
 		var sgn = 0;
 		if (code_bits < n)
 			stbi__grow_buffer_unsafe();
 		sgn = (int)code_buffer >> 31;
-		k = MathExtensions._lrotl(code_buffer, n);
+		k = Utility._lrotl(code_buffer, n);
 		code_buffer = k & ~stbi__bmask[n];
 		k &= stbi__bmask[n];
 		code_bits -= n;
 		return (int)(k + (stbi__jbias[n] & ~sgn));
 	}
 
-	private int stbi__jpeg_get_bits(int n)
+	private int stbi__jpeg_get_bits(int n) throws Exception
 	{
 		long k = 0;
 		if (code_bits < n)
 			stbi__grow_buffer_unsafe();
-		k = MathExtensions._lrotl(code_buffer, n);
+		k = Utility._lrotl(code_buffer, n);
 		code_buffer = k & ~stbi__bmask[n];
 		k &= stbi__bmask[n];
 		code_bits -= n;
 		return (int)k;
 	}
 
-	private int stbi__jpeg_get_bit()
+	private int stbi__jpeg_get_bit() throws Exception
 	{
 		long k = 0;
 		if (code_bits < 1)
@@ -293,7 +293,7 @@ public class JpgDecoder extends Decoder
 	}
 
 	private int stbi__jpeg_decode_block(short[] data, stbi__huffman hdc, stbi__huffman hac, short[] fac, int b,
-		int[] dequant)
+										int[] dequant) throws Exception
 	{
 		var diff = 0;
 		var dc = 0;
@@ -305,7 +305,7 @@ public class JpgDecoder extends Decoder
 		if (t < 0)
 			stbi__err("bad huffman code");
 
-		Array.Clear(data, 0, data.length);
+		Arrays.fill(data, (short)0);
 		diff = t != 0 ? stbi__extend_receive(t) : 0;
 		dc = img_comp[b].dc_pred + diff;
 		img_comp[b].dc_pred = dc;
@@ -313,7 +313,7 @@ public class JpgDecoder extends Decoder
 		k = 1;
 		do
 		{
-			long zig = 0;
+			int zig = 0;
 			var c = 0;
 			var r = 0;
 			var s = 0;
@@ -355,7 +355,7 @@ public class JpgDecoder extends Decoder
 		return 1;
 	}
 
-	private int stbi__jpeg_decode_block_prog_dc(FakePtr<Short> data, stbi__huffman hdc, int b)
+	private int stbi__jpeg_decode_block_prog_dc(FakePtr<Short> data, stbi__huffman hdc, int b) throws Exception
 	{
 		var diff = 0;
 		var dc = 0;
@@ -366,23 +366,25 @@ public class JpgDecoder extends Decoder
 			stbi__grow_buffer_unsafe();
 		if (succ_high == 0)
 		{
-			data.Clear(64);
+			data.fill((short)0, 64);
 			t = stbi__jpeg_huff_decode(hdc);
 			diff = t != 0 ? stbi__extend_receive(t) : 0;
 			dc = img_comp[b].dc_pred + diff;
 			img_comp[b].dc_pred = dc;
-			data[0] = (short)(dc << succ_low);
+			data.setAt(0, (short)(dc << succ_low));
 		}
 		else
 		{
-			if (stbi__jpeg_get_bit() != 0)
-				data[0] += (short)(1 << succ_low);
+			if (stbi__jpeg_get_bit() != 0) {
+				short val = data.getAt(0);
+				data.setAt(0, (short)(val + (short)(1 << succ_low)));
+			}
 		}
 
 		return 1;
 	}
 
-	private int stbi__jpeg_decode_block_prog_ac(FakePtr<Short> data, stbi__huffman hac, short[] fac)
+	private int stbi__jpeg_decode_block_prog_ac(FakePtr<Short> data, stbi__huffman hac, short[] fac) throws Exception
 	{
 		var k = 0;
 		if (spec_start == 0)
@@ -399,7 +401,7 @@ public class JpgDecoder extends Decoder
 			k = spec_start;
 			do
 			{
-				long zig = 0;
+				int zig = 0;
 				var c = 0;
 				var r = 0;
 				var s = 0;
@@ -414,7 +416,7 @@ public class JpgDecoder extends Decoder
 					code_buffer <<= s;
 					code_bits -= s;
 					zig = stbi__jpeg_dezigzag[k++];
-					data[zig] = (short)((r >> 8) << shift);
+					data.setAt(zig, (short)((r >> 8) << shift));
 				}
 				else
 				{
@@ -440,7 +442,7 @@ public class JpgDecoder extends Decoder
 					{
 						k += r;
 						zig = stbi__jpeg_dezigzag[k++];
-						data[zig] = (short)(stbi__extend_receive(s) << shift);
+						data.setAt(zig, (short)(stbi__extend_receive(s) << shift));
 					}
 				}
 			} while (k <= spec_end);
@@ -454,15 +456,16 @@ public class JpgDecoder extends Decoder
 				for (k = spec_start; k <= spec_end; ++k)
 				{
 					var idx = stbi__jpeg_dezigzag[k];
-					var value = data[idx];
+					var value = data.getAt(idx);
 					if (value != 0)
 						if (stbi__jpeg_get_bit() != 0)
 							if ((value & bit) == 0)
 							{
+								short val = data.getAt(idx);
 								if (value > 0)
-									data[idx] += bit;
+									data.setAt(idx, (short)(val + bit));
 								else
-									data[idx] -= bit;
+									data.setAt(idx, (short)(val - bit));
 							}
 				}
 			}
@@ -501,23 +504,24 @@ public class JpgDecoder extends Decoder
 					while (k <= spec_end)
 					{
 						var idx = stbi__jpeg_dezigzag[k++];
-						var value = data[idx];
+						var value = data.getAt(idx);
 						if (value != 0)
 						{
 							if (stbi__jpeg_get_bit() != 0)
 								if ((value & bit) == 0)
 								{
+									short val = data.getAt(idx);
 									if (value > 0)
-										data[idx] += bit;
+										data.setAt(idx, (short)(val + bit));
 									else
-										data[idx] -= bit;
+										data.setAt(idx, (short)(val - bit));
 								}
 						}
 						else
 						{
 							if (r == 0)
 							{
-								data[idx] = (short)s;
+								data.setAt(idx, (short)s);
 								break;
 							}
 
@@ -538,7 +542,7 @@ public class JpgDecoder extends Decoder
 			if (x < 0)
 				return 0;
 			if (x > 255)
-				return 255;
+				return (byte)255;
 		}
 
 		return (byte)x;
@@ -547,11 +551,11 @@ public class JpgDecoder extends Decoder
 	private static void stbi__idct_block(FakePtr<Byte> _out_, int out_stride, FakePtr<Short> data)
 	{
 		var i = 0;
-		var val = new int[64];
-		var v = new FakePtr<int>(val);
+		var val = new Integer[64];
+		var v = new FakePtr<>(val);
 		FakePtr<Byte> o;
 		var d = data;
-		for (i = 0; i < 8; ++i, ++d, ++v)
+		for (i = 0; i < 8; ++i, d.increase(), v.increase())
 			if (d[8] == 0 && d[16] == 0 && d[24] == 0 && d[32] == 0 && d[40] == 0 && d[48] == 0 && d[56] == 0)
 			{
 				var dcterm = d[0] * 4;
@@ -620,7 +624,7 @@ public class JpgDecoder extends Decoder
 				v[32] = (x3 - t0) >> 10;
 			}
 
-		for (i = 0, v = new FakePtr<int>(val), o = _out_; i < 8; ++i, v += 8, o += out_stride)
+		for (i = 0, v = new FakePtr<Integer>(val), o = _out_; i < 8; ++i, v += 8, o += out_stride)
 		{
 			var t0 = 0;
 			var t1 = 0;
@@ -684,19 +688,19 @@ public class JpgDecoder extends Decoder
 		}
 	}
 
-	private byte stbi__get_marker()
+	private byte stbi__get_marker() throws Exception
 	{
 		byte x = 0;
 		if (marker != 0xff)
 		{
 			x = marker;
-			marker = 0xff;
+			marker = (byte)0xff;
 			return x;
 		}
 
 		x = stbi__get8();
 		if (x != 0xff)
-			return 0xff;
+			return (byte)0xff;
 		while (x == 0xff) x = stbi__get8();
 		return x;
 	}
@@ -707,12 +711,12 @@ public class JpgDecoder extends Decoder
 		code_buffer = 0;
 		nomore = 0;
 		img_comp[0].dc_pred = img_comp[1].dc_pred = img_comp[2].dc_pred = img_comp[3].dc_pred = 0;
-		marker = 0xff;
+		marker = (byte)0xff;
 		todo = restart_interval != 0 ? restart_interval : 0x7fffffff;
 		eob_run = 0;
 	}
 
-	private int stbi__parse_entropy_coded_data()
+	private int stbi__parse_entropy_coded_data() throws Exception
 	{
 		stbi__jpeg_reset();
 		if (progressive == 0)
@@ -721,7 +725,7 @@ public class JpgDecoder extends Decoder
 			{
 				var i = 0;
 				var j = 0;
-				var data = new short[64];
+				var data = new Short[64];
 				var n = order[0];
 				var w = (img_comp[n].x + 7) >> 3;
 				var h = (img_comp[n].y + 7) >> 3;
@@ -893,7 +897,7 @@ public class JpgDecoder extends Decoder
 		}
 	}
 
-	private int stbi__process_marker(int m)
+	private int stbi__process_marker(int m) throws Exception
 	{
 		var L = 0;
 		switch (m)
