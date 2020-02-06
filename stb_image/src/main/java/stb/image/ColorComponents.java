@@ -1,7 +1,6 @@
-﻿package stb.image;
+package stb.image;
 
-public enum ColorComponents
-{
+public enum ColorComponents {
 	Grey(1),
 	GreyAlpha(2),
 	RedGreenBlue(3),
@@ -9,8 +8,7 @@ public enum ColorComponents
 
 	private int value;
 
-	ColorComponents(int value)
-	{
+	ColorComponents(int value) {
 		this.value = value;
 	}
 
@@ -18,8 +16,7 @@ public enum ColorComponents
 		return value;
 	}
 
-	public static ColorComponents fromInt(int value)
-	{
+	public static ColorComponents fromInt(int value) {
 		return values()[value];
 	}
 }

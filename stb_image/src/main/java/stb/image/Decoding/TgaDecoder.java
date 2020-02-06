@@ -1,11 +1,15 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
-import stb.image.Decoding.Utility.Conversion;
+import stb.image.ColorComponents;
+import stb.image.ImageResult;
 
-public class TgaDecoder extends Decoder
+import java.io.InputStream;
+
+/*public class TgaDecoder extends Decoder
 {
-	private TgaDecoder(InputStream stream) : base(stream)
+	private TgaDecoder(InputStream stream)
 	{
+		super(stream)
 	}
 
 	private static int stbi__tga_get_comp(int bits_per_pixel, int is_grey, out int is_rgb16)
@@ -29,7 +33,7 @@ public class TgaDecoder extends Decoder
 		}
 	}
 
-	private void stbi__tga_read_rgb16(FakePtr<Byte> _out_)
+	private void stbi__tga_read_rgb16(FakePtr<Byte> _out_) throws Exception
 	{
 		var px = (int)stbi__get16le();
 		var fiveBitMask = (int)31;
@@ -41,7 +45,7 @@ public class TgaDecoder extends Decoder
 		_out_[2] = (byte)(b * 255 / 31);
 	}
 
-	private ImageResult InternalDecode(ColorComponents  requiredComponents)
+	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception
 	{
 		var tga_offset = (int)stbi__get8();
 		var tga_indexed = (int)stbi__get8();
@@ -323,4 +327,4 @@ public class TgaDecoder extends Decoder
 		var decoder = new TgaDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}
-}
+}*/

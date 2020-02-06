@@ -1,12 +1,12 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class Decoder {
-	private static final int STBI__SCAN_load = 0;
-	private static final int STBI__SCAN_type = 1;
-	private static final int STBI__SCAN_header = 2;
+	protected static final int STBI__SCAN_load = 0;
+	protected static final int STBI__SCAN_type = 1;
+	protected static final int STBI__SCAN_header = 2;
 
 	protected int img_x = 0;
 	protected int img_y = 0;
@@ -23,28 +23,27 @@ public class Decoder {
 	}
 
 	protected long stbi__get32be() throws Exception {
-		return IOUtils.stbi__get32be(InputStream);
+		return Utility.stbi__get32be(InputStream);
 	}
 
 	protected int stbi__get16be() throws Exception {
-		return IOUtils.stbi__get16be(InputStream);
+		return Utility.stbi__get16be(InputStream);
 	}
 
 	protected long stbi__get32le() throws Exception {
-		return IOUtils.stbi__get32le(InputStream);
+		return Utility.stbi__get32le(InputStream);
 	}
 
 	protected int stbi__get16le() throws Exception {
-		return IOUtils.stbi__get16le(InputStream);
+		return Utility.stbi__get16le(InputStream);
 	}
 
-	protected byte stbi__get8() throws Exception {
-		return IOUtils.stbi__get8(InputStream);
+	protected short stbi__get8() throws Exception {
+		return Utility.stbi__get8(InputStream);
 	}
 
 	protected boolean stbi__getn(byte[] buffer, int offset, int count) throws IOException {
-		var read = InputStream.read(buffer, offset, count);
-
+		int read = InputStream.read(buffer, offset, count);
 		return read == count;
 	}
 

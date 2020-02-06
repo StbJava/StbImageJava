@@ -1,4 +1,4 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
 import java.io.InputStream;
 
@@ -20,7 +20,7 @@ class Utility
 		return (x << y) | (x >> (32 - y));
 	}
 
-	public static byte stbi__get8(InputStream s) throws Exception
+	public static short stbi__get8(InputStream s) throws Exception
 	{
 		int b = s.read();
 		if (b == -1)
@@ -28,7 +28,7 @@ class Utility
 			throw new Exception("EOF");
 		}
 
-		return (byte)b;
+		return (short)b;
 	}
 
 	public static int stbi__get16be(InputStream s) throws Exception
@@ -191,7 +191,7 @@ class Utility
 		if ((req_comp) == (img_n))
 			return data;
 
-		var good = new Byte[req_comp * x * y];
+		Byte[] good = new Byte[req_comp * x * y];
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
 		{
 			FakePtr<Byte> src = new FakePtr<>(data, (int) (j * x * img_n));
@@ -325,7 +325,7 @@ class Utility
 	{
 		int i = 0;
 		int img_len = (int)(w * h * channels);
-		var enlarged = new int[img_len];
+		int[] enlarged = new int[img_len];
 		for (i = (int)(0); (i) < (img_len); ++i)
 		{
 			enlarged[i] = ((int)((orig[i] << 8) + orig[i]));
@@ -334,7 +334,7 @@ class Utility
 		return enlarged;
 	}
 
-	public static void stbi__vertical_flip(byte[] image, int w, int h, int bytes_per_pixel)
+/*	public static void stbi__vertical_flip(byte[] image, int w, int h, int bytes_per_pixel)
 	{
 		int row = 0;
 		int bytes_per_row = w * bytes_per_pixel;
@@ -355,5 +355,5 @@ class Utility
 				bytes_left -= bytes_copy;
 			}
 		}
-	}
+	}*/
 }

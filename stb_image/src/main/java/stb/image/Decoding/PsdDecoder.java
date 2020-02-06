@@ -1,11 +1,16 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
-import stb.image.Decoding.Utility.Conversion;
+import stb.image.ColorComponents;
+import stb.image.ImageInfo;
+import stb.image.ImageResult;
 
-public class PsdDecoder extends Decoder
+import java.io.InputStream;
+
+/*public class PsdDecoder extends Decoder
 {
-	private PsdDecoder(InputStream stream) : base(stream)
+	private PsdDecoder(InputStream stream)
 	{
+		super(stream);
 	}
 
 	private int stbi__psd_decode_rle(FakePtr<Byte> p, int pixelCount)
@@ -131,7 +136,7 @@ public class PsdDecoder extends Decoder
 													*q = (int)(val);
 												}*/
 
-					var p = ptr + channel;
+/*					var p = ptr + channel;
 					var val = (byte)(channel == 3 ? 255 : 0);
 					for (i = 0; i < pixelCount; i++, p += 4) p.set(val);
 				}
@@ -145,7 +150,7 @@ public class PsdDecoder extends Decoder
 													*q = ((int)(stbi__get16be()));
 												}*/
 
-					var p = ptr + channel;
+/*					var p = ptr + channel;
 					if (bitdepth == 16)
 						for (i = 0; i < pixelCount; i++, p += 4)
 							p.set((byte)(stbi__get16be() >> 8));
@@ -172,7 +177,7 @@ public class PsdDecoder extends Decoder
 										pixel[2] = ((int)(pixel[2] * ra + inv_a));
 									}
 								}*/
-			for (i = 0; i < w * h; ++i)
+/*			for (i = 0; i < w * h; ++i)
 			{
 				var pixel = ptr + 4 * i;
 				if (pixel[3] != 0 && pixel[3] != 255)
@@ -250,9 +255,19 @@ public class PsdDecoder extends Decoder
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents = null, int bpc = 8)
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents, int bpc)
 	{
 		var decoder = new PsdDecoder(stream);
 		return decoder.InternalDecode(requiredComponents, bpc);
 	}
-}
+
+	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents)
+	{
+		return Decode(stream, requiredComponents, 8);
+	}
+
+	public static ImageResult Decode(InputStream stream)
+	{
+		return Decode(stream, null);
+	}
+}*/

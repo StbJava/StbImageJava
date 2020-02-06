@@ -1,10 +1,11 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
-import stb.image.Decoding.Utility.Conversion;
+import stb.image.ColorComponents;
+import stb.image.ImageResult;
 
 import java.io.InputStream;
 
-public class PngDecoder extends Decoder
+/*public class PngDecoder extends Decoder
 {
 	private static class stbi__pngchunk
 	{
@@ -63,9 +64,9 @@ public class PngDecoder extends Decoder
 	private static int stbi__paeth(int a, int b, int c)
 	{
 		var p = a + b - c;
-		var pa = Math.Abs(p - a);
-		var pb = Math.Abs(p - b);
-		var pc = Math.Abs(p - c);
+		var pa = Math.abs(p - a);
+		var pb = Math.abs(p - b);
+		var pc = Math.abs(p - c);
 		if (pa <= pb && pa <= pc)
 			return a;
 		if (pb <= pc)
@@ -361,7 +362,7 @@ public class PngDecoder extends Decoder
 							*cur16 = (int)((cur[0] << 8) | cur[1]);
 						}*/
 
-		return 1;
+/*		return 1;
 	}
 
 	private int stbi__create_png_image(FakePtr<Byte> image_data, long image_data_len, int out_n, int depth,
@@ -493,7 +494,7 @@ public class PngDecoder extends Decoder
 					}
 
 					return (int)(1);*/
-	}
+/*	}
 
 	private int stbi__expand_png_palette(byte[] palette, int len, int pal_img_n)
 	{
@@ -583,7 +584,7 @@ public class PngDecoder extends Decoder
 		}
 	}
 
-	private int stbi__parse_png_file(int scan, int req_comp)
+	private int stbi__parse_png_file(int scan, int req_comp) throws Exception
 	{
 		var palette = new byte[1024];
 		var pal_img_n = (byte)0;
@@ -832,7 +833,7 @@ public class PngDecoder extends Decoder
 		}
 	}
 
-	private ImageResult InternalDecode(ColorComponents  requiredComponents)
+	private ImageResult InternalDecode(ColorComponents requiredComponents)
 	{
 		var req_comp = requiredComponents.ToReqComp();
 		if (req_comp < 0 || req_comp > 4)
@@ -908,4 +909,4 @@ public class PngDecoder extends Decoder
 		var decoder = new PngDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}
-}
+}*/

@@ -1,6 +1,6 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
-class ZLib
+/*class ZLib
 {
 	private static class stbi__zhuffman
 	{
@@ -447,4 +447,4 @@ class ZLib
 
 		return null;
 	}
-}
+}*/

@@ -1,11 +1,11 @@
-﻿package stb.image.Decoding;
+package stb.image.Decoding;
 
 import stb.image.ColorComponents;
-import stb.image.Decoding.Utility.Conversion;
+import stb.image.ImageResult;
 
 import java.io.InputStream;
 
-public class GifDecoder extends Decoder
+/*public class GifDecoder extends Decoder
 {
 	private static class stbi__gif_lzw
 	{
@@ -370,7 +370,7 @@ public class GifDecoder extends Decoder
 					break;
 			}
 		}
-	}
+	}*/
 
 /*		private void* stbi__load_gif_main(int** delays, int* x, int* y, int* z, int* comp, int req_comp)
 		{
@@ -437,7 +437,7 @@ public class GifDecoder extends Decoder
 
 		}*/
 
-	private ImageResult InternalDecode(ColorComponents  requiredComponents)
+/*	private ImageResult InternalDecode(ColorComponents  requiredComponents)
 	{
 		int comp;
 		var u = stbi__gif_load_next(out comp, null);
@@ -501,4 +501,4 @@ public class GifDecoder extends Decoder
 		var decoder = new GifDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}
-}
+}*/
