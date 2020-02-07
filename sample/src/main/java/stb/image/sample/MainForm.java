@@ -66,6 +66,7 @@ public class MainForm extends JFrame {
 		result.add(new FileNameExtensionFilter("PNG Files(*.png)", "png"));
 		result.add(new FileNameExtensionFilter("JPEG Files(*.jpg)", "jpg"));
 		result.add(new FileNameExtensionFilter("BMP Files(*.bmp)", "bmp"));
+		result.add(new FileNameExtensionFilter("GIF Files(*.gif)", "gif"));
 
 		return result;
 	}
@@ -89,9 +90,8 @@ public class MainForm extends JFrame {
 
 	private void Open(String filePath) {
 		try {
-			byte[] shorts = Files.readAllBytes(new File(filePath).toPath());
-			ByteArrayInputStream stream = new ByteArrayInputStream(shorts);
-			ImageResult image = ImageResult.FromInputStream(stream, ColorComponents.RedGreenBlueAlpha, false);
+			byte[] bytes = Files.readAllBytes(new File(filePath).toPath());
+			ImageResult image = ImageResult.FromData(bytes, ColorComponents.RedGreenBlueAlpha);
 			panel.img = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			int i = 0;
 

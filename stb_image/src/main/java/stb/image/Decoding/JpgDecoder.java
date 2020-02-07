@@ -4,7 +4,7 @@ import stb.image.ColorComponents;
 import stb.image.ImageInfo;
 import stb.image.ImageResult;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1488,7 +1488,7 @@ public class JpgDecoder extends Decoder {
 				ColorComponents.fromInt(comp),
 				req_comp != null ? req_comp : ColorComponents.fromInt(comp),
 				8,
-				Utility.toByteArray(output));
+				Utility.toResultArray(output));
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
@@ -1497,25 +1497,23 @@ public class JpgDecoder extends Decoder {
 		return load_jpeg_image(requiredComponents);
 	}
 
-	public static boolean Test(InputStream stream) throws IOException {
-		JpgDecoder decoder = new JpgDecoder(stream);
-		decoder.stbi__setup_jpeg();
+	public static boolean Test(byte[] data) {
 		try {
-			stream.mark(0);
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
+			JpgDecoder decoder = new JpgDecoder(stream);
+			decoder.stbi__setup_jpeg();
 			return decoder.stbi__decode_jpeg_header(STBI__SCAN_type);
 		} catch (Exception ex) {
 			return false;
-		} finally {
-			stream.reset();
 		}
 	}
 
-	public static ImageInfo Info(InputStream stream) throws IOException {
-		JpgDecoder decoder = new JpgDecoder(stream);
-
-		decoder.stbi__setup_jpeg();
+	public static ImageInfo Info(byte[] data) {
 		try {
-			stream.mark(0);
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
+			JpgDecoder decoder = new JpgDecoder(stream);
+
+			decoder.stbi__setup_jpeg();
 			boolean r = decoder.stbi__decode_jpeg_header(STBI__SCAN_header);
 			if (!r) return null;
 
@@ -1525,17 +1523,16 @@ public class JpgDecoder extends Decoder {
 					8);
 		} catch (Exception ex) {
 			return null;
-		} finally {
-			stream.reset();
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents requiredComponents) throws Exception {
+	public static ImageResult Decode(byte[] data, ColorComponents requiredComponents) throws Exception {
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
 		JpgDecoder decoder = new JpgDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}
 
-	public static ImageResult Decode(InputStream stream) throws Exception {
-		return Decode(stream, null);
+	public static ImageResult Decode(byte[] data) throws Exception {
+		return Decode(data, null);
 	}
 }

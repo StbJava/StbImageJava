@@ -4,7 +4,7 @@ import stb.image.ColorComponents;
 import stb.image.ImageInfo;
 import stb.image.ImageResult;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public class BmpDecoder extends Decoder {
@@ -201,9 +201,9 @@ public class BmpDecoder extends Decoder {
 			int z = 0;
 			if (psize == 0 || psize > 256) stbi__err("invalid");
 			for (i = 0; i < psize; ++i) {
-				pal[i * 4 + 2] = (short)stbi__get8();
-				pal[i * 4 + 1] = (short)stbi__get8();
-				pal[i * 4 + 0] = (short)stbi__get8();
+				pal[i * 4 + 2] = (short) stbi__get8();
+				pal[i * 4 + 1] = (short) stbi__get8();
+				pal[i * 4 + 0] = (short) stbi__get8();
 				if (info.hsz != 12)
 					stbi__get8();
 				pal[i * 4 + 3] = (short) 255;
@@ -307,9 +307,9 @@ public class BmpDecoder extends Decoder {
 				if (easy != 0) {
 					for (i = 0; i < img_x; ++i) {
 						short a = 0;
-						_out_[z + 2] = (short)stbi__get8();
-						_out_[z + 1] = (short)stbi__get8();
-						_out_[z + 0] = (short)stbi__get8();
+						_out_[z + 2] = (short) stbi__get8();
+						_out_[z + 1] = (short) stbi__get8();
+						_out_[z + 0] = (short) stbi__get8();
 						z += 3;
 						a = (short) (easy == 2 ? stbi__get8() : 255);
 						all_a |= a;
@@ -361,7 +361,7 @@ public class BmpDecoder extends Decoder {
 				ColorComponents.fromInt(img_n),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 				8,
-				Utility.toByteArray(_out_)
+				Utility.toResultArray(_out_)
 		);
 	}
 
@@ -380,44 +380,38 @@ public class BmpDecoder extends Decoder {
 		return r;
 	}
 
-	public static boolean Test(InputStream stream) throws IOException {
+	public static boolean Test(byte[] data) {
 		try {
-			stream.mark(0);
-			boolean r = TestInternal(stream);
-			return r;
+			return TestInternal(new ByteArrayInputStream(data));
 		} catch (Exception ex) {
 			return false;
-		} finally {
-			stream.reset();
 		}
 	}
 
-	public static ImageInfo Info(InputStream stream) throws IOException {
-		stbi__bmp_data info = new stbi__bmp_data();
-		info.all_a = 255;
-
-		BmpDecoder decoder = new BmpDecoder(stream);
+	public static ImageInfo Info(byte[] data) {
 		try {
-			stream.mark(0);
+			stbi__bmp_data info = new stbi__bmp_data();
+			info.all_a = 255;
+
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
+			BmpDecoder decoder = new BmpDecoder(stream);
 			decoder.stbi__bmp_parse_header(info);
+			return new ImageInfo(decoder.img_x,
+					decoder.img_y,
+					info.ma != 0 ? ColorComponents.RedGreenBlueAlpha : ColorComponents.RedGreenBlue,
+					8);
 		} catch (Exception ex) {
 			return null;
-		} finally {
-			stream.reset();
 		}
-
-		return new ImageInfo(decoder.img_x,
-				decoder.img_y,
-				info.ma != 0 ? ColorComponents.RedGreenBlueAlpha : ColorComponents.RedGreenBlue,
-				8);
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents requiredComponents) throws Exception {
+	public static ImageResult Decode(byte[] data, ColorComponents requiredComponents) throws Exception {
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
 		BmpDecoder decoder = new BmpDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
 	}
 
-	public static ImageResult Decode(InputStream stream) throws Exception {
-		return Decode(stream, null);
+	public static ImageResult Decode(byte[] data) throws Exception {
+		return Decode(data, null);
 	}
 }

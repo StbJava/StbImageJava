@@ -36,33 +36,33 @@ public class ImageInfo
         return bitsPerChannel;
     }
 
-    public static ImageInfo FromInputStream(InputStream stream) throws IOException
+    public static ImageInfo FromInputStream(byte[] data)
 	{
-		ImageInfo info = JpgDecoder.Info(stream);
+		ImageInfo info = JpgDecoder.Info(data);
 		if (info != null)
 		{
 			return info;
 		}
 
-		info = PngDecoder.Info(stream);
+		info = PngDecoder.Info(data);
 		if (info != null)
 		{
 			return info;
 		}
 
-/*		info = GifDecoder.Info(stream);
-		if (info != null)
-		{
-			return info;
-		}*/
-
-		info = BmpDecoder.Info(stream);
+		info = GifDecoder.Info(data);
 		if (info != null)
 		{
 			return info;
 		}
 
-/*		info = PsdDecoder.Info(stream);
+		info = BmpDecoder.Info(data);
+		if (info != null)
+		{
+			return info;
+		}
+
+/*		info = PsdDecoder.Info(data);
 		if (info != null)
 		{
 			return info;

@@ -4,7 +4,7 @@ import stb.image.ColorComponents;
 import stb.image.ImageInfo;
 import stb.image.ImageResult;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -783,7 +783,7 @@ public class PngDecoder extends Decoder {
 					ColorComponents.fromInt(img_n),
 					requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 					bits_per_channel,
-					Utility.toByteArray(result));
+					Utility.toResultArray(result));
 		} finally {
 			_out_ = null;
 			expanded = null;
@@ -791,20 +791,18 @@ public class PngDecoder extends Decoder {
 		}
 	}
 
-	public static boolean Test(InputStream stream) throws IOException {
+	public static boolean Test(byte[] data) {
 		try {
-			stream.mark(0);
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
 			return stbi__check_png_header(stream);
 		} catch (Exception ex) {
 			return false;
-		} finally {
-			stream.reset();
 		}
 	}
 
-	public static ImageInfo Info(InputStream stream) throws IOException {
+	public static ImageInfo Info(byte[] data) {
 		try {
-			stream.mark(0);
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
 			PngDecoder decoder = new PngDecoder(stream);
 			int r = decoder.stbi__parse_png_file(STBI__SCAN_header, 0);
 			if (r == 0) return null;
@@ -812,13 +810,17 @@ public class PngDecoder extends Decoder {
 			return new ImageInfo(decoder.img_x, decoder.img_y, ColorComponents.fromInt(decoder.img_n), decoder.depth);
 		} catch (Exception ex) {
 			return null;
-		} finally {
-			stream.reset();
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents requiredComponents) throws Exception {
+	public static ImageResult Decode(byte[] data, ColorComponents requiredComponents) throws Exception {
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
 		PngDecoder decoder = new PngDecoder(stream);
 		return decoder.InternalDecode(requiredComponents);
+	}
+
+	public static ImageResult Decode(byte[] data) throws Exception
+	{
+		return Decode(data, null);
 	}
 }

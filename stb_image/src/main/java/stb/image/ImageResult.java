@@ -2,8 +2,6 @@ package stb.image;
 
 import stb.image.Decoding.*;
 
-import java.io.InputStream;
-
 public	class ImageResult
 {
 	private int width;
@@ -52,26 +50,26 @@ public	class ImageResult
 		return data;
 	}
 
-	public static ImageResult FromInputStream(InputStream stream, ColorComponents  requiredComponents, boolean use8BitsPerChannel) throws Exception
+	public static ImageResult FromData(byte[] data, ColorComponents  requiredComponents) throws Exception
 	{
 		ImageResult result = null;
-		if (JpgDecoder.Test(stream))
+		if (JpgDecoder.Test(data))
 		{
-			result = JpgDecoder.Decode(stream, requiredComponents);
+			result = JpgDecoder.Decode(data, requiredComponents);
 		}
-		else if (PngDecoder.Test(stream))
+		else if (PngDecoder.Test(data))
 		{
-			result = PngDecoder.Decode(stream, requiredComponents);
+			result = PngDecoder.Decode(data, requiredComponents);
 		}
-		else if (BmpDecoder.Test(stream))
+		else if (BmpDecoder.Test(data))
 		{
-			result = BmpDecoder.Decode(stream, requiredComponents);
+			result = BmpDecoder.Decode(data, requiredComponents);
 		}
-/*		else if (GifDecoder.Test(stream))
+		else if (GifDecoder.Test(data))
 		{
-			result = GifDecoder.Decode(stream, requiredComponents);
+			result = GifDecoder.Decode(data, requiredComponents);
 		}
-		else if (PsdDecoder.Test(stream))
+/*		else if (PsdDecoder.Test(stream))
 		{
 			result = PsdDecoder.Decode(stream, requiredComponents);
 		}
@@ -85,11 +83,11 @@ public	class ImageResult
 			throw new Exception("unknown image type");
 		}
 
-		if (use8BitsPerChannel && result.bitsPerChannel != 8)
+/*		if (use8BitsPerChannel && result.bitsPerChannel != 8)
 		{
-/*			result.data = Utility.stbi__convert_16_to_8(result.data, result.width, result.height, (int)result.colorComponents);*/
+			result.data = Utility.stbi__convert_16_to_8(result.data, result.width, result.height, (int)result.colorComponents);
 			throw new UnsupportedOperationException();
-		}
+		}*/
 
 		return result;
 	}

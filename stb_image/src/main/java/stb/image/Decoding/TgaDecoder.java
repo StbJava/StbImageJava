@@ -212,17 +212,17 @@ import java.io.InputStream;
 	{
 		try
 		{
-			stream.stbi__get8();
-			int tga_color_type = (int)stream.stbi__get8();
+			Utility.stbi__get8(stream);
+			int tga_color_type = (int)Utility.stbi__get8(stream);
 			if (tga_color_type > 1)
 				return false;
-			int sz = (int)stream.stbi__get8();
+			int sz = (int)Utility.stbi__get8(stream);
 			if (tga_color_type == 1)
 			{
 				if (sz != 1 && sz != 9)
 					return false;
 				stream.stbi__skip(4);
-				sz = stream.stbi__get8();
+				sz = Utility.stbi__get8(stream);
 				if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
 					return false;
 				stream.stbi__skip(4);
@@ -238,7 +238,7 @@ import java.io.InputStream;
 				return false;
 			if (Utility.stbi__get16le(stream) < 1)
 				return false;
-			sz = stream.stbi__get8();
+			sz = Utility.stbi__get8(stream);
 			if (tga_color_type == 1 && sz != 8 && sz != 16)
 				return false;
 			if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
@@ -264,16 +264,16 @@ import java.io.InputStream;
 			int tga_colormap_bpp = 0;
 			int sz = 0;
 			int tga_colormap_type = 0;
-			stream.stbi__get8();
-			tga_colormap_type = stream.stbi__get8();
+			Utility.stbi__get8(stream);
+			tga_colormap_type = Utility.stbi__get8(stream);
 			if (tga_colormap_type > 1) return null;
 
-			tga_image_type = stream.stbi__get8();
+			tga_image_type = Utility.stbi__get8(stream);
 			if (tga_colormap_type == 1)
 			{
 				if (tga_image_type != 1 && tga_image_type != 9) return null;
 				stream.stbi__skip(4);
-				sz = stream.stbi__get8();
+				sz = Utility.stbi__get8(stream);
 				if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32) return null;
 				stream.stbi__skip(4);
 				tga_colormap_bpp = sz;
@@ -292,8 +292,8 @@ import java.io.InputStream;
 			tga_h = Utility.stbi__get16le(stream);
 			if (tga_h < 1) return null;
 
-			tga_bits_per_pixel = stream.stbi__get8();
-			stream.stbi__get8();
+			tga_bits_per_pixel = Utility.stbi__get8(stream);
+			Utility.stbi__get8(stream);
 			int is_rgb16;
 			if (tga_colormap_bpp != 0)
 			{

@@ -1,7 +1,6 @@
 package stb.image.Decoding;
 
 import java.io.InputStream;
-import java.util.Arrays;
 
 class Utility
 {
@@ -174,7 +173,7 @@ class Utility
 		return good;*/
 	}
 
-	public static short[] toByteArray(Short[] data)
+	public static short[] toResultArray(Short[] data)
 	{
 		short[] result = new short[data.length];
 		for(int i = 0; i < data.length; ++i)
@@ -194,6 +193,11 @@ class Utility
 		}
 
 		return result;
+	}
+
+	public static <T> void memcpy(FakePtr<T> ptr1, FakePtr<T> ptr2, int count)
+	{
+		ptr1.memcpy(ptr2, count);
 	}
 
 	public static Short[] stbi__convert_format(Short[] data, int img_n, int req_comp, int x, int y) throws Exception
@@ -359,9 +363,9 @@ class Utility
 			while ((shorts_left) != 0)
 			{
 				int shorts_copy = (((shorts_left) < (2048)) ? shorts_left : 2048);
-				FakePtr<Short>.memcpy(temp, row0, shorts_copy);
-				FakePtr<Short>.memcpy(row0, row1, shorts_copy);
-				FakePtr<Short>.memcpy(row1, temp, shorts_copy);
+				Utility.memcpy(temp, row0, shorts_copy);
+				Utility.memcpy(row0, row1, shorts_copy);
+				Utility.memcpy(row1, temp, shorts_copy);
 				row0 += shorts_copy;
 				row1 += shorts_copy;
 				shorts_left -= shorts_copy;

@@ -46,9 +46,8 @@ public class Decoder {
 		byte[] buffer2 = new byte[count];
 		int read = InputStream.read(buffer2, 0, count);
 
-		for(int i = 0; i < read; ++i)
-		{
-			buffer[offset + i] = (short)(buffer2[i] & 0xff);
+		for (int i = 0; i < read; ++i) {
+			buffer[offset + i] = (short) (buffer2[i] & 0xff);
 		}
 
 		return read == count;
