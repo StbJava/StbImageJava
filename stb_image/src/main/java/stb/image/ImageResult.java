@@ -69,14 +69,14 @@ public	class ImageResult
 		{
 			result = GifDecoder.Decode(data, requiredComponents);
 		}
-/*		else if (PsdDecoder.Test(stream))
+		else if (PsdDecoder.Test(data))
 		{
-			result = PsdDecoder.Decode(stream, requiredComponents);
+			result = PsdDecoder.Decode(data, requiredComponents);
 		}
-		else if (TgaDecoder.Test(stream))
+		else if (TgaDecoder.Test(data))
 		{
-			result = TgaDecoder.Decode(stream, requiredComponents);
-		}*/
+			result = TgaDecoder.Decode(data, requiredComponents);
+		}
 
 		if (result == null)
 		{

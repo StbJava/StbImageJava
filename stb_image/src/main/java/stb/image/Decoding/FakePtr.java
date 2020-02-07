@@ -29,6 +29,10 @@ public class FakePtr<T> {
 		return _array[Offset];
 	}
 
+	public void set(T value) {
+		_array[Offset] = value;
+	}
+
 	public T getAt(int offset) {
 		return _array[Offset + offset];
 	}

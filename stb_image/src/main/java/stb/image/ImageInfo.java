@@ -62,17 +62,17 @@ public class ImageInfo
 			return info;
 		}
 
-/*		info = PsdDecoder.Info(data);
+		info = PsdDecoder.Info(data);
 		if (info != null)
 		{
 			return info;
 		}
 
-		info = TgaDecoder.Info(stream);
+		info = TgaDecoder.Info(data);
 		if (info != null)
 		{
 			return info;
-		}*/
+		}
 
 		return null;
 	}

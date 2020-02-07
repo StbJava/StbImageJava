@@ -1,5 +1,6 @@
 package stb.image.Decoding;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 class Utility
@@ -18,6 +19,10 @@ class Utility
 
 	public static long _lrotl(long x, int y) {
 		return (x << y) | (x >> (32 - y));
+	}
+
+	protected static void stbi__skip(InputStream s, int count) throws IOException {
+		s.skip(count);
 	}
 
 	public static short stbi__get8(InputStream s) throws Exception

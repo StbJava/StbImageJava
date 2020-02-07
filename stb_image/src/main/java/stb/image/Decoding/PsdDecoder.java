@@ -4,52 +4,43 @@ import stb.image.ColorComponents;
 import stb.image.ImageInfo;
 import stb.image.ImageResult;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-/*public class PsdDecoder extends Decoder
-{
-	private PsdDecoder(InputStream stream)
-	{
+public class PsdDecoder extends Decoder {
+	private PsdDecoder(InputStream stream) {
 		super(stream);
 	}
 
-	private int stbi__psd_decode_rle(FakePtr<Short> p, int pixelCount)
-	{
+	private int stbi__psd_decode_rle(FakePtr<Short> po, int pixelCount) throws Exception {
+		FakePtr<Short> p = po.clone();
 		int count = 0;
 		int nleft = 0;
 		int len = 0;
 		count = 0;
-		while ((nleft = pixelCount - count) > 0)
-		{
+		while ((nleft = pixelCount - count) > 0) {
 			len = stbi__get8();
-			if (len == 128)
-			{
-			}
-			else if (len < 128)
-			{
+			if (len == 128) {
+			} else if (len < 128) {
 				len++;
 				if (len > nleft)
 					return 0;
 				count += len;
-				while (len != 0)
-				{
-					p.Value = stbi__get8();
-					p += 4;
+				while (len != 0) {
+					p.set(stbi__get8());
+					p.move(4);
 					len--;
 				}
-			}
-			else if (len > 128)
-			{
+			} else if (len > 128) {
 				short val = 0;
 				len = 257 - len;
 				if (len > nleft)
 					return 0;
 				val = stbi__get8();
 				count += len;
-				while (len != 0)
-				{
-					p.Value = val;
-					p += 4;
+				while (len != 0) {
+					p.set(val);
+					p.move(4);
 					len--;
 				}
 			}
@@ -58,8 +49,7 @@ import java.io.InputStream;
 		return 1;
 	}
 
-	private ImageResult InternalDecode(ColorComponents  requiredComponents, int bpc)
-	{
+	private ImageResult InternalDecode(ColorComponents requiredComponents, int bpc) throws Exception {
 		int pixelCount = 0;
 		int channelCount = 0;
 		int compression = 0;
@@ -68,7 +58,7 @@ import java.io.InputStream;
 		int bitdepth = 0;
 		int w = 0;
 		int h = 0;
-		short[] _out_;
+		Short[] _out_;
 		if (stbi__get32be() != 0x38425053)
 			stbi__err("not PSD");
 		if (stbi__get16be() != 1)
@@ -77,56 +67,44 @@ import java.io.InputStream;
 		channelCount = stbi__get16be();
 		if (channelCount < 0 || channelCount > 16)
 			stbi__err("wrong channel count");
-		h = (int)stbi__get32be();
-		w = (int)stbi__get32be();
+		h = (int) stbi__get32be();
+		w = (int) stbi__get32be();
 		bitdepth = stbi__get16be();
 		if (bitdepth != 8 && bitdepth != 16)
 			stbi__err("unsupported bit depth");
 		if (stbi__get16be() != 3)
 			stbi__err("wrong color format");
-		stbi__skip((int)stbi__get32be());
-		stbi__skip((int)stbi__get32be());
-		stbi__skip((int)stbi__get32be());
+		stbi__skip((int) stbi__get32be());
+		stbi__skip((int) stbi__get32be());
+		stbi__skip((int) stbi__get32be());
 		compression = stbi__get16be();
 		if (compression > 1)
 			stbi__err("bad compression");
 
-		var bits_per_channel = 8;
-		if (compression == 0 && bitdepth == 16 && bpc == 16)
-		{
-			_out_ = new short[8 * w * h];
+		int bits_per_channel = 8;
+		if (compression == 0 && bitdepth == 16 && bpc == 16) {
+			_out_ = new Short[8 * w * h];
 			bits_per_channel = 16;
-		}
-		else
-		{
-			_out_ = new short[4 * w * h];
+		} else {
+			_out_ = new Short[4 * w * h];
 		}
 
 		pixelCount = w * h;
 
 		FakePtr<Short> ptr = new FakePtr<>(_out_);
-		if (compression != 0)
-		{
+		if (compression != 0) {
 			stbi__skip(h * channelCount * 2);
-			for (channel = 0; channel < 4; channel++)
-			{
-				FakePtr<Short> p;
-				p = ptr + channel;
-				if (channel >= channelCount)
-				{
-					for (i = 0; i < pixelCount; i++, p += 4) p.set((short)(channel == 3 ? 255 : 0));
-				}
-				else
-				{
+			for (channel = 0; channel < 4; channel++) {
+				FakePtr<Short> p = new FakePtr<Short>(ptr, channel);
+				if (channel >= channelCount) {
+					for (i = 0; i < pixelCount; i++, p.move(4)) p.set((short) (channel == 3 ? 255 : 0));
+				} else {
 					if (stbi__psd_decode_rle(p, pixelCount) == 0) stbi__err("corrupt");
 				}
 			}
-		}
-		else
-		{
+		} else {
 			for (channel = 0; channel < 4; channel++)
-				if (channel >= channelCount)
-				{
+				if (channel >= channelCount) {
 					if (bitdepth == 16 && bpc == 16)
 						throw new UnsupportedOperationException();
 					/*							int* q = ((int*)(ptr)) + channel;
@@ -136,12 +114,10 @@ import java.io.InputStream;
 													*q = (int)(val);
 												}*/
 
-/*					var p = ptr + channel;
-					short val = (short)(channel == 3 ? 255 : 0);
-					for (i = 0; i < pixelCount; i++, p += 4) p.set(val);
-				}
-				else
-				{
+					FakePtr<Short> p = new FakePtr<Short>(ptr, channel);
+					short val = (short) (channel == 3 ? 255 : 0);
+					for (i = 0; i < pixelCount; i++, p.move(4)) p.set(val);
+				} else {
 					if (bits_per_channel == 16)
 						throw new UnsupportedOperationException();
 					/*							int* q = ((int*)(ptr)) + channel;
@@ -150,18 +126,17 @@ import java.io.InputStream;
 													*q = ((int)(stbi__get16be()));
 												}*/
 
-/*					var p = ptr + channel;
+					FakePtr<Short> p = new FakePtr<Short>(ptr, channel);
 					if (bitdepth == 16)
-						for (i = 0; i < pixelCount; i++, p += 4)
-							p.set((short)(stbi__get16be() >> 8));
+						for (i = 0; i < pixelCount; i++, p.move(4))
+							p.set((short) (stbi__get16be() >> 8));
 					else
-						for (i = 0; i < pixelCount; i++, p += 4)
+						for (i = 0; i < pixelCount; i++, p.move(4))
 							p.set(stbi__get8());
 				}
 		}
 
-		if (channelCount >= 4)
-		{
+		if (channelCount >= 4) {
 			if (bits_per_channel == 16)
 				throw new UnsupportedOperationException();
 			/*					for (i = (int)(0); (i) < (w * h); ++i)
@@ -177,97 +152,82 @@ import java.io.InputStream;
 										pixel[2] = ((int)(pixel[2] * ra + inv_a));
 									}
 								}*/
-/*			for (i = 0; i < w * h; ++i)
-			{
-				var pixel = ptr + 4 * i;
-				if (pixel[3] != 0 && pixel[3] != 255)
-				{
-					var a = pixel[3] / 255.0f;
-					var ra = 1.0f / a;
-					var inv_a = 255.0f * (1 - ra);
-					pixel[0] = (short)(pixel[0] * ra + inv_a);
-					pixel[1] = (short)(pixel[1] * ra + inv_a);
-					pixel[2] = (short)(pixel[2] * ra + inv_a);
+			for (i = 0; i < w * h; ++i) {
+				FakePtr<Short> pixel = new FakePtr<Short>(ptr, 4 * i);
+				if (pixel.getAt(3) != 0 && pixel.getAt(3) != 255) {
+					float a = pixel.getAt(3) / 255.0f;
+					float ra = 1.0f / a;
+					float inv_a = 255.0f * (1 - ra);
+					pixel.setAt(0, (short) (pixel.getAt(0) * ra + inv_a));
+					pixel.setAt(1, (short) (pixel.getAt(1) * ra + inv_a));
+					pixel.setAt(2, (short) (pixel.getAt(2) * ra + inv_a));
 				}
 			}
 		}
 
-		var req_comp = requiredComponents.ToReqComp();
-		if (req_comp != 0 && req_comp != 4)
-		{
+		int req_comp = ColorComponents.toReqComp(requiredComponents);
+		if (req_comp != 0 && req_comp != 4) {
 			if (bits_per_channel == 16)
-				_out_ = Utility.stbi__convert_format16(_out_, 4, req_comp, (long)w, (long)h);
+				_out_ = Utility.stbi__convert_format16(_out_, 4, req_comp, w, h);
 			else
-				_out_ = Utility.stbi__convert_format(_out_, 4, req_comp, (long)w, (long)h);
+				_out_ = Utility.stbi__convert_format(_out_, 4, req_comp, w, h);
 		}
 
-		return new ImageResult
-		{
-			Width = w,
-			Height = h,
-			SourceComponents = ColorComponents.RedGreenBlueAlpha,
-			ColorComponents = requiredComponents != null
-				? requiredComponents.Value
-				: ColorComponents.RedGreenBlueAlpha,
-			BitsPerChannel = bits_per_channel,
-			Data = _out_
-		};
+		return new ImageResult(w,
+				h,
+				ColorComponents.RedGreenBlueAlpha,
+				requiredComponents != null
+						? requiredComponents
+						: ColorComponents.RedGreenBlueAlpha,
+				bits_per_channel,
+				Utility.toResultArray(_out_)
+		);
 	}
 
-	public static boolean Test(InputStream stream)
-	{
-		var r = stream.stbi__get32be() == 0x38425053;
-		stream.Rewind();
-
-		return r;
+	public static boolean Test(byte[] data) {
+		try {
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
+			return Utility.stbi__get32be(stream) == 0x38425053;
+		} catch (Exception ex) {
+			return false;
+		}
 	}
 
-	public static ImageInfo Info(InputStream stream)
-	{
-		try
-		{
-			if (stream.stbi__get32be() != 0x38425053) return null;
+	public static ImageInfo Info(byte[] data) {
+		try {
+			ByteArrayInputStream stream = new ByteArrayInputStream(data);
+			if (Utility.stbi__get32be(stream) != 0x38425053) return null;
 
-			if (stream.stbi__get16be() != 1) return null;
+			if (Utility.stbi__get16be(stream) != 1) return null;
 
-			stream.stbi__skip(6);
-			var channelCount = stream.stbi__get16be();
+			Utility.stbi__skip(stream, 6);
+			int channelCount = Utility.stbi__get16be(stream);
 			if (channelCount < 0 || channelCount > 16) return null;
 
-			int height = (int)stream.stbi__get32be();
-			int width = (int)stream.stbi__get32be();
-			var depth = stream.stbi__get16be();
+			int height = (int) Utility.stbi__get32be(stream);
+			int width = (int) Utility.stbi__get32be(stream);
+			int depth = Utility.stbi__get16be(stream);
 			if (depth != 8 && depth != 16) return null;
 
-			if (stream.stbi__get16be() != 3) return null;
+			if (Utility.stbi__get16be(stream) != 3) return null;
 
-			return new ImageInfo
-			{
-				Width = width,
-				Height = height,
-				ColorComponents = ColorComponents.RedGreenBlueAlpha,
-				BitsPerChannel = depth
-			};
-		}
-		finally
-		{
-			stream.Rewind();
+			return new ImageInfo(width, height, ColorComponents.RedGreenBlueAlpha, depth);
+		} catch (Exception ex) {
+			return null;
 		}
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents, int bpc)
-	{
-		var decoder = new PsdDecoder(stream);
+	public static ImageResult Decode(byte[] data, ColorComponents requiredComponents, int bpc) throws Exception {
+		ByteArrayInputStream stream = new ByteArrayInputStream(data);
+		PsdDecoder decoder = new PsdDecoder(stream);
 		return decoder.InternalDecode(requiredComponents, bpc);
 	}
 
-	public static ImageResult Decode(InputStream stream, ColorComponents  requiredComponents)
-	{
-		return Decode(stream, requiredComponents, 8);
+	public static ImageResult Decode(byte[] data, ColorComponents requiredComponents) throws Exception {
+		return Decode(data, requiredComponents, 8);
 	}
 
-	public static ImageResult Decode(InputStream stream)
-	{
-		return Decode(stream, null);
+	public static ImageResult Decode(byte[] data) throws Exception {
+		return Decode(data, null);
 	}
-}*/
+}

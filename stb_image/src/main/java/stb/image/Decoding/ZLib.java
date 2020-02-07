@@ -1,6 +1,5 @@
 package stb.image.Decoding;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
 
 class ZLib
@@ -435,7 +434,7 @@ class ZLib
 		return stbi__parse_zlib(parse_header);
 	}
 
-	public static AbstractMap.SimpleEntry<Short[], Integer> stbi_zlib_decode_malloc_guesssize_headerflag(Short[] buffer, int len,
+	public static Pair<Short[], Integer> stbi_zlib_decode_malloc_guesssize_headerflag(Short[] buffer, int len,
 																										 int initial_size, int parse_header) throws Exception
 	{
 		ZLib a = new ZLib();
@@ -444,7 +443,7 @@ class ZLib
 		a.zbuffer_end = new FakePtr<Short>(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0)
 		{
-			return new AbstractMap.SimpleEntry(a.zout_start, a.zout.Offset);
+			return new Pair<>(a.zout_start, a.zout.Offset);
 		}
 
 		return null;

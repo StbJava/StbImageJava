@@ -6,7 +6,6 @@ import stb.image.ImageResult;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.AbstractMap;
 import java.util.Arrays;
 
 public class PngDecoder extends Decoder {
@@ -701,9 +700,9 @@ public class PngDecoder extends Decoder {
 					bpl = (long) ((img_x * depth + 7) / 8);
 					raw_len = (int) (bpl * img_y * img_n + img_y);
 
-					AbstractMap.SimpleEntry<Short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
+					Pair<Short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
 
-					expanded = pair.getKey();
+					expanded = pair.value1;
 					if (expanded == null)
 						return 0;
 					idata = null;

@@ -67,6 +67,8 @@ public class MainForm extends JFrame {
 		result.add(new FileNameExtensionFilter("JPEG Files(*.jpg)", "jpg"));
 		result.add(new FileNameExtensionFilter("BMP Files(*.bmp)", "bmp"));
 		result.add(new FileNameExtensionFilter("GIF Files(*.gif)", "gif"));
+		result.add(new FileNameExtensionFilter("TGA Files(*.tga)", "tga"));
+		result.add(new FileNameExtensionFilter("PSD Files(*.psd)", "psd"));
 
 		return result;
 	}
