@@ -1,6 +1,9 @@
 package stb.image.Decoding;
 
-/*class ZLib
+import java.util.AbstractMap;
+import java.util.Arrays;
+
+class ZLib
 {
 	private static class stbi__zhuffman
 	{
@@ -30,7 +33,7 @@ package stb.image.Decoding;
 	private static final int[] stbi__zdist_extra =
 		{0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
 
-	private static final short[] stbi__zdefault_length =
+	private static final Short[] stbi__zdefault_length =
 	{
 		8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 		8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
@@ -42,10 +45,10 @@ package stb.image.Decoding;
 		9, 9, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8
 	};
 
-	private static final short[] stbi__zdefault_distance =
+	private static final Short[] stbi__zdefault_distance =
 		{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
-	private static final short[] length_dezigzag =
+	private static final Short[] length_dezigzag =
 		{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
 	private long code_buffer;
@@ -58,13 +61,13 @@ package stb.image.Decoding;
 	private FakePtr<Short> zbuffer_end;
 	private FakePtr<Short> zout;
 	private FakePtr<Short> zout_end;
-	private short[] zout_start;
+	private Short[] zout_start;
 
 	private short stbi__zget8()
 	{
 		if (zbuffer.Offset >= zbuffer_end.Offset)
 			return 0;
-		return zbuffer.GetAndIncrease();
+		return zbuffer.getAndIncrease();
 	}
 
 	private void stbi__fill_bits()
@@ -89,9 +92,9 @@ package stb.image.Decoding;
 
 	private int stbi__zhuffman_decode_slowpath(stbi__zhuffman z)
 	{
-		var b = 0;
-		var s = 0;
-		var k = 0;
+		int b = 0;
+		int s = 0;
+		int k = 0;
 		k = Utility.stbi__bit_reverse((int)code_buffer, 16);
 		for (s = 9 + 1; ; ++s)
 			if (k < z.maxcode[s])
@@ -106,11 +109,11 @@ package stb.image.Decoding;
 
 	private int stbi__zhuffman_decode(stbi__zhuffman z)
 	{
-		var b = 0;
-		var s = 0;
+		int b = 0;
+		int s = 0;
 		if (num_bits < 16)
 			stbi__fill_bits();
-		b = z.fast[code_buffer & ((1 << 9) - 1)];
+		b = z.fast[(int)code_buffer & ((1 << 9) - 1)];
 		if (b != 0)
 		{
 			s = b >> 9;
@@ -122,30 +125,30 @@ package stb.image.Decoding;
 		return stbi__zhuffman_decode_slowpath(z);
 	}
 
-	private int stbi__zexpand(FakePtr<Short> zout, int n)
+	private int stbi__zexpand(FakePtr<Short> zout, int n) throws Exception
 	{
-		var cur = 0;
-		var limit = 0;
-		var old_limit = 0;
-		this.zout = zout;
+		int cur = 0;
+		int limit = 0;
+		int old_limit = 0;
+		this.zout = zout.clone();
 		if (z_expandable == 0)
 			Decoder.stbi__err("output buffer limit");
 		cur = this.zout.Offset;
 		limit = old_limit = zout_end.Offset;
 		while (cur + n > limit) limit *= 2;
 
-		Array.Resize(ref zout_start, limit);
+		zout_start = Arrays.copyOf(zout_start, limit);
 		this.zout = new FakePtr<Short>(zout_start, cur);
 		zout_end = new FakePtr<Short>(zout_start, limit);
 		return 1;
 	}
 
-	private int stbi__parse_huffman_block()
+	private int stbi__parse_huffman_block() throws Exception
 	{
-		var zout = this.zout;
+		FakePtr<Short> zout = this.zout.clone();
 		for (; ; )
 		{
-			var z = stbi__zhuffman_decode(z_length);
+			int z = stbi__zhuffman_decode(z_length);
 			if (z < 256)
 			{
 				if (z < 0)
@@ -157,12 +160,12 @@ package stb.image.Decoding;
 					zout = this.zout;
 				}
 
-				zout.SetAndIncrease((short)z);
+				zout.setAndIncrease((short)z);
 			}
 			else
 			{
-				var len = 0;
-				var dist = 0;
+				int len = 0;
+				int dist = 0;
 				if (z == 256)
 				{
 					this.zout = zout;
@@ -188,14 +191,14 @@ package stb.image.Decoding;
 					zout = this.zout;
 				}
 
-				var p = new FakePtr<Short>(zout, -dist);
+				FakePtr<Short> p = new FakePtr<Short>(zout, -dist);
 				if (dist == 1)
 				{
-					var v = p.Value;
+					Short v = p.get();
 					if (len != 0)
 						do
 						{
-							zout.SetAndIncrease(v);
+							zout.setAndIncrease(v);
 						} while (--len != 0);
 				}
 				else
@@ -203,23 +206,23 @@ package stb.image.Decoding;
 					if (len != 0)
 						do
 						{
-							zout.SetAndIncrease(p.GetAndIncrease());
+							zout.setAndIncrease(p.getAndIncrease());
 						} while (--len != 0);
 				}
 			}
 		}
 	}
 
-	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<Short> sizelist, int num)
+	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<Short> sizelist, int num) throws Exception
 	{
-		var i = 0;
-		var k = 0;
-		var code = 0;
-		var next_code = new int[16];
-		var sizes = new int[17];
-		sizes.Clear();
-		z.fast.Clear();
-		for (i = 0; i < num; ++i) ++sizes[sizelist[i]];
+		int i = 0;
+		int k = 0;
+		int code = 0;
+		int[] next_code = new int[16];
+		int[] sizes = new int[17];
+		Arrays.fill(sizes, 0);
+		Arrays.fill(z.fast, 0);
+		for (i = 0; i < num; ++i) ++sizes[sizelist.getAt(i)];
 		sizes[0] = 0;
 		for (i = 1; i < 16; ++i)
 			if (sizes[i] > 1 << i)
@@ -242,16 +245,16 @@ package stb.image.Decoding;
 		z.maxcode[16] = 0x10000;
 		for (i = 0; i < num; ++i)
 		{
-			var s = (int)sizelist[i];
+			int s = (int)sizelist.getAt(i);
 			if (s != 0)
 			{
-				var c = next_code[s] - z.firstcode[s] + z.firstsymbol[s];
-				var fastv = (int)((s << 9) | i);
+				int c = next_code[s] - z.firstcode[s] + z.firstsymbol[s];
+				int fastv = (int)((s << 9) | i);
 				z.size[c] = (short)s;
 				z.value[c] = (int)i;
 				if (s <= 9)
 				{
-					var j = Utility.stbi__bit_reverse(next_code[s], s);
+					int j = Utility.stbi__bit_reverse(next_code[s], s);
 					while (j < 1 << 9)
 					{
 						z.fast[j] = fastv;
@@ -266,21 +269,21 @@ package stb.image.Decoding;
 		return 1;
 	}
 
-	private int stbi__compute_huffman_codes()
+	private int stbi__compute_huffman_codes() throws Exception
 	{
-		var z_codelength = new stbi__zhuffman();
-		var lencodes = new short[286 + 32 + 137];
-		var codelength_sizes = new short[19];
-		var i = 0;
-		var n = 0;
-		var hlit = (int)(stbi__zreceive(5) + 257);
-		var hdist = (int)(stbi__zreceive(5) + 1);
-		var hclen = (int)(stbi__zreceive(4) + 4);
-		var ntot = hlit + hdist;
-		codelength_sizes.Clear();
+		stbi__zhuffman z_codelength = new stbi__zhuffman();
+		Short[] lencodes = new Short[286 + 32 + 137];
+		Short[] codelength_sizes = new Short[19];
+		int i = 0;
+		int n = 0;
+		int hlit = (int)(stbi__zreceive(5) + 257);
+		int hdist = (int)(stbi__zreceive(5) + 1);
+		int hclen = (int)(stbi__zreceive(4) + 4);
+		int ntot = hlit + hdist;
+		Arrays.fill(codelength_sizes, (short)0);
 		for (i = 0; i < hclen; ++i)
 		{
-			var s = (int)stbi__zreceive(3);
+			int s = (int)stbi__zreceive(3);
 			codelength_sizes[length_dezigzag[i]] = (short)s;
 		}
 
@@ -289,7 +292,7 @@ package stb.image.Decoding;
 		n = 0;
 		while (n < ntot)
 		{
-			var c = stbi__zhuffman_decode(z_codelength);
+			int c = stbi__zhuffman_decode(z_codelength);
 			if (c < 0 || c >= 19)
 				Decoder.stbi__err("bad codelengths");
 			if (c < 16)
@@ -298,7 +301,7 @@ package stb.image.Decoding;
 			}
 			else
 			{
-				var fill = (short)0;
+				short fill = (short)0;
 				if (c == 16)
 				{
 					c = (int)(stbi__zreceive(2) + 3);
@@ -317,7 +320,8 @@ package stb.image.Decoding;
 
 				if (ntot - n < c)
 					Decoder.stbi__err("bad codelengths");
-				lencodes.set(n, c, fill);
+
+				Arrays.fill(lencodes, n, n + c, fill);
 				n += c;
 			}
 		}
@@ -331,12 +335,12 @@ package stb.image.Decoding;
 		return 1;
 	}
 
-	private int stbi__parse_uncompressed_block()
+	private int stbi__parse_uncompressed_block() throws Exception
 	{
-		var header = new short[4];
-		var len = 0;
-		var nlen = 0;
-		var k = 0;
+		short[] header = new short[4];
+		int len = 0;
+		int nlen = 0;
+		int k = 0;
 		if ((num_bits & 7) != 0)
 			stbi__zreceive(num_bits & 7);
 		k = 0;
@@ -357,17 +361,17 @@ package stb.image.Decoding;
 		if (zout.Offset + len > zout_end.Offset)
 			if (stbi__zexpand(zout, len) == 0)
 				return 0;
-		for (var i = 0; i < len; i++) zout[i] = zbuffer[i];
-		zbuffer += len;
-		zout += len;
+		for (int i = 0; i < len; i++) zout.setAt(i, zbuffer.getAt(i));
+		zbuffer.move(len);
+		zout.move(len);
 		return 1;
 	}
 
-	private int stbi__parse_zlib_header()
+	private int stbi__parse_zlib_header() throws Exception
 	{
-		var cmf = (int)stbi__zget8();
-		var cm = cmf & 15;
-		var flg = (int)stbi__zget8();
+		int cmf = (int)stbi__zget8();
+		int cm = cmf & 15;
+		int flg = (int)stbi__zget8();
 		if ((cmf * 256 + flg) % 31 != 0)
 			Decoder.stbi__err("bad zlib header");
 		if ((flg & 32) != 0)
@@ -377,10 +381,10 @@ package stb.image.Decoding;
 		return 1;
 	}
 
-	private int stbi__parse_zlib(int parse_header)
+	private int stbi__parse_zlib(int parse_header) throws Exception
 	{
-		var final = 0;
-		var type = 0;
+		int _final_ = 0;
+		int type = 0;
 		if (parse_header != 0)
 			if (stbi__parse_zlib_header() == 0)
 				return 0;
@@ -388,7 +392,7 @@ package stb.image.Decoding;
 		code_buffer = 0;
 		do
 		{
-			final = (int)stbi__zreceive(1);
+			_final_ = (int)stbi__zreceive(1);
 			type = (int)stbi__zreceive(2);
 			if (type == 0)
 			{
@@ -417,12 +421,12 @@ package stb.image.Decoding;
 				if (stbi__parse_huffman_block() == 0)
 					return 0;
 			}
-		} while (final == 0);
+		} while (_final_ == 0);
 
 		return 1;
 	}
 
-	private int stbi__do_zlib(short[] obuf, int olen, int exp, int parse_header)
+	private int stbi__do_zlib(Short[] obuf, int olen, int exp, int parse_header) throws Exception
 	{
 		zout_start = obuf;
 		zout = new FakePtr<Short>(obuf);
@@ -431,20 +435,18 @@ package stb.image.Decoding;
 		return stbi__parse_zlib(parse_header);
 	}
 
-	public static short[] stbi_zlib_decode_malloc_guesssize_headerflag(short[] buffer, int len, int initial_size,
-		out int outlen, int parse_header)
+	public static AbstractMap.SimpleEntry<Short[], Integer> stbi_zlib_decode_malloc_guesssize_headerflag(Short[] buffer, int len,
+																										 int initial_size, int parse_header) throws Exception
 	{
-		outlen = 0;
-		var a = new ZLib();
-		var p = new short[initial_size];
+		ZLib a = new ZLib();
+		Short[] p = new Short[initial_size];
 		a.zbuffer = new FakePtr<Short>(buffer);
 		a.zbuffer_end = new FakePtr<Short>(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0)
 		{
-			outlen = a.zout.Offset;
-			return a.zout_start;
+			return new AbstractMap.SimpleEntry(a.zout_start, a.zout.Offset);
 		}
 
 		return null;
 	}
-}*/
+}

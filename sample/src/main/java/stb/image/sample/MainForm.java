@@ -63,6 +63,7 @@ public class MainForm extends JFrame {
 	private static List<FileFilter> getFileFilters() {
 		List<FileFilter> result = new LinkedList<>();
 
+		result.add(new FileNameExtensionFilter("PNG Files(*.png)", "png"));
 		result.add(new FileNameExtensionFilter("JPEG Files(*.jpg)", "jpg"));
 		result.add(new FileNameExtensionFilter("BMP Files(*.bmp)", "bmp"));
 

@@ -25,6 +25,10 @@ public class FakePtr<T> {
 		Arrays.fill(_array, Offset, Offset + count, 0);
 	}
 
+	public T get() {
+		return _array[Offset];
+	}
+
 	public T getAt(int offset) {
 		return _array[Offset + offset];
 	}
@@ -39,6 +43,12 @@ public class FakePtr<T> {
 
 	public void increase() {
 		move(1);
+	}
+
+	public T getAndIncrease() {
+		T result = _array[Offset];
+		++Offset;
+		return result;
 	}
 
 	public void setAndIncrease(T value) {

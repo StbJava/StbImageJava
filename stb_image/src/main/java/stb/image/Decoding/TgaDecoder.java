@@ -35,8 +35,8 @@ import java.io.InputStream;
 
 	private void stbi__tga_read_rgb16(FakePtr<Short> _out_) throws Exception
 	{
-		var px = (int)stbi__get16le();
-		var fiveBitMask = (int)31;
+		int px = (int)stbi__get16le();
+		int fiveBitMask = (int)31;
 		var r = (px >> 10) & fiveBitMask;
 		var g = (px >> 5) & fiveBitMask;
 		var b = px & fiveBitMask;
@@ -47,30 +47,30 @@ import java.io.InputStream;
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception
 	{
-		var tga_offset = (int)stbi__get8();
-		var tga_indexed = (int)stbi__get8();
-		var tga_image_type = (int)stbi__get8();
-		var tga_is_RLE = 0;
+		int tga_offset = (int)stbi__get8();
+		int tga_indexed = (int)stbi__get8();
+		int tga_image_type = (int)stbi__get8();
+		int tga_is_RLE = 0;
 		var tga_palette_start = stbi__get16le();
 		var tga_palette_len = stbi__get16le();
-		var tga_palette_bits = (int)stbi__get8();
+		int tga_palette_bits = (int)stbi__get8();
 		var tga_x_origin = stbi__get16le();
 		var tga_y_origin = stbi__get16le();
 		var tga_width = stbi__get16le();
 		var tga_height = stbi__get16le();
-		var tga_bits_per_pixel = (int)stbi__get8();
-		var tga_comp = 0;
-		var tga_rgb16 = 0;
-		var tga_inverted = (int)stbi__get8();
+		int tga_bits_per_pixel = (int)stbi__get8();
+		int tga_comp = 0;
+		int tga_rgb16 = 0;
+		int tga_inverted = (int)stbi__get8();
 		short[] tga_data;
 		short[] tga_palette = null;
-		var i = 0;
-		var j = 0;
-		var raw_data = new short[4];
+		int i = 0;
+		int j = 0;
+		short[] raw_data = new short[4];
 		raw_data[0] = 0;
 
-		var RLE_count = 0;
-		var RLE_repeating = 0;
+		int RLE_count = 0;
+		int RLE_repeating = 0;
 		var read_next_pixel = 1;
 		if (tga_image_type >= 8)
 		{
@@ -104,7 +104,7 @@ import java.io.InputStream;
 				tga_palette = new short[tga_palette_len * tga_comp];
 				if (tga_rgb16 != 0)
 				{
-					var pal_entry = new FakePtr<Short>(tga_palette);
+					FakePtr<Short> pal_entry = new FakePtr<>(tga_palette);
 					for (i = 0; i < tga_palette_len; ++i)
 					{
 						stbi__tga_read_rgb16(pal_entry);
@@ -123,7 +123,7 @@ import java.io.InputStream;
 				{
 					if (RLE_count == 0)
 					{
-						var RLE_cmd = (int)stbi__get8();
+						int RLE_cmd = (int)stbi__get8();
 						RLE_count = 1 + (RLE_cmd & 127);
 						RLE_repeating = RLE_cmd >> 7;
 						read_next_pixel = 1;
@@ -181,7 +181,7 @@ import java.io.InputStream;
 
 		if (tga_comp >= 3 && tga_rgb16 == 0)
 		{
-			var tga_pixel = new FakePtr<Short>(tga_data);
+			FakePtr<Short> tga_pixel = new FakePtr<>(tga_data);
 			for (i = 0; i < tga_width * tga_height; ++i)
 			{
 				var temp = tga_pixel[0];
@@ -213,10 +213,10 @@ import java.io.InputStream;
 		try
 		{
 			stream.stbi__get8();
-			var tga_color_type = (int)stream.stbi__get8();
+			int tga_color_type = (int)stream.stbi__get8();
 			if (tga_color_type > 1)
 				return false;
-			var sz = (int)stream.stbi__get8();
+			int sz = (int)stream.stbi__get8();
 			if (tga_color_type == 1)
 			{
 				if (sz != 1 && sz != 9)
@@ -256,14 +256,14 @@ import java.io.InputStream;
 	{
 		try
 		{
-			var tga_w = 0;
-			var tga_h = 0;
-			var tga_comp = 0;
-			var tga_image_type = 0;
-			var tga_bits_per_pixel = 0;
-			var tga_colormap_bpp = 0;
-			var sz = 0;
-			var tga_colormap_type = 0;
+			int tga_w = 0;
+			int tga_h = 0;
+			int tga_comp = 0;
+			int tga_image_type = 0;
+			int tga_bits_per_pixel = 0;
+			int tga_colormap_bpp = 0;
+			int sz = 0;
+			int tga_colormap_type = 0;
 			stream.stbi__get8();
 			tga_colormap_type = stream.stbi__get8();
 			if (tga_colormap_type > 1) return null;

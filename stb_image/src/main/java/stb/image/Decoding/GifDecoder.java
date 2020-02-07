@@ -86,17 +86,17 @@ import java.io.InputStream;
 
 	private void stbi__out_gif_code(int code)
 	{
-		var idx = 0;
+		int idx = 0;
 		if (codes[code].prefix >= 0)
 			stbi__out_gif_code((int)codes[code].prefix);
 		if (cur_y >= max_y)
 			return;
 		idx = cur_x + cur_y;
 		history[idx / 4] = 1;
-		var c = new FakePtr<Short>(color_table, codes[code].suffix * 4);
+		FakePtr<Short> c = new FakePtr<>(color_table, codes[code].suffix * 4);
 		if (c[3] > 128)
 		{
-			var p = new FakePtr<Short>(_out_, idx);
+			FakePtr<Short> p = new FakePtr<Short>(_out_, idx);
 			p[0] = c[2];
 			p[1] = c[1];
 			p[2] = c[0];
@@ -120,16 +120,16 @@ import java.io.InputStream;
 	private short[] stbi__process_gif_raster()
 	{
 		short lzw_cs = 0;
-		var len = 0;
-		var init_code = 0;
+		int len = 0;
+		int init_code = 0;
 		long first = 0;
-		var codesize = 0;
-		var codemask = 0;
-		var avail = 0;
-		var oldcode = 0;
-		var bits = 0;
-		var valid_bits = 0;
-		var clear = 0;
+		int codesize = 0;
+		int codemask = 0;
+		int avail = 0;
+		int oldcode = 0;
+		int bits = 0;
+		int valid_bits = 0;
+		int clear = 0;
 		lzw_cs = stbi__get8();
 		if (lzw_cs > 12)
 			return null;
@@ -218,10 +218,10 @@ import java.io.InputStream;
 	{
 		comp = 0;
 
-		var dispose = 0;
-		var first_frame = 0;
-		var pi = 0;
-		var pcount = 0;
+		int dispose = 0;
+		int first_frame = 0;
+		int pi = 0;
+		int pcount = 0;
 		first_frame = 0;
 		if (_out_ == null)
 		{
@@ -238,7 +238,7 @@ import java.io.InputStream;
 		}
 		else
 		{
-			var ptr = new FakePtr<Short>(_out_);
+			FakePtr<Short> ptr = new FakePtr<>(_out_);
 			dispose = (eflags & 0x1C) >> 2;
 			pcount = w * h;
 			if (dispose == 3 && two_back == null) dispose = 2;
@@ -263,15 +263,15 @@ import java.io.InputStream;
 		Array.Clear(history, 0, w * h);
 		for (; ; )
 		{
-			var tag = (int)stbi__get8();
+			int tag = (int)stbi__get8();
 			switch (tag)
 			{
 				case 0x2C:
 				{
-					var x = 0;
-					var y = 0;
-					var w = 0;
-					var h = 0;
+					int x = 0;
+					int y = 0;
+					int w = 0;
+					int h = 0;
 					short[] o;
 					x = stbi__get16le();
 					y = stbi__get16le();
@@ -332,8 +332,8 @@ import java.io.InputStream;
 				}
 				case 0x21:
 				{
-					var len = 0;
-					var ext = (int)stbi__get8();
+					int len = 0;
+					int ext = (int)stbi__get8();
 					if (ext == 0xF9)
 					{
 						len = stbi__get8();
@@ -459,7 +459,7 @@ import java.io.InputStream;
 
 	private static boolean InternalTest(InputStream stream)
 	{
-		var sz = 0;
+		int sz = 0;
 		if (stream.stbi__get8() != 'G' || stream.stbi__get8() != 'I' || stream.stbi__get8() != 'F' ||
 			stream.stbi__get8() != '8')
 			return false;

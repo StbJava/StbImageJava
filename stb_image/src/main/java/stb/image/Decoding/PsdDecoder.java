@@ -15,9 +15,9 @@ import java.io.InputStream;
 
 	private int stbi__psd_decode_rle(FakePtr<Short> p, int pixelCount)
 	{
-		var count = 0;
-		var nleft = 0;
-		var len = 0;
+		int count = 0;
+		int nleft = 0;
+		int len = 0;
 		count = 0;
 		while ((nleft = pixelCount - count) > 0)
 		{
@@ -60,14 +60,14 @@ import java.io.InputStream;
 
 	private ImageResult InternalDecode(ColorComponents  requiredComponents, int bpc)
 	{
-		var pixelCount = 0;
-		var channelCount = 0;
-		var compression = 0;
-		var channel = 0;
-		var i = 0;
-		var bitdepth = 0;
-		var w = 0;
-		var h = 0;
+		int pixelCount = 0;
+		int channelCount = 0;
+		int compression = 0;
+		int channel = 0;
+		int i = 0;
+		int bitdepth = 0;
+		int w = 0;
+		int h = 0;
 		short[] _out_;
 		if (stbi__get32be() != 0x38425053)
 			stbi__err("not PSD");
@@ -104,7 +104,7 @@ import java.io.InputStream;
 
 		pixelCount = w * h;
 
-		var ptr = new FakePtr<Short>(_out_);
+		FakePtr<Short> ptr = new FakePtr<>(_out_);
 		if (compression != 0)
 		{
 			stbi__skip(h * channelCount * 2);
@@ -137,7 +137,7 @@ import java.io.InputStream;
 												}*/
 
 /*					var p = ptr + channel;
-					var val = (short)(channel == 3 ? 255 : 0);
+					short val = (short)(channel == 3 ? 255 : 0);
 					for (i = 0; i < pixelCount; i++, p += 4) p.set(val);
 				}
 				else
@@ -234,8 +234,8 @@ import java.io.InputStream;
 			var channelCount = stream.stbi__get16be();
 			if (channelCount < 0 || channelCount > 16) return null;
 
-			var height = (int)stream.stbi__get32be();
-			var width = (int)stream.stbi__get32be();
+			int height = (int)stream.stbi__get32be();
+			int width = (int)stream.stbi__get32be();
 			var depth = stream.stbi__get16be();
 			if (depth != 8 && depth != 16) return null;
 

@@ -17,6 +17,10 @@ public enum ColorComponents {
 	}
 
 	public static ColorComponents fromInt(int value) {
-		return values()[value];
+		return values()[value - 1];
+	}
+
+	public static int toReqComp(ColorComponents cc) {
+		return cc != null ? cc.value : 0;
 	}
 }

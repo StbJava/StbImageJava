@@ -59,10 +59,10 @@ public	class ImageResult
 		{
 			result = JpgDecoder.Decode(stream, requiredComponents);
 		}
-/*		else if (PngDecoder.Test(stream))
+		else if (PngDecoder.Test(stream))
 		{
 			result = PngDecoder.Decode(stream, requiredComponents);
-		}*/
+		}
 		else if (BmpDecoder.Test(stream))
 		{
 			result = BmpDecoder.Decode(stream, requiredComponents);

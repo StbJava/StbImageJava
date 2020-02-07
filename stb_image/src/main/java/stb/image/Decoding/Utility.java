@@ -1,6 +1,7 @@
 package stb.image.Decoding;
 
 import java.io.InputStream;
+import java.util.Arrays;
 
 class Utility
 {
@@ -65,7 +66,7 @@ class Utility
 		return (int)(((r * 77) + (g * 150) + (29 * b)) >> 8);
 	}
 
-	public static short[] stbi__convert_format16(short[] data, int img_n, int req_comp, long x, long y)
+	public static Short[] stbi__convert_format16(Short[] data, int img_n, int req_comp, long x, long y)
 	{
 		throw new UnsupportedOperationException();
 /*			int i = 0;
@@ -73,7 +74,7 @@ class Utility
 		if ((req_comp) == (img_n))
 			return data;
 
-		var good = new short[req_comp * x * y * 2];
+		short[] good = new short[req_comp * x * y * 2];
 		FakePtr<Short> dataPtr = new FakePtr<Short>(data);
 		FakePtr<Short> goodPtr = new FakePtr<Short>(good);
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
@@ -319,7 +320,7 @@ class Utility
 
 /*			int i = 0;
 		int img_len = (int)(w * h * channels);
-		var reduced = new short[img_len];
+		short[] reduced = new short[img_len];
 
 		fixed (short* ptr2 = &orig[0])
 		{

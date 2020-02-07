@@ -42,13 +42,13 @@ public class Decoder {
 		return Utility.stbi__get8(InputStream);
 	}
 
-	protected boolean stbi__getn(short[] buffer, int offset, int count) throws IOException {
+	protected boolean stbi__getn(Short[] buffer, int offset, int count) throws IOException {
 		byte[] buffer2 = new byte[count];
 		int read = InputStream.read(buffer2, 0, count);
 
 		for(int i = 0; i < read; ++i)
 		{
-			buffer[offset + i] = buffer2[i];
+			buffer[offset + i] = (short)(buffer2[i] & 0xff);
 		}
 
 		return read == count;

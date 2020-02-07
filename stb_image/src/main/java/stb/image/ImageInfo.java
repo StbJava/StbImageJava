@@ -44,13 +44,13 @@ public class ImageInfo
 			return info;
 		}
 
-/*		info = PngDecoder.Info(stream);
+		info = PngDecoder.Info(stream);
 		if (info != null)
 		{
 			return info;
 		}
 
-		info = GifDecoder.Info(stream);
+/*		info = GifDecoder.Info(stream);
 		if (info != null)
 		{
 			return info;
