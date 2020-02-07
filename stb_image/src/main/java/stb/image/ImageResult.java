@@ -11,14 +11,14 @@ public	class ImageResult
 	private ColorComponents colorComponents;
 	private ColorComponents sourceComponents;
 	private int bitsPerChannel;
-	private byte[] data;
+	private short[] data;
 
 	public ImageResult(int width,
 					   int height,
 					   ColorComponents sourceComponents,
 					   ColorComponents colorComponents,
 					   int bitsPerChannel,
-					   byte[] data)
+					   short[] data)
 	{
 		this.width = width;
 		this.height = height;
@@ -48,7 +48,7 @@ public	class ImageResult
 		return bitsPerChannel;
 	}
 
-	public byte[] getData() {
+	public short[] getData() {
 		return data;
 	}
 

@@ -33,16 +33,16 @@ import java.io.InputStream;
 		}
 	}
 
-	private void stbi__tga_read_rgb16(FakePtr<Byte> _out_) throws Exception
+	private void stbi__tga_read_rgb16(FakePtr<Short> _out_) throws Exception
 	{
 		var px = (int)stbi__get16le();
 		var fiveBitMask = (int)31;
 		var r = (px >> 10) & fiveBitMask;
 		var g = (px >> 5) & fiveBitMask;
 		var b = px & fiveBitMask;
-		_out_[0] = (byte)(r * 255 / 31);
-		_out_[1] = (byte)(g * 255 / 31);
-		_out_[2] = (byte)(b * 255 / 31);
+		_out_[0] = (short)(r * 255 / 31);
+		_out_[1] = (short)(g * 255 / 31);
+		_out_[2] = (short)(b * 255 / 31);
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception
@@ -62,11 +62,11 @@ import java.io.InputStream;
 		var tga_comp = 0;
 		var tga_rgb16 = 0;
 		var tga_inverted = (int)stbi__get8();
-		byte[] tga_data;
-		byte[] tga_palette = null;
+		short[] tga_data;
+		short[] tga_palette = null;
 		var i = 0;
 		var j = 0;
-		var raw_data = new byte[4];
+		var raw_data = new short[4];
 		raw_data[0] = 0;
 
 		var RLE_count = 0;
@@ -86,7 +86,7 @@ import java.io.InputStream;
 		if (tga_comp == 0)
 			stbi__err("bad format");
 
-		tga_data = new byte[tga_width * tga_height * tga_comp];
+		tga_data = new short[tga_width * tga_height * tga_comp];
 		stbi__skip(tga_offset);
 		if (tga_indexed == 0 && tga_is_RLE == 0 && tga_rgb16 == 0)
 		{
@@ -101,10 +101,10 @@ import java.io.InputStream;
 			if (tga_indexed != 0)
 			{
 				stbi__skip(tga_palette_start);
-				tga_palette = new byte[tga_palette_len * tga_comp];
+				tga_palette = new short[tga_palette_len * tga_comp];
 				if (tga_rgb16 != 0)
 				{
-					var pal_entry = new FakePtr<Byte>(tga_palette);
+					var pal_entry = new FakePtr<Short>(tga_palette);
 					for (i = 0; i < tga_palette_len; ++i)
 					{
 						stbi__tga_read_rgb16(pal_entry);
@@ -149,7 +149,7 @@ import java.io.InputStream;
 					}
 					else if (tga_rgb16 != 0)
 					{
-						stbi__tga_read_rgb16(new FakePtr<Byte>(raw_data));
+						stbi__tga_read_rgb16(new FakePtr<Short>(raw_data));
 					}
 					else
 					{
@@ -181,7 +181,7 @@ import java.io.InputStream;
 
 		if (tga_comp >= 3 && tga_rgb16 == 0)
 		{
-			var tga_pixel = new FakePtr<Byte>(tga_data);
+			var tga_pixel = new FakePtr<Short>(tga_data);
 			for (i = 0; i < tga_width * tga_height; ++i)
 			{
 				var temp = tga_pixel[0];

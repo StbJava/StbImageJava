@@ -8,7 +8,7 @@ package stb.image.Decoding;
 		public final int[] firstcode = new int[16];
 		public final int[] firstsymbol = new int[16];
 		public final int[] maxcode = new int[17];
-		public final byte[] size = new byte[288];
+		public final short[] size = new short[288];
 		public final int[] value = new int[288];
 	}
 
@@ -30,7 +30,7 @@ package stb.image.Decoding;
 	private static final int[] stbi__zdist_extra =
 		{0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
 
-	private static final byte[] stbi__zdefault_length =
+	private static final short[] stbi__zdefault_length =
 	{
 		8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 		8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
@@ -42,10 +42,10 @@ package stb.image.Decoding;
 		9, 9, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8
 	};
 
-	private static final byte[] stbi__zdefault_distance =
+	private static final short[] stbi__zdefault_distance =
 		{5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
-	private static final byte[] length_dezigzag =
+	private static final short[] length_dezigzag =
 		{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
 	private long code_buffer;
@@ -54,13 +54,13 @@ package stb.image.Decoding;
 	private int z_expandable;
 	private final stbi__zhuffman z_length = new stbi__zhuffman();
 
-	private FakePtr<Byte> zbuffer;
-	private FakePtr<Byte> zbuffer_end;
-	private FakePtr<Byte> zout;
-	private FakePtr<Byte> zout_end;
-	private byte[] zout_start;
+	private FakePtr<Short> zbuffer;
+	private FakePtr<Short> zbuffer_end;
+	private FakePtr<Short> zout;
+	private FakePtr<Short> zout_end;
+	private short[] zout_start;
 
-	private byte stbi__zget8()
+	private short stbi__zget8()
 	{
 		if (zbuffer.Offset >= zbuffer_end.Offset)
 			return 0;
@@ -122,7 +122,7 @@ package stb.image.Decoding;
 		return stbi__zhuffman_decode_slowpath(z);
 	}
 
-	private int stbi__zexpand(FakePtr<Byte> zout, int n)
+	private int stbi__zexpand(FakePtr<Short> zout, int n)
 	{
 		var cur = 0;
 		var limit = 0;
@@ -135,8 +135,8 @@ package stb.image.Decoding;
 		while (cur + n > limit) limit *= 2;
 
 		Array.Resize(ref zout_start, limit);
-		this.zout = new FakePtr<Byte>(zout_start, cur);
-		zout_end = new FakePtr<Byte>(zout_start, limit);
+		this.zout = new FakePtr<Short>(zout_start, cur);
+		zout_end = new FakePtr<Short>(zout_start, limit);
 		return 1;
 	}
 
@@ -157,7 +157,7 @@ package stb.image.Decoding;
 					zout = this.zout;
 				}
 
-				zout.SetAndIncrease((byte)z);
+				zout.SetAndIncrease((short)z);
 			}
 			else
 			{
@@ -188,7 +188,7 @@ package stb.image.Decoding;
 					zout = this.zout;
 				}
 
-				var p = new FakePtr<Byte>(zout, -dist);
+				var p = new FakePtr<Short>(zout, -dist);
 				if (dist == 1)
 				{
 					var v = p.Value;
@@ -210,7 +210,7 @@ package stb.image.Decoding;
 		}
 	}
 
-	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<Byte> sizelist, int num)
+	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtr<Short> sizelist, int num)
 	{
 		var i = 0;
 		var k = 0;
@@ -247,7 +247,7 @@ package stb.image.Decoding;
 			{
 				var c = next_code[s] - z.firstcode[s] + z.firstsymbol[s];
 				var fastv = (int)((s << 9) | i);
-				z.size[c] = (byte)s;
+				z.size[c] = (short)s;
 				z.value[c] = (int)i;
 				if (s <= 9)
 				{
@@ -269,8 +269,8 @@ package stb.image.Decoding;
 	private int stbi__compute_huffman_codes()
 	{
 		var z_codelength = new stbi__zhuffman();
-		var lencodes = new byte[286 + 32 + 137];
-		var codelength_sizes = new byte[19];
+		var lencodes = new short[286 + 32 + 137];
+		var codelength_sizes = new short[19];
 		var i = 0;
 		var n = 0;
 		var hlit = (int)(stbi__zreceive(5) + 257);
@@ -281,10 +281,10 @@ package stb.image.Decoding;
 		for (i = 0; i < hclen; ++i)
 		{
 			var s = (int)stbi__zreceive(3);
-			codelength_sizes[length_dezigzag[i]] = (byte)s;
+			codelength_sizes[length_dezigzag[i]] = (short)s;
 		}
 
-		if (stbi__zbuild_huffman(z_codelength, new FakePtr<Byte>(codelength_sizes), 19) == 0)
+		if (stbi__zbuild_huffman(z_codelength, new FakePtr<Short>(codelength_sizes), 19) == 0)
 			return 0;
 		n = 0;
 		while (n < ntot)
@@ -294,11 +294,11 @@ package stb.image.Decoding;
 				Decoder.stbi__err("bad codelengths");
 			if (c < 16)
 			{
-				lencodes[n++] = (byte)c;
+				lencodes[n++] = (short)c;
 			}
 			else
 			{
-				var fill = (byte)0;
+				var fill = (short)0;
 				if (c == 16)
 				{
 					c = (int)(stbi__zreceive(2) + 3);
@@ -324,16 +324,16 @@ package stb.image.Decoding;
 
 		if (n != ntot)
 			Decoder.stbi__err("bad codelengths");
-		if (stbi__zbuild_huffman(z_length, new FakePtr<Byte>(lencodes), hlit) == 0)
+		if (stbi__zbuild_huffman(z_length, new FakePtr<Short>(lencodes), hlit) == 0)
 			return 0;
-		if (stbi__zbuild_huffman(z_distance, new FakePtr<Byte>(lencodes, hlit), hdist) == 0)
+		if (stbi__zbuild_huffman(z_distance, new FakePtr<Short>(lencodes, hlit), hdist) == 0)
 			return 0;
 		return 1;
 	}
 
 	private int stbi__parse_uncompressed_block()
 	{
-		var header = new byte[4];
+		var header = new short[4];
 		var len = 0;
 		var nlen = 0;
 		var k = 0;
@@ -342,7 +342,7 @@ package stb.image.Decoding;
 		k = 0;
 		while (num_bits > 0)
 		{
-			header[k++] = (byte)(code_buffer & 255);
+			header[k++] = (short)(code_buffer & 255);
 			code_buffer >>= 8;
 			num_bits -= 8;
 		}
@@ -403,9 +403,9 @@ package stb.image.Decoding;
 			{
 				if (type == 1)
 				{
-					if (stbi__zbuild_huffman(z_length, new FakePtr<Byte>(stbi__zdefault_length), 288) == 0)
+					if (stbi__zbuild_huffman(z_length, new FakePtr<Short>(stbi__zdefault_length), 288) == 0)
 						return 0;
-					if (stbi__zbuild_huffman(z_distance, new FakePtr<Byte>(stbi__zdefault_distance), 32) == 0)
+					if (stbi__zbuild_huffman(z_distance, new FakePtr<Short>(stbi__zdefault_distance), 32) == 0)
 						return 0;
 				}
 				else
@@ -422,23 +422,23 @@ package stb.image.Decoding;
 		return 1;
 	}
 
-	private int stbi__do_zlib(byte[] obuf, int olen, int exp, int parse_header)
+	private int stbi__do_zlib(short[] obuf, int olen, int exp, int parse_header)
 	{
 		zout_start = obuf;
-		zout = new FakePtr<Byte>(obuf);
-		zout_end = new FakePtr<Byte>(obuf, olen);
+		zout = new FakePtr<Short>(obuf);
+		zout_end = new FakePtr<Short>(obuf, olen);
 		z_expandable = exp;
 		return stbi__parse_zlib(parse_header);
 	}
 
-	public static byte[] stbi_zlib_decode_malloc_guesssize_headerflag(byte[] buffer, int len, int initial_size,
+	public static short[] stbi_zlib_decode_malloc_guesssize_headerflag(short[] buffer, int len, int initial_size,
 		out int outlen, int parse_header)
 	{
 		outlen = 0;
 		var a = new ZLib();
-		var p = new byte[initial_size];
-		a.zbuffer = new FakePtr<Byte>(buffer);
-		a.zbuffer_end = new FakePtr<Byte>(buffer, +len);
+		var p = new short[initial_size];
+		a.zbuffer = new FakePtr<Short>(buffer);
+		a.zbuffer_end = new FakePtr<Short>(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0)
 		{
 			outlen = a.zout.Offset;

@@ -7,16 +7,33 @@ import stb.image.sample.utility.Swing;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MainForm extends JFrame {
-	public MainForm()
-	{
+	class MyPanel extends JPanel {
+		BufferedImage img;
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+
+			if (img != null) {
+				g.drawImage(img, 0, 0, this);
+			}
+		}
+	}
+
+	MyPanel panel;
+
+
+	public MainForm() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setSize(1200, 800);
@@ -38,6 +55,9 @@ public class MainForm extends JFrame {
 		menuFile.add(menuItemOpen);
 		mainMenu.add(menuFile);
 		setJMenuBar(mainMenu);
+
+		panel = new MyPanel();
+		setContentPane(panel);
 	}
 
 	private static List<FileFilter> getFileFilters() {
@@ -54,6 +74,8 @@ public class MainForm extends JFrame {
 
 		JFileChooser fc = new JFileChooser();
 
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.setCurrentDirectory(new File("D:\\Temp\\"));
 		for (FileFilter ff : getFileFilters()) {
 			fc.addChoosableFileFilter(ff);
 		}
@@ -66,27 +88,31 @@ public class MainForm extends JFrame {
 
 	private void Open(String filePath) {
 		try {
-			byte[] bytes = Files.readAllBytes(new File(filePath).toPath());
-			ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+			byte[] shorts = Files.readAllBytes(new File(filePath).toPath());
+			ByteArrayInputStream stream = new ByteArrayInputStream(shorts);
 			ImageResult image = ImageResult.FromInputStream(stream, ColorComponents.RedGreenBlueAlpha, false);
-			int k = 5;
+			panel.img = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			int i = 0;
+
+			short[] data = image.getData();
+			for (int y = 0; y < image.getHeight(); y++) {
+				for (int x = 0; x < image.getWidth(); x++) {
+					int col = new Color(data[i],
+							data[i + 1],
+							data[i + 2],
+							data[i + 3]).getRGB();
+					panel.img.setRGB(x, y, col);
+					i += 4;
+				}
+			}
+
+			panel.repaint();
 		} catch (Exception ex) {
 			Swing.showErrorMessageBox(this, ex.getMessage());
 		}
 	}
 
-
 	public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-/*        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-        Enumeration keys = UIManager.getDefaults().keys();
-        while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            Object value = UIManager.get(key);
-            if (value != null && value instanceof FontUIResource)
-                UIManager.put(key, Resources.DefaultFont);
-        }*/
-
 		MainForm frame = new MainForm();
 		Swing.centreWindow(frame);
 		frame.setVisible(true);

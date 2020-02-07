@@ -21,11 +21,11 @@ import java.io.InputStream;
 	private static final int STBI__F_avg_first = 5;
 	private static final int STBI__F_paeth_first = 6;
 
-	private static final byte[] first_row_filter =
+	private static final short[] first_row_filter =
 		{STBI__F_none, STBI__F_sub, STBI__F_none, STBI__F_avg_first, STBI__F_paeth_first};
 
-	private static final byte[] stbi__depth_scale_table = { 0, 0xff, 0x55, 0, 0x11, 0, 0, 0, 0x01 };
-	private static final byte[] png_sig = { 137, 80, 78, 71, 13, 10, 26, 10 };
+	private static final short[] stbi__depth_scale_table = { 0, 0xff, 0x55, 0, 0x11, 0, 0, 0, 0x01 };
+	private static final short[] png_sig = { 137, 80, 78, 71, 13, 10, 26, 10 };
 
 	protected int img_out_n;
 
@@ -33,9 +33,9 @@ import java.io.InputStream;
 
 	private int stbi__de_iphone_flag;
 
-	private byte[] idata;
-	private byte[] expanded;
-	private byte[] _out_;
+	private short[] idata;
+	private short[] expanded;
+	private short[] _out_;
 	private int depth;
 
 	private PngDecoder(InputStream stream)
@@ -55,7 +55,7 @@ import java.io.InputStream;
 	{
 		var i = 0;
 		for (i = 0; i < 8; ++i)
-			if (input.ReadByte() != png_sig[i])
+			if (input.ReadShort() != png_sig[i])
 				return false;
 
 		return true;
@@ -74,44 +74,44 @@ import java.io.InputStream;
 		return c;
 	}
 
-	private int stbi__create_png_image_raw(FakePtr<Byte> raw, long raw_len, int out_n, long x, long y, int depth,
+	private int stbi__create_png_image_raw(FakePtr<Short> raw, long raw_len, int out_n, long x, long y, int depth,
 		int color)
 	{
-		var bytes = depth == 16 ? 2 : 1;
+		var shorts = depth == 16 ? 2 : 1;
 		long i = 0;
 		long j = 0;
-		var stride = (long)(x * out_n * bytes);
+		var stride = (long)(x * out_n * shorts);
 		long img_len = 0;
-		long img_width_bytes = 0;
+		long img_width_shorts = 0;
 		var k = 0;
-		var output_bytes = out_n * bytes;
-		var filter_bytes = img_n * bytes;
+		var output_shorts = out_n * shorts;
+		var filter_shorts = img_n * shorts;
 		var width = (int)x;
-		_out_ = new byte[x * y * output_bytes];
-		img_width_bytes = (long)((img_n * x * depth + 7) >> 3);
-		img_len = (img_width_bytes + 1) * y;
+		_out_ = new short[x * y * output_shorts];
+		img_width_shorts = (long)((img_n * x * depth + 7) >> 3);
+		img_len = (img_width_shorts + 1) * y;
 		if (raw_len < img_len)
 			stbi__err("not enough pixels");
-		var ptr = new FakePtr<Byte>(_out_);
+		var ptr = new FakePtr<Short>(_out_);
 		for (j = (long)0; j < y; ++j)
 		{
 			var cur = ptr + stride * j;
-			FakePtr<Byte> prior;
+			FakePtr<Short> prior;
 			var filter = (int)raw.Value;
 			raw++;
 			if (filter > 4)
 				stbi__err("invalid filter");
 			if (depth < 8)
 			{
-				cur += x * out_n - img_width_bytes;
-				filter_bytes = 1;
-				width = (int)img_width_bytes;
+				cur += x * out_n - img_width_shorts;
+				filter_shorts = 1;
+				width = (int)img_width_shorts;
 			}
 
 			prior = cur - stride;
 			if (j == 0)
 				filter = first_row_filter[filter];
-			for (k = 0; k < filter_bytes; ++k)
+			for (k = 0; k < filter_shorts; ++k)
 				switch (filter)
 				{
 					case STBI__F_none:
@@ -121,13 +121,13 @@ import java.io.InputStream;
 						cur[k] = raw[k];
 						break;
 					case STBI__F_up:
-						cur[k] = (byte)((raw[k] + prior[k]) & 255);
+						cur[k] = (short)((raw[k] + prior[k]) & 255);
 						break;
 					case STBI__F_avg:
-						cur[k] = (byte)((raw[k] + (prior[k] >> 1)) & 255);
+						cur[k] = (short)((raw[k] + (prior[k] >> 1)) & 255);
 						break;
 					case STBI__F_paeth:
-						cur[k] = (byte)((raw[k] + stbi__paeth(0, prior[k], 0)) & 255);
+						cur[k] = (short)((raw[k] + stbi__paeth(0, prior[k], 0)) & 255);
 						break;
 					case STBI__F_avg_first:
 						cur[k] = raw[k];
@@ -149,13 +149,13 @@ import java.io.InputStream;
 			{
 				if (img_n != out_n)
 				{
-					cur[filter_bytes] = 255;
-					cur[filter_bytes + 1] = 255;
+					cur[filter_shorts] = 255;
+					cur[filter_shorts + 1] = 255;
 				}
 
-				raw += filter_bytes;
-				cur += output_bytes;
-				prior += output_bytes;
+				raw += filter_shorts;
+				cur += output_shorts;
+				prior += output_shorts;
 			}
 			else
 			{
@@ -166,33 +166,33 @@ import java.io.InputStream;
 
 			if (depth < 8 || img_n == out_n)
 			{
-				var nk = (width - 1) * filter_bytes;
+				var nk = (width - 1) * filter_shorts;
 				switch (filter)
 				{
 					case STBI__F_none:
-						FakePtr<Byte>.memcpy(cur, raw, nk);
+						FakePtr<Short>.memcpy(cur, raw, nk);
 						break;
 					case STBI__F_sub:
-						for (k = 0; k < nk; ++k) cur[k] = (byte)((raw[k] + cur[k - filter_bytes]) & 255);
+						for (k = 0; k < nk; ++k) cur[k] = (short)((raw[k] + cur[k - filter_shorts]) & 255);
 						break;
 					case STBI__F_up:
-						for (k = 0; k < nk; ++k) cur[k] = (byte)((raw[k] + prior[k]) & 255);
+						for (k = 0; k < nk; ++k) cur[k] = (short)((raw[k] + prior[k]) & 255);
 						break;
 					case STBI__F_avg:
 						for (k = 0; k < nk; ++k)
-							cur[k] = (byte)((raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)) & 255);
+							cur[k] = (short)((raw[k] + ((prior[k] + cur[k - filter_shorts]) >> 1)) & 255);
 						break;
 					case STBI__F_paeth:
 						for (k = 0; k < nk; ++k)
-							cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - filter_bytes], prior[k],
-												  prior[k - filter_bytes])) & 255);
+							cur[k] = (short)((raw[k] + stbi__paeth(cur[k - filter_shorts], prior[k],
+												  prior[k - filter_shorts])) & 255);
 						break;
 					case STBI__F_avg_first:
-						for (k = 0; k < nk; ++k) cur[k] = (byte)((raw[k] + (cur[k - filter_bytes] >> 1)) & 255);
+						for (k = 0; k < nk; ++k) cur[k] = (short)((raw[k] + (cur[k - filter_shorts] >> 1)) & 255);
 						break;
 					case STBI__F_paeth_first:
 						for (k = 0; k < nk; ++k)
-							cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - filter_bytes], 0, 0)) & 255);
+							cur[k] = (short)((raw[k] + stbi__paeth(cur[k - filter_shorts], 0, 0)) & 255);
 						break;
 				}
 
@@ -205,66 +205,66 @@ import java.io.InputStream;
 					case STBI__F_none:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
 								cur[k] = raw[k];
 						break;
 					case STBI__F_sub:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + cur[k - output_bytes]) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + cur[k - output_shorts]) & 255);
 						break;
 					case STBI__F_up:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + prior[k]) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + prior[k]) & 255);
 						break;
 					case STBI__F_avg:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + ((prior[k] + cur[k - output_bytes]) >> 1)) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + ((prior[k] + cur[k - output_shorts]) >> 1)) & 255);
 						break;
 					case STBI__F_paeth:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - output_bytes], prior[k],
-													  prior[k - output_bytes])) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + stbi__paeth(cur[k - output_shorts], prior[k],
+													  prior[k - output_shorts])) & 255);
 						break;
 					case STBI__F_avg_first:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + (cur[k - output_bytes] >> 1)) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + (cur[k - output_shorts] >> 1)) & 255);
 						break;
 					case STBI__F_paeth_first:
 						for (i = x - 1;
 							i >= 1;
-							--i, cur[filter_bytes] = (byte)255, raw += filter_bytes, cur += output_bytes, prior +=
-								output_bytes)
-							for (k = 0; k < filter_bytes; ++k)
-								cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - output_bytes], 0, 0)) & 255);
+							--i, cur[filter_shorts] = (short)255, raw += filter_shorts, cur += output_shorts, prior +=
+								output_shorts)
+							for (k = 0; k < filter_shorts; ++k)
+								cur[k] = (short)((raw[k] + stbi__paeth(cur[k - output_shorts], 0, 0)) & 255);
 						break;
 				}
 
 				if (depth == 16)
 				{
 					cur = ptr + stride * j;
-					for (i = (long)0; i < x; ++i, cur += output_bytes) cur[filter_bytes + 1] = 255;
+					for (i = (long)0; i < x; ++i, cur += output_shorts) cur[filter_shorts + 1] = 255;
 				}
 			}
 		}
@@ -273,64 +273,64 @@ import java.io.InputStream;
 			for (j = (long)0; j < y; ++j)
 			{
 				var cur = ptr + stride * j;
-				var _in_ = ptr + stride * j + x * out_n - img_width_bytes;
-				var scale = (byte)(color == 0 ? stbi__depth_scale_table[depth] : 1);
+				var _in_ = ptr + stride * j + x * out_n - img_width_shorts;
+				var scale = (short)(color == 0 ? stbi__depth_scale_table[depth] : 1);
 				if (depth == 4)
 				{
 					for (k = (int)(x * img_n); k >= 2; k -= 2, ++_in_)
 					{
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 4)));
-						cur.SetAndIncrease((byte)(scale * (_in_.Value & 0x0f)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 4)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value & 0x0f)));
 					}
 
 					if (k > 0)
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 4)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 4)));
 				}
 				else if (depth == 2)
 				{
 					for (k = (int)(x * img_n); k >= 4; k -= 4, ++_in_)
 					{
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 6)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 4) & 0x03)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 2) & 0x03)));
-						cur.SetAndIncrease((byte)(scale * (_in_.Value & 0x03)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 6)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 4) & 0x03)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 2) & 0x03)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value & 0x03)));
 					}
 
 					if (k > 0)
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 6)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 6)));
 					if (k > 1)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 4) & 0x03)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 4) & 0x03)));
 					if (k > 2)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 2) & 0x03)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 2) & 0x03)));
 				}
 				else if (depth == 1)
 				{
 					for (k = (int)(x * img_n); k >= 8; k -= 8, ++_in_)
 					{
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 7)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 6) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 5) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 4) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 3) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 2) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 1) & 0x01)));
-						cur.SetAndIncrease((byte)(scale * (_in_.Value & 0x01)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 7)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 6) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 5) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 4) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 3) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 2) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 1) & 0x01)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value & 0x01)));
 					}
 
 					if (k > 0)
-						cur.SetAndIncrease((byte)(scale * (_in_.Value >> 7)));
+						cur.SetAndIncrease((short)(scale * (_in_.Value >> 7)));
 					if (k > 1)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 6) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 6) & 0x01)));
 					if (k > 2)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 5) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 5) & 0x01)));
 					if (k > 3)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 4) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 4) & 0x01)));
 					if (k > 4)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 3) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 3) & 0x01)));
 					if (k > 5)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 2) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 2) & 0x01)));
 					if (k > 6)
-						cur.SetAndIncrease((byte)(scale * ((_in_.Value >> 1) & 0x01)));
+						cur.SetAndIncrease((short)(scale * ((_in_.Value >> 1) & 0x01)));
 				}
 
 				if (img_n != out_n)
@@ -355,7 +355,7 @@ import java.io.InputStream;
 			}
 		else if (depth == 16)
 			throw new UnsupportedOperationException();
-		/*				FakePtr<Byte> cur = ptr;
+		/*				FakePtr<Short> cur = ptr;
 						int* cur16 = (int*)(cur);
 						for (i = (long)(0); (i) < (x * y * out_n); ++i, cur16++, cur += 2)
 						{
@@ -365,16 +365,16 @@ import java.io.InputStream;
 /*		return 1;
 	}
 
-	private int stbi__create_png_image(FakePtr<Byte> image_data, long image_data_len, int out_n, int depth,
+	private int stbi__create_png_image(FakePtr<Short> image_data, long image_data_len, int out_n, int depth,
 		int color, int interlaced)
 	{
-		var bytes = depth == 16 ? 2 : 1;
-		var out_bytes = out_n * bytes;
+		var shorts = depth == 16 ? 2 : 1;
+		var out_shorts = out_n * shorts;
 		var p = 0;
 		if (interlaced == 0)
 			return stbi__create_png_image_raw(image_data, image_data_len, out_n, (long)img_x, (long)img_y, depth,
 				color);
-		var final = new byte[img_x * img_y * out_bytes];
+		var final = new short[img_x * img_y * out_shorts];
 		var xorig = new int[7];
 		var yorig = new int[7];
 		var xspc = new int[7];
@@ -425,16 +425,16 @@ import java.io.InputStream;
 				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, (long)x, (long)y, depth,
 						color) == 0) return 0;
 
-				var finalPtr = new FakePtr<Byte>(final);
-				var outPtr = new FakePtr<Byte>(_out_);
+				var finalPtr = new FakePtr<Short>(final);
+				var outPtr = new FakePtr<Short>(_out_);
 				for (j = 0; j < y; ++j)
 					for (i = 0; i < x; ++i)
 					{
 						var out_y = j * yspc[p] + yorig[p];
 						var out_x = i * xspc[p] + xorig[p];
-						FakePtr<Byte>.memcpy(finalPtr + out_y * img_x * out_bytes + out_x * out_bytes,
-							outPtr + (j * x + i) * out_bytes,
-							out_bytes);
+						FakePtr<Short>.memcpy(finalPtr + out_y * img_x * out_shorts + out_x * out_shorts,
+							outPtr + (j * x + i) * out_shorts,
+							out_shorts);
 					}
 
 				image_data += img_len;
@@ -446,15 +446,15 @@ import java.io.InputStream;
 		return 1;
 	}
 
-	private int stbi__compute_transparency(byte[] tc, int out_n)
+	private int stbi__compute_transparency(short[] tc, int out_n)
 	{
 		long i = 0;
 		var pixel_count = (long)(img_x * img_y);
-		var p = new FakePtr<Byte>(_out_);
+		var p = new FakePtr<Short>(_out_);
 		if (out_n == 2)
 			for (i = (long)0; i < pixel_count; ++i)
 			{
-				p[1] = (byte)(p[0] == tc[0] ? 0 : 255);
+				p[1] = (short)(p[0] == tc[0] ? 0 : 255);
 				p += 2;
 			}
 		else
@@ -496,13 +496,13 @@ import java.io.InputStream;
 					return (int)(1);*/
 /*	}
 
-	private int stbi__expand_png_palette(byte[] palette, int len, int pal_img_n)
+	private int stbi__expand_png_palette(short[] palette, int len, int pal_img_n)
 	{
 		long i = 0;
 		var pixel_count = (long)(img_x * img_y);
 		var orig = _out_;
-		_out_ = new byte[pixel_count * pal_img_n];
-		var p = new FakePtr<Byte>(_out_);
+		_out_ = new short[pixel_count * pal_img_n];
+		var p = new FakePtr<Short>(_out_);
 		if (pal_img_n == 3)
 			for (i = (long)0; i < pixel_count; ++i)
 			{
@@ -540,7 +540,7 @@ import java.io.InputStream;
 	{
 		long i = 0;
 		var pixel_count = (long)(img_x * img_y);
-		var p = new FakePtr<Byte>(_out_);
+		var p = new FakePtr<Short>(_out_);
 		if (img_out_n == 3)
 		{
 			for (i = (long)0; i < pixel_count; ++i)
@@ -560,10 +560,10 @@ import java.io.InputStream;
 					var t = p[0];
 					if (a != 0)
 					{
-						var half = (byte)(a / 2);
-						p[0] = (byte)((p[2] * 255 + half) / a);
-						p[1] = (byte)((p[1] * 255 + half) / a);
-						p[2] = (byte)((t * 255 + half) / a);
+						var half = (short)(a / 2);
+						p[0] = (short)((p[2] * 255 + half) / a);
+						p[1] = (short)((p[1] * 255 + half) / a);
+						p[2] = (short)((t * 255 + half) / a);
 					}
 					else
 					{
@@ -586,10 +586,10 @@ import java.io.InputStream;
 
 	private int stbi__parse_png_file(int scan, int req_comp) throws Exception
 	{
-		var palette = new byte[1024];
-		var pal_img_n = (byte)0;
-		var has_trans = (byte)0;
-		var tc = new byte[3];
+		var palette = new short[1024];
+		var pal_img_n = (short)0;
+		var has_trans = (short)0;
+		var tc = new short[3];
 		tc[0] = 0;
 
 		var tc16 = new int[3];
@@ -725,7 +725,7 @@ import java.io.InputStream;
 								tc16[k] = (int)stbi__get16be();
 						else
 							for (k = 0; k < img_n; ++k)
-								tc[k] = (byte)((byte)(stbi__get16be() & 255) * stbi__depth_scale_table[depth]);
+								tc[k] = (short)((short)(stbi__get16be() & 255) * stbi__depth_scale_table[depth]);
 					}
 
 					break;
@@ -780,7 +780,7 @@ import java.io.InputStream;
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtr<Byte>(expanded), (long)raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new FakePtr<Short>(expanded), (long)raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0)

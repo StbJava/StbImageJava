@@ -10,25 +10,25 @@ import java.io.InputStream;
 	private static class stbi__gif_lzw
 	{
 		public short prefix;
-		public byte first;
-		public byte suffix;
+		public short first;
+		public short suffix;
 	}
 
 	private int w;
 	private int h;
-	private byte[] _out_;
-	private byte[] background;
-	private byte[] history;
+	private short[] _out_;
+	private short[] background;
+	private short[] history;
 	private int flags;
 	private int bgindex;
 	private int ratio;
 	private int transparent;
 	private int eflags;
 	private int delay;
-	private final byte[] pal;
-	private final byte[] lpal;
+	private final short[] pal;
+	private final short[] lpal;
 	private final stbi__gif_lzw[] codes = new stbi__gif_lzw[8192];
-	private byte[] color_table;
+	private short[] color_table;
 	private int parse;
 	private int step;
 	private int lflags;
@@ -43,11 +43,11 @@ import java.io.InputStream;
 	private GifDecoder(InputStream stream)
 	{
 		super(stream);
-		pal = new byte[256 * 4];
-		lpal = new byte[256 * 4];
+		pal = new short[256 * 4];
+		lpal = new short[256 * 4];
 	}
 
-	private void stbi__gif_parse_colortable(byte[] pal, int num_entries, int transp) throws Exception
+	private void stbi__gif_parse_colortable(short[] pal, int num_entries, int transp) throws Exception
 	{
 		int i;
 		for (i = 0; i < num_entries; ++i)
@@ -55,13 +55,13 @@ import java.io.InputStream;
 			pal[i * 4 + 2] = stbi__get8();
 			pal[i * 4 + 1] = stbi__get8();
 			pal[i * 4] = stbi__get8();
-			pal[i * 4 + 3] = (byte)(transp == i ? 0 : 255);
+			pal[i * 4 + 3] = (short)(transp == i ? 0 : 255);
 		}
 	}
 
 	private int stbi__gif_header(out int comp, int is_info) throws Exception
 	{
-		byte version = 0;
+		short version = 0;
 		if (stbi__get8() != 'G' || stbi__get8() != 'I' || stbi__get8() != 'F' || stbi__get8() != '8')
 			stbi__err("not GIF");
 		version = stbi__get8();
@@ -93,10 +93,10 @@ import java.io.InputStream;
 			return;
 		idx = cur_x + cur_y;
 		history[idx / 4] = 1;
-		var c = new FakePtr<Byte>(color_table, codes[code].suffix * 4);
+		var c = new FakePtr<Short>(color_table, codes[code].suffix * 4);
 		if (c[3] > 128)
 		{
-			var p = new FakePtr<Byte>(_out_, idx);
+			var p = new FakePtr<Short>(_out_, idx);
 			p[0] = c[2];
 			p[1] = c[1];
 			p[2] = c[0];
@@ -117,9 +117,9 @@ import java.io.InputStream;
 		}
 	}
 
-	private byte[] stbi__process_gif_raster()
+	private short[] stbi__process_gif_raster()
 	{
-		byte lzw_cs = 0;
+		short lzw_cs = 0;
 		var len = 0;
 		var init_code = 0;
 		long first = 0;
@@ -142,8 +142,8 @@ import java.io.InputStream;
 		for (init_code = 0; init_code < clear; init_code++)
 		{
 			codes[init_code].prefix = -1;
-			codes[init_code].first = (byte)init_code;
-			codes[init_code].suffix = (byte)init_code;
+			codes[init_code].first = (short)init_code;
+			codes[init_code].suffix = (short)init_code;
 		}
 
 		avail = clear + 2;
@@ -214,7 +214,7 @@ import java.io.InputStream;
 			}
 	}
 
-	private byte[] stbi__gif_load_next(out int comp, FakePtr<Byte>? two_back)
+	private short[] stbi__gif_load_next(out int comp, FakePtr<Short>? two_back)
 	{
 		comp = 0;
 
@@ -228,17 +228,17 @@ import java.io.InputStream;
 			if (stbi__gif_header(out comp, 0) == 0)
 				return null;
 			pcount = w * h;
-			_out_ = new byte[4 * pcount];
+			_out_ = new short[4 * pcount];
 			Array.Clear(_out_, 0, _out_.length);
-			background = new byte[4 * pcount];
+			background = new short[4 * pcount];
 			Array.Clear(background, 0, background.length);
-			history = new byte[pcount];
+			history = new short[pcount];
 			Array.Clear(history, 0, history.length);
 			first_frame = 1;
 		}
 		else
 		{
-			var ptr = new FakePtr<Byte>(_out_);
+			var ptr = new FakePtr<Short>(_out_);
 			dispose = (eflags & 0x1C) >> 2;
 			pcount = w * h;
 			if (dispose == 3 && two_back == null) dispose = 2;
@@ -246,18 +246,18 @@ import java.io.InputStream;
 			{
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						FakePtr<Byte>.memcpy(new FakePtr<Byte>(ptr, pi * 4),
-							new FakePtr<Byte>(two_back.Value, pi * 4), 4);
+						FakePtr<Short>.memcpy(new FakePtr<Short>(ptr, pi * 4),
+							new FakePtr<Short>(two_back.Value, pi * 4), 4);
 			}
 			else if (dispose == 2)
 			{
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						FakePtr<Byte>.memcpy(new FakePtr<Byte>(ptr, pi * 4), new FakePtr<Byte>(background, pi * 4),
+						FakePtr<Short>.memcpy(new FakePtr<Short>(ptr, pi * 4), new FakePtr<Short>(background, pi * 4),
 							4);
 			}
 
-			FakePtr<Byte>.memcpy(new FakePtr<Byte>(background), ptr, 4 * w * h);
+			FakePtr<Short>.memcpy(new FakePtr<Short>(background), ptr, 4 * w * h);
 		}
 
 		Array.Clear(history, 0, w * h);
@@ -272,7 +272,7 @@ import java.io.InputStream;
 					var y = 0;
 					var w = 0;
 					var h = 0;
-					byte[] o;
+					short[] o;
 					x = stbi__get16le();
 					y = stbi__get16le();
 					w = stbi__get16le();
@@ -324,8 +324,8 @@ import java.io.InputStream;
 							if (history[pi] == 0)
 							{
 								pal[bgindex * 4 + 3] = 255;
-								FakePtr<Byte>.memcpy(new FakePtr<Byte>(_out_, pi * 4),
-									new FakePtr<Byte>(pal, bgindex), 4);
+								FakePtr<Short>.memcpy(new FakePtr<Short>(_out_, pi * 4),
+									new FakePtr<Short>(pal, bgindex), 4);
 							}
 
 					return o;
@@ -377,9 +377,9 @@ import java.io.InputStream;
 			if ((IsGif(InputStream)))
 			{
 				int layers = (int)(0);
-				byte* u = null;
-				byte* _out_ = null;
-				byte* two_back = null;
+				short* u = null;
+				short* _out_ = null;
+				short* two_back = null;
 				int stride = 0;
 				if ((delays) != null)
 				{
@@ -396,7 +396,7 @@ import java.io.InputStream;
 						stride = (int)(w * h * 4);
 						if ((_out_) != null)
 						{
-							_out_ = (byte*)(CRuntime.realloc(_out_, (ulong)(layers * stride)));
+							_out_ = (short*)(CRuntime.realloc(_out_, (ulong)(layers * stride)));
 							if ((delays) != null)
 							{
 								*delays = (int*)(CRuntime.realloc(*delays, (ulong)(sizeof(int) * layers)));
@@ -404,7 +404,7 @@ import java.io.InputStream;
 						}
 						else
 						{
-							_out_ = (byte*)(Utility.stbi__malloc((ulong)(layers * stride)));
+							_out_ = (short*)(Utility.stbi__malloc((ulong)(layers * stride)));
 							if ((delays) != null)
 							{
 								*delays = (int*)(Utility.stbi__malloc((ulong)(layers * sizeof(int))));

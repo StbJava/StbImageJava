@@ -13,7 +13,7 @@ import java.io.InputStream;
 		super(stream);
 	}
 
-	private int stbi__psd_decode_rle(FakePtr<Byte> p, int pixelCount)
+	private int stbi__psd_decode_rle(FakePtr<Short> p, int pixelCount)
 	{
 		var count = 0;
 		var nleft = 0;
@@ -40,7 +40,7 @@ import java.io.InputStream;
 			}
 			else if (len > 128)
 			{
-				byte val = 0;
+				short val = 0;
 				len = 257 - len;
 				if (len > nleft)
 					return 0;
@@ -68,7 +68,7 @@ import java.io.InputStream;
 		var bitdepth = 0;
 		var w = 0;
 		var h = 0;
-		byte[] _out_;
+		short[] _out_;
 		if (stbi__get32be() != 0x38425053)
 			stbi__err("not PSD");
 		if (stbi__get16be() != 1)
@@ -94,27 +94,27 @@ import java.io.InputStream;
 		var bits_per_channel = 8;
 		if (compression == 0 && bitdepth == 16 && bpc == 16)
 		{
-			_out_ = new byte[8 * w * h];
+			_out_ = new short[8 * w * h];
 			bits_per_channel = 16;
 		}
 		else
 		{
-			_out_ = new byte[4 * w * h];
+			_out_ = new short[4 * w * h];
 		}
 
 		pixelCount = w * h;
 
-		var ptr = new FakePtr<Byte>(_out_);
+		var ptr = new FakePtr<Short>(_out_);
 		if (compression != 0)
 		{
 			stbi__skip(h * channelCount * 2);
 			for (channel = 0; channel < 4; channel++)
 			{
-				FakePtr<Byte> p;
+				FakePtr<Short> p;
 				p = ptr + channel;
 				if (channel >= channelCount)
 				{
-					for (i = 0; i < pixelCount; i++, p += 4) p.set((byte)(channel == 3 ? 255 : 0));
+					for (i = 0; i < pixelCount; i++, p += 4) p.set((short)(channel == 3 ? 255 : 0));
 				}
 				else
 				{
@@ -137,7 +137,7 @@ import java.io.InputStream;
 												}*/
 
 /*					var p = ptr + channel;
-					var val = (byte)(channel == 3 ? 255 : 0);
+					var val = (short)(channel == 3 ? 255 : 0);
 					for (i = 0; i < pixelCount; i++, p += 4) p.set(val);
 				}
 				else
@@ -153,7 +153,7 @@ import java.io.InputStream;
 /*					var p = ptr + channel;
 					if (bitdepth == 16)
 						for (i = 0; i < pixelCount; i++, p += 4)
-							p.set((byte)(stbi__get16be() >> 8));
+							p.set((short)(stbi__get16be() >> 8));
 					else
 						for (i = 0; i < pixelCount; i++, p += 4)
 							p.set(stbi__get8());
@@ -185,9 +185,9 @@ import java.io.InputStream;
 					var a = pixel[3] / 255.0f;
 					var ra = 1.0f / a;
 					var inv_a = 255.0f * (1 - ra);
-					pixel[0] = (byte)(pixel[0] * ra + inv_a);
-					pixel[1] = (byte)(pixel[1] * ra + inv_a);
-					pixel[2] = (byte)(pixel[2] * ra + inv_a);
+					pixel[0] = (short)(pixel[0] * ra + inv_a);
+					pixel[1] = (short)(pixel[1] * ra + inv_a);
+					pixel[2] = (short)(pixel[2] * ra + inv_a);
 				}
 			}
 		}

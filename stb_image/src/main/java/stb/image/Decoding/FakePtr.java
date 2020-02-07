@@ -41,24 +41,17 @@ public class FakePtr<T> {
 		move(1);
 	}
 
-	public T getAndIncrease() {
-		T result = _array[Offset];
-		++Offset;
-
-		return result;
-	}
-
 	public void setAndIncrease(T value) {
 		_array[Offset] = value;
 		++Offset;
 	}
 
-	public void set(T value) {
-		_array[Offset] = value;
-	}
-
 	public FakePtr<T> cloneAdd(int offset) {
 		return new FakePtr<T>(_array, Offset + offset);
+	}
+
+	public FakePtr<T> clone() {
+		return new FakePtr<T>(_array, Offset);
 	}
 
 	public void fill(T value, int count) {
