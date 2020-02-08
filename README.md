@@ -1,5 +1,5 @@
 # StbImageJava
-StbImageJava is pure Java library that can load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
+StbImageJava is Java library that can load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
 
 It is based on the code of stb_image.h(version 2.22).
 
