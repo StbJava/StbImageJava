@@ -1,1 +1,2 @@
-include 'stb_image', 'sample'
+rootProject.name = 'stb_image'
+include 'sample'
