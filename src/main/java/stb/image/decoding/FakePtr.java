@@ -1,10 +1,9 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import java.util.Arrays;
 
-public class FakePtr<T> {
+class FakePtr<T> {
 	private T[] _array;
-
 	public int Offset;
 
 	public FakePtr(FakePtr<T> ptr, int offset) {
@@ -72,10 +71,18 @@ public class FakePtr<T> {
 		Arrays.fill(_array, Offset, Offset + count, value);
 	}
 
+	public void fillAndIncrease(T value, int count) {
+		fill(value, count);
+		Offset += count;
+	}
+
 	public void memcpy(FakePtr<T> b, int count) {
-		for (int i = 0; i < count; ++i) {
-			setAt(i, b.getAt(i));
-		}
+		System.arraycopy(b._array, b.Offset, _array, Offset, count);
+	}
+
+	public void memcpyAndIncrease(FakePtr<T> b, int count) {
+		memcpy(b, count);
+		Offset += count;
 	}
 
 	public void memcpy(T[] b, int count) {

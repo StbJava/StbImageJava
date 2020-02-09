@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import stb.image.ColorComponents;
 import stb.image.ImageInfo;
@@ -34,9 +34,9 @@ public class PngDecoder extends Decoder {
 
 	private int stbi__de_iphone_flag;
 
-	private Short[] idata;
-	private Short[] expanded;
-	private Short[] _out_;
+	private short[] idata;
+	private short[] expanded;
+	private short[] _out_;
 	private int depth;
 
 	private PngDecoder(InputStream stream) {
@@ -71,9 +71,9 @@ public class PngDecoder extends Decoder {
 		return c;
 	}
 
-	private int stbi__create_png_image_raw(FakePtr<Short> rawOriginal, long raw_len, int out_n,
+	private int stbi__create_png_image_raw(ShortFakePtr rawOriginal, long raw_len, int out_n,
 										   int x, int y, int depth, int color) throws Exception {
-		FakePtr<Short> raw = rawOriginal.clone();
+		ShortFakePtr raw = rawOriginal.clone();
 		int shorts = depth == 16 ? 2 : 1;
 		int i = 0;
 		int j = 0;
@@ -84,15 +84,15 @@ public class PngDecoder extends Decoder {
 		int output_shorts = out_n * shorts;
 		int filter_shorts = img_n * shorts;
 		int width = (int) x;
-		_out_ = new Short[x * y * output_shorts];
+		_out_ = new short[x * y * output_shorts];
 		img_width_shorts = ((img_n * x * depth + 7) >> 3);
 		img_len = (img_width_shorts + 1) * y;
 		if (raw_len < img_len)
 			stbi__err("not enough pixels");
-		FakePtr<Short> ptr = new FakePtr<Short>(_out_);
+		ShortFakePtr ptr = new ShortFakePtr(_out_);
 		for (j = 0; j < y; ++j) {
-			FakePtr<Short> cur = new FakePtr<Short>(ptr, stride * j);
-			FakePtr<Short> prior;
+			ShortFakePtr cur = new ShortFakePtr(ptr, stride * j);
+			ShortFakePtr prior;
 			int filter = raw.getAndIncrease();
 			if (filter > 4)
 				stbi__err("invalid filter");
@@ -102,7 +102,7 @@ public class PngDecoder extends Decoder {
 				width = (int) img_width_shorts;
 			}
 
-			prior = new FakePtr<Short>(cur, -stride);
+			prior = new ShortFakePtr(cur, -stride);
 			if (j == 0)
 				filter = first_row_filter[filter];
 			for (k = 0; k < filter_shorts; ++k)
@@ -239,7 +239,7 @@ public class PngDecoder extends Decoder {
 				}
 
 				if (depth == 16) {
-					cur = new FakePtr<Short>(ptr, stride * j);
+					cur = new ShortFakePtr(ptr, stride * j);
 					for (i = 0; i < x; ++i, cur.move(output_shorts)) cur.setAt(filter_shorts + 1, (short) 255);
 				}
 			}
@@ -247,8 +247,8 @@ public class PngDecoder extends Decoder {
 
 		if (depth < 8)
 			for (j = 0; j < y; ++j) {
-				FakePtr<Short> cur = new FakePtr<Short>(ptr, stride * j);
-				FakePtr<Short> _in_ = new FakePtr<Short>(ptr, stride * j + x * out_n - img_width_shorts);
+				ShortFakePtr cur = new ShortFakePtr(ptr, stride * j);
+				ShortFakePtr _in_ = new ShortFakePtr(ptr, stride * j + x * out_n - img_width_shorts);
 				short scale = (short) (color == 0 ? stbi__depth_scale_table[depth] : 1);
 				if (depth == 4) {
 					for (k = (int) (x * img_n); k >= 2; k -= 2, _in_.increase()) {
@@ -302,7 +302,7 @@ public class PngDecoder extends Decoder {
 
 				if (img_n != out_n) {
 					int q = 0;
-					cur = new FakePtr<Short>(ptr, stride * j);
+					cur = new ShortFakePtr(ptr, stride * j);
 					if (img_n == 1)
 						for (q = (int) (x - 1); q >= 0; --q) {
 							cur.setAt(q * 2 + 1, (short) 255);
@@ -319,7 +319,7 @@ public class PngDecoder extends Decoder {
 			}
 		else if (depth == 16)
 			throw new UnsupportedOperationException();
-		/*				FakePtr<Short> cur = ptr;
+		/*				ShortFakePtr cur = ptr;
 						int* cur16 = (int*)(cur);
 						for (i = (long)(0); (i) < (x * y * out_n); ++i, cur16++, cur.move(2))
 						{
@@ -329,15 +329,15 @@ public class PngDecoder extends Decoder {
 		return 1;
 	}
 
-	private int stbi__create_png_image(FakePtr<Short> image_dataOriginal, long image_data_len, int out_n, int depth,
+	private int stbi__create_png_image(ShortFakePtr image_dataOriginal, long image_data_len, int out_n, int depth,
 									   int color, int interlaced) throws Exception {
-		FakePtr<Short> image_data = image_dataOriginal.clone();
+		ShortFakePtr image_data = image_dataOriginal.clone();
 		int shorts = depth == 16 ? 2 : 1;
 		int out_shorts = out_n * shorts;
 		int p = 0;
 		if (interlaced == 0)
 			return stbi__create_png_image_raw(image_data, image_data_len, out_n, img_x, img_y, depth, color);
-		Short[] _final_ = new Short[img_x * img_y * out_shorts];
+		short[] _final_ = new short[img_x * img_y * out_shorts];
 		int[] xorig = new int[7];
 		int[] yorig = new int[7];
 		int[] xspc = new int[7];
@@ -386,14 +386,14 @@ public class PngDecoder extends Decoder {
 				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, x, y, depth,
 						color) == 0) return 0;
 
-				FakePtr<Short> finalPtr = new FakePtr<>(_final_);
-				FakePtr<Short> outPtr = new FakePtr<>(_out_);
+				ShortFakePtr finalPtr = new ShortFakePtr(_final_);
+				ShortFakePtr outPtr = new ShortFakePtr(_out_);
 				for (j = 0; j < y; ++j)
 					for (i = 0; i < x; ++i) {
 						int out_y = j * yspc[p] + yorig[p];
 						int out_x = i * xspc[p] + xorig[p];
-						FakePtr<Short> ptr1 = new FakePtr<Short>(finalPtr, out_y * img_x * out_shorts + out_x * out_shorts);
-						FakePtr<Short> ptr2 = new FakePtr<Short>(outPtr, (j * x + i) * out_shorts);
+						ShortFakePtr ptr1 = new ShortFakePtr(finalPtr, out_y * img_x * out_shorts + out_x * out_shorts);
+						ShortFakePtr ptr2 = new ShortFakePtr(outPtr, (j * x + i) * out_shorts);
 						ptr1.memcpy(ptr2, out_shorts);
 					}
 
@@ -409,7 +409,7 @@ public class PngDecoder extends Decoder {
 	private int stbi__compute_transparency(short[] tc, int out_n) {
 		long i = 0;
 		long pixel_count = (long) (img_x * img_y);
-		FakePtr<Short> p = new FakePtr<Short>(_out_);
+		ShortFakePtr p = new ShortFakePtr(_out_);
 		if (out_n == 2)
 			for (i = 0; i < pixel_count; ++i) {
 				p.setAt(1, (short) (p.getAt(0) == tc[0] ? 0 : 255));
@@ -455,9 +455,9 @@ public class PngDecoder extends Decoder {
 	private int stbi__expand_png_palette(short[] palette, int len, int pal_img_n) {
 		int i = 0;
 		int pixel_count = img_x * img_y;
-		Short[] orig = _out_;
-		_out_ = new Short[pixel_count * pal_img_n];
-		FakePtr<Short> p = new FakePtr<Short>(_out_);
+		short[] orig = _out_;
+		_out_ = new short[pixel_count * pal_img_n];
+		ShortFakePtr p = new ShortFakePtr(_out_);
 		if (pal_img_n == 3)
 			for (i = 0; i < pixel_count; ++i) {
 				int n = orig[i] * 4;
@@ -490,7 +490,7 @@ public class PngDecoder extends Decoder {
 	private void stbi__de_iphone() {
 		long i = 0;
 		long pixel_count = (long) (img_x * img_y);
-		FakePtr<Short> p = new FakePtr<Short>(_out_);
+		ShortFakePtr p = new ShortFakePtr(_out_);
 		if (img_out_n == 3) {
 			for (i = 0; i < pixel_count; ++i) {
 				Short t = p.getAt(0);
@@ -677,7 +677,7 @@ public class PngDecoder extends Decoder {
 						while (ioff + c.length > idata_limit) idata_limit *= 2;
 
 						if (idata == null) {
-							idata = new Short[idata_limit];
+							idata = new short[idata_limit];
 						} else {
 							idata = Arrays.copyOf(idata, idata_limit);
 						}
@@ -700,7 +700,7 @@ public class PngDecoder extends Decoder {
 					bpl = (long) ((img_x * depth + 7) / 8);
 					raw_len = (int) (bpl * img_y * img_n + img_y);
 
-					Pair<Short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
+					Pair<short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
 
 					expanded = pair.value1;
 					if (expanded == null)
@@ -710,7 +710,7 @@ public class PngDecoder extends Decoder {
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtr<Short>(expanded), (long) raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new ShortFakePtr(expanded), (long) raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0) {
@@ -767,7 +767,7 @@ public class PngDecoder extends Decoder {
 				bits_per_channel = 8;
 			else
 				bits_per_channel = depth;
-			Short[] result = _out_;
+			short[] result = _out_;
 			_out_ = null;
 			if (req_comp != 0 && req_comp != img_out_n) {
 				if (bits_per_channel == 8)
@@ -777,12 +777,13 @@ public class PngDecoder extends Decoder {
 				img_out_n = req_comp;
 			}
 
+			Utility.clampResult(result);
 			return new ImageResult(img_x,
 					img_y,
 					ColorComponents.fromInt(img_n),
 					requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 					bits_per_channel,
-					Utility.toResultArray(result));
+					result);
 		} finally {
 			_out_ = null;
 			expanded = null;

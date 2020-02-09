@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import stb.image.ColorComponents;
 import stb.image.ImageInfo;
@@ -159,7 +159,7 @@ public class BmpDecoder extends Decoder {
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
-		Short[] _out_;
+		short[] _out_;
 		long mr = 0;
 		long mg = 0;
 		long mb = 0;
@@ -196,7 +196,7 @@ public class BmpDecoder extends Decoder {
 			target = (int) requiredComponents.getValue();
 		else
 			target = img_n;
-		_out_ = new Short[target * img_x * img_y];
+		_out_ = new short[target * img_x * img_y];
 		if (info.bpp < 16) {
 			int z = 0;
 			if (psize == 0 || psize > 256) stbi__err("invalid");
@@ -340,10 +340,10 @@ public class BmpDecoder extends Decoder {
 				_out_[i] = (short) 255;
 		if (flip_vertically != 0) {
 			short t = 0;
-			FakePtr<Short> ptr = new FakePtr<>(_out_);
+			ShortFakePtr ptr = new ShortFakePtr(_out_);
 			for (j = 0; j < img_y >> 1; ++j) {
-				FakePtr<Short> p1 = ptr.cloneAdd(j * img_x * target);
-				FakePtr<Short> p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
+				ShortFakePtr p1 = ptr.cloneAdd(j * img_x * target);
+				ShortFakePtr p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
 				for (i = 0; i < img_x * target; ++i) {
 					t = p1.getAt(i);
 					p1.setAt(i, p2.getAt(i));
@@ -355,13 +355,14 @@ public class BmpDecoder extends Decoder {
 		if (requiredComponents != null && (int) requiredComponents.getValue() != target)
 			_out_ = Utility.stbi__convert_format(_out_, target, requiredComponents.getValue(), img_x, img_y);
 
+		Utility.clampResult(_out_);
 		return new ImageResult(
 				img_x,
 				img_y,
 				ColorComponents.fromInt(img_n),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 				8,
-				Utility.toResultArray(_out_)
+				_out_
 		);
 	}
 

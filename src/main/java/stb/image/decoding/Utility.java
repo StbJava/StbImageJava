@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +70,7 @@ class Utility
 		return (int)(((r * 77) + (g * 150) + (29 * b)) >> 8);
 	}
 
-	public static Short[] stbi__convert_format16(Short[] data, int img_n, int req_comp, long x, long y)
+	public static short[] stbi__convert_format16(short[] data, int img_n, int req_comp, long x, long y)
 	{
 		throw new UnsupportedOperationException();
 /*			int i = 0;
@@ -79,8 +79,8 @@ class Utility
 			return data;
 
 		short[] good = new short[req_comp * x * y * 2];
-		FakePtr<Short> dataPtr = new FakePtr<Short>(data);
-		FakePtr<Short> goodPtr = new FakePtr<Short>(good);
+		ShortFakePtr dataPtr = new ShortFakePtr(data);
+		ShortFakePtr goodPtr = new ShortFakePtr(good);
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
 		{
 			int* src = (int*)dataPtr + j * x * img_n;
@@ -178,45 +178,35 @@ class Utility
 		return good;*/
 	}
 
-	public static short[] toResultArray(Short[] data)
+	public static void clampResult(short[] data)
 	{
-		short[] result = new short[data.length];
 		for(int i = 0; i < data.length; ++i)
 		{
 			short v = data[i];
 			if (v < 0)
 			{
-				v = 0;
+				data[i] = 0;
 			}
 
 			if (v > 255)
 			{
-				v = 255;
+				data[i] = 255;
 			}
-
-			result[i] = v;
 		}
-
-		return result;
 	}
 
-	public static <T> void memcpy(FakePtr<T> ptr1, FakePtr<T> ptr2, int count)
-	{
-		ptr1.memcpy(ptr2, count);
-	}
-
-	public static Short[] stbi__convert_format(Short[] data, int img_n, int req_comp, int x, int y) throws Exception
+	public static short[] stbi__convert_format(short[] data, int img_n, int req_comp, int x, int y) throws Exception
 	{
 		int i = 0;
 		int j = 0;
 		if ((req_comp) == (img_n))
 			return data;
 
-		Short[] good = new Short[req_comp * x * y];
+		short[] good = new short[req_comp * x * y];
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
 		{
-			FakePtr<Short> src = new FakePtr<>(data, (int) (j * x * img_n));
-			FakePtr<Short> dest = new FakePtr<>(good, (int) (j * x * req_comp));
+			ShortFakePtr src = new ShortFakePtr(data, (int) (j * x * img_n));
+			ShortFakePtr dest = new ShortFakePtr(good, (int) (j * x * req_comp));
 			switch (((img_n) * 8 + (req_comp)))
 			{
 				case ((1) * 8 + (2)):
@@ -362,8 +352,8 @@ class Utility
 		short[] temp = new short[2048];
 		for (row = (int)(0); (row) < (h >> 1); row++)
 		{
-			FakePtr<Short> row0 = new FakePtr<Short>(image, (int)(row * shorts_per_row));
-			FakePtr<Short> row1 = new FakePtr<Short>(image, (int)((h - row - 1) * shorts_per_row));
+			ShortFakePtr row0 = new ShortFakePtr(image, (int)(row * shorts_per_row));
+			ShortFakePtr row1 = new ShortFakePtr(image, (int)((h - row - 1) * shorts_per_row));
 			int shorts_left = shorts_per_row;
 			while ((shorts_left) != 0)
 			{

@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 class Pair<T1, T2> {
 	public T1 value1;

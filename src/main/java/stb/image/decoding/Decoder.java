@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ public class Decoder {
 		return Utility.stbi__get8(InputStream);
 	}
 
-	protected boolean stbi__getn(Short[] buffer, int offset, int count) throws IOException {
+	protected boolean stbi__getn(short[] buffer, int offset, int count) throws IOException {
 		byte[] buffer2 = new byte[count];
 		int read = InputStream.read(buffer2, 0, count);
 

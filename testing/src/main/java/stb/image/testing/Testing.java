@@ -23,7 +23,7 @@ public class Testing {
 	private static int stbJavaLoadingFromMemory;
 	private static int stbNativeLoadingFromMemory;
 
-	private static final ExecutorService pool = Executors.newFixedThreadPool(4);
+	private static final ExecutorService pool = Executors.newFixedThreadPool(2);
 
 	private static final int LoadTries = 10;
 
@@ -108,7 +108,8 @@ public class Testing {
 		}
 
 		for (int i = 0; i < parsed.getData().length; ++i) {
-			if (parsed.getData()[i] != parsed2.getData()[i]) {
+
+			if (Math.abs(parsed.getData()[i] - parsed2.getData()[i]) > 5) {
 				throw new Exception(String.format("Inconsistent data: index=%d, StbJava=%d, Stb.Native=%d",
 						i,
 						(int) parsed.getData()[i],

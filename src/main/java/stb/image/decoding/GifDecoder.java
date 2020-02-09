@@ -1,4 +1,4 @@
-package stb.image.Decoding;
+package stb.image.decoding;
 
 import stb.image.ColorComponents;
 import stb.image.ImageInfo;
@@ -17,8 +17,8 @@ public class GifDecoder extends Decoder {
 
 	private int w;
 	private int h;
-	private Short[] _out_;
-	private Short[] background;
+	private short[] _out_;
+	private short[] background;
 	private short[] history;
 	private int flags;
 	private int bgindex;
@@ -26,10 +26,10 @@ public class GifDecoder extends Decoder {
 	private int transparent;
 	private int eflags;
 	private int delay;
-	private final Short[] pal;
-	private final Short[] lpal;
+	private final short[] pal;
+	private final short[] lpal;
 	private final stbi__gif_lzw[] codes = new stbi__gif_lzw[8192];
-	private Short[] color_table;
+	private short[] color_table;
 	private int parse;
 	private int step;
 	private int lflags;
@@ -46,11 +46,11 @@ public class GifDecoder extends Decoder {
 		for (int i = 0; i < codes.length; ++i) {
 			codes[i] = new stbi__gif_lzw();
 		}
-		pal = new Short[256 * 4];
-		lpal = new Short[256 * 4];
+		pal = new short[256 * 4];
+		lpal = new short[256 * 4];
 	}
 
-	private void stbi__gif_parse_colortable(Short[] pal, int num_entries, int transp) throws Exception {
+	private void stbi__gif_parse_colortable(short[] pal, int num_entries, int transp) throws Exception {
 		int i;
 		for (i = 0; i < num_entries; ++i) {
 			pal[i * 4 + 2] = stbi__get8();
@@ -92,9 +92,9 @@ public class GifDecoder extends Decoder {
 			return;
 		idx = cur_x + cur_y;
 		history[idx / 4] = 1;
-		FakePtr<Short> c = new FakePtr<>(color_table, codes[code].suffix * 4);
+		ShortFakePtr c = new ShortFakePtr(color_table, codes[code].suffix * 4);
 		if (c.getAt(3) > 128) {
-			FakePtr<Short> p = new FakePtr<Short>(_out_, idx);
+			ShortFakePtr p = new ShortFakePtr(_out_, idx);
 			p.setAt(0, c.getAt(2));
 			p.setAt(1, c.getAt(1));
 			p.setAt(2, c.getAt(0));
@@ -113,7 +113,7 @@ public class GifDecoder extends Decoder {
 		}
 	}
 
-	private Short[] stbi__process_gif_raster() throws Exception {
+	private short[] stbi__process_gif_raster() throws Exception {
 		short lzw_cs = 0;
 		int len = 0;
 		int init_code = 0;
@@ -193,7 +193,7 @@ public class GifDecoder extends Decoder {
 			}
 	}
 
-	private Pair<Short[], Integer> stbi__gif_load_next(FakePtr<Short> two_back) throws Exception {
+	private Pair<short[], Integer> stbi__gif_load_next(ShortFakePtr two_back) throws Exception {
 		int dispose = 0;
 		int first_frame = 0;
 		int pi = 0;
@@ -206,33 +206,31 @@ public class GifDecoder extends Decoder {
 			if (comp == 0)
 				return null;
 			pcount = w * h;
-			_out_ = new Short[4 * pcount];
+			_out_ = new short[4 * pcount];
 			Arrays.fill(_out_, (short) 0);
-			background = new Short[4 * pcount];
+			background = new short[4 * pcount];
 			Arrays.fill(background, (short) 0);
 			history = new short[pcount];
 			Arrays.fill(history, (short) 0);
 			first_frame = 1;
 		} else {
-			FakePtr<Short> ptr = new FakePtr<>(_out_);
+			ShortFakePtr ptr = new ShortFakePtr(_out_);
 			dispose = (eflags & 0x1C) >> 2;
 			pcount = w * h;
 			if (dispose == 3 && two_back == null) dispose = 2;
 			if (dispose == 3) {
 				for (pi = 0; pi < pcount; ++pi) {
 					if (history[pi] != 0) {
-						Utility.memcpy(new FakePtr<Short>(ptr, pi * 4),
-								new FakePtr<Short>(two_back, pi * 4), 4);
+						new ShortFakePtr(ptr, pi * 4).memcpy(new ShortFakePtr(two_back, pi * 4), 4);
 					}
 				}
 			} else if (dispose == 2) {
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						Utility.memcpy(new FakePtr<Short>(ptr, pi * 4), new FakePtr<Short>(background, pi * 4),
-								4);
+						new ShortFakePtr(ptr, pi * 4).memcpy(new ShortFakePtr(background, pi * 4), 4);
 			}
 
-			Utility.memcpy(new FakePtr<Short>(background), ptr, 4 * w * h);
+			new ShortFakePtr(background).memcpy(ptr, 4 * w * h);
 		}
 
 		Arrays.fill(history, 0, w * h, (short) 0);
@@ -244,7 +242,7 @@ public class GifDecoder extends Decoder {
 					int y = 0;
 					int w = 0;
 					int h = 0;
-					Short[] o;
+					short[] o;
 					x = stbi__get16le();
 					y = stbi__get16le();
 					w = stbi__get16le();
@@ -287,8 +285,7 @@ public class GifDecoder extends Decoder {
 						for (pi = 0; pi < pcount; ++pi)
 							if (history[pi] == 0) {
 								pal[bgindex * 4 + 3] = 255;
-								Utility.memcpy(new FakePtr<Short>(_out_, pi * 4),
-										new FakePtr<Short>(pal, bgindex), 4);
+								new ShortFakePtr(_out_, pi * 4).memcpy(new ShortFakePtr(pal, bgindex), 4);
 							}
 
 					return new Pair<>(o, comp);
@@ -395,19 +392,20 @@ public class GifDecoder extends Decoder {
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
 		int comp;
 
-		Pair<Short[], Integer> u = stbi__gif_load_next(null);
+		Pair<short[], Integer> u = stbi__gif_load_next(null);
 		if (u == null) throw new Exception("could not decode gif");
 
-		Short[] data = u.value1;
+		short[] data = u.value1;
 		if (requiredComponents != null && requiredComponents != ColorComponents.RedGreenBlueAlpha)
 			data = Utility.stbi__convert_format(data, 4, ColorComponents.toReqComp(requiredComponents), w, h);
 
+		Utility.clampResult(data);
 		return new ImageResult(w,
 				h,
 				ColorComponents.fromInt(u.value2),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(u.value2),
 				8,
-				Utility.toResultArray(data));
+				data);
 	}
 
 	private static boolean InternalTest(InputStream stream) throws Exception {

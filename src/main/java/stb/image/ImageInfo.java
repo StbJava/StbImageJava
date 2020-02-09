@@ -1,6 +1,6 @@
 package stb.image;
 
-import stb.image.Decoding.*;
+import stb.image.decoding.*;
 
 import java.io.IOException;
 import java.io.InputStream;

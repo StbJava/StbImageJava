@@ -1,6 +1,6 @@
 package stb.image;
 
-import stb.image.Decoding.*;
+import stb.image.decoding.*;
 
 public	class ImageResult
 {

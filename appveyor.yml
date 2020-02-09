@@ -1,4 +1,4 @@
-version: 0.5.0.{build}
+version: 0.5.5.{build}
 build_script:
 - cmd: >-
     gradlew -Pversion=%APPVEYOR_BUILD_VERSION% jar
