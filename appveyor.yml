@@ -3,7 +3,7 @@ build_script:
 - cmd: >-
     gradlew -Pversion=%APPVEYOR_BUILD_VERSION% jar
 artifacts:
-  - path: '**\*.jar'
+  - path: 'build\libs\stb_image-$(appveyor_build_version).jar'
     name: Jar
 deploy:
   - provider: GitHub
