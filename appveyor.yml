@@ -3,7 +3,7 @@ build_script:
 - cmd: >-
     build_all.bat
 artifacts:
-  - path: stb_image.$(appveyor_build_version).jar
+  - path: stb_image-$(appveyor_build_version).jar
     name: Jar
 deploy:
   - provider: GitHub
