@@ -1,7 +1,7 @@
 version: 0.5.0.{build}
 build_script:
 - cmd: >-
-    gradle -Pversion=$(appveyor_build_version) jar
+    gradlew -Pversion=$(appveyor_build_version) jar
 artifacts:
   - path: stb_image.$(appveyor_build_version).jar
     name: Jar
