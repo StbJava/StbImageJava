@@ -1,1 +1,0 @@
-gradlew -Pversion=%APPVEYOR_BUILD_VERSION% jar

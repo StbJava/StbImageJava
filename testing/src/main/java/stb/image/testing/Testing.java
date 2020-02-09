@@ -1,70 +1,58 @@
 package stb.image.testing;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import stb.image.ColorComponents;
 import stb.image.ImageResult;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Testing {
-	static class Passed {
-		public int load1;
-		public int load2;
-
-		public Passed(int load1, int load2) {
-			this.load1 = load1;
-			this.load2 = load2;
-		}
-	}
-
-	interface LoadInterface	{
+	interface LoadInterface {
 		ImageResult Do() throws Exception;
 	}
 
 	private static int tasksStarted;
-	private static int filesProcessed;
-	private static int stbSharpLoadingFromStream;
-	private static int stbNativeLoadingFromStream;
-	private static int stbSharpLoadingFromMemory;
+	private static int filesProcessed, filesMatches;
+	private static int stbJavaLoadingFromMemory;
 	private static int stbNativeLoadingFromMemory;
-	
+
+	private static final ExecutorService pool = Executors.newFixedThreadPool(4);
+
 	private static final int LoadTries = 10;
 
 	private static final int[] JpgQualities = {1, 4, 8, 16, 25, 32, 50, 64, 72, 80, 90, 100};
 	private static final String[] FormatNames = {"BMP", "TGA", "HDR", "PNG", "JPG"};
 
-	public static void Log(String message)
-	{
+	public static void Log(String message) {
 		System.out.println(Thread.currentThread().getId() + " -- " + message);
 	}
 
-	public static boolean RunTests() throws Exception
-	{
-		String imagesPath = "../../../../../../../TestImages";
+	public static boolean RunTests() throws Exception {
+		String imagesPath = "D:/Projects/TestImages";
 
 		File folder = new File(imagesPath);
 		final File[] files = folder.listFiles();
 		Log("Files count: " + files.length);
 
-		for(int i = 0; i < files.length; ++i)
-		{
+		for (int i = 0; i < files.length; ++i) {
 			final int i2 = i;
 			Runnable runnable = () -> ThreadProc(files[i2].getAbsolutePath());
 
-			Thread thread = new Thread(runnable);
-			thread.start();
+			pool.execute(runnable);
 			tasksStarted++;
 		}
 
-		while (true)
-		{
+		while (true) {
 			Thread.sleep(1000);
 
-			if (tasksStarted == 0)
-			{
+			if (tasksStarted == 0) {
 				break;
 			}
 		}
@@ -72,21 +60,19 @@ public class Testing {
 		return true;
 	}
 
-	private static Passed ParseTest(LoadInterface load1, LoadInterface load2) throws Exception
-	{
-		Log("With StbSharp");
+	private static void ParseTest(LoadInterface load1, LoadInterface load2) throws Exception {
+		Log("With StbJava");
 
 		long start = System.currentTimeMillis();
 
 		ImageResult parsed = null;
-		for (int i = 0; i < LoadTries; ++i)
-		{
+		for (int i = 0; i < LoadTries; ++i) {
 			parsed = load1.Do();
 		}
 
 		Log(String.format("x: %d, y: %d, comp: %s, size: %d", parsed.getWidth(), parsed.getHeight(), parsed.getColorComponents(), parsed.getData().length));
 
-		int load1Passed = (int)(System.currentTimeMillis() - start)/LoadTries;
+		int load1Passed = (int) (System.currentTimeMillis() - start) / LoadTries;
 
 		Log(String.format("Span: %d ms", load1Passed));
 
@@ -94,130 +80,113 @@ public class Testing {
 		ImageResult parsed2 = null;
 
 		start = System.currentTimeMillis();
-		for (int i = 0; i < LoadTries; ++i)
-		{
+		for (int i = 0; i < LoadTries; ++i) {
 			parsed2 = load2.Do();
 		}
 
 		Log(String.format("x: %d, y: %d, comp: %s, size: %d", parsed2.getWidth(), parsed2.getHeight(), parsed2.getColorComponents(), parsed2.getData().length));
-		int load2Passed = (int)(System.currentTimeMillis() - start)/LoadTries;
+		int load2Passed = (int) (System.currentTimeMillis() - start) / LoadTries;
 		Log(String.format("Span: %d ms", load2Passed));
 
-		if (parsed.getWidth() != parsed2.getWidth())
-		{
-			throw new Exception(String.format("Inconsistent x: StbSharp=%d, Stb.Native=%d", parsed.getWidth(), parsed2.getWidth()));
+		stbJavaLoadingFromMemory += load1Passed;
+		stbNativeLoadingFromMemory += load2Passed;
+
+		if (parsed.getWidth() != parsed2.getWidth()) {
+			throw new Exception(String.format("Inconsistent x: StbJava=%d, Stb.Native=%d", parsed.getWidth(), parsed2.getWidth()));
 		}
 
-		if (parsed.getHeight() != parsed2.getHeight())
-		{
-			throw new Exception(String.format("Inconsistent y: StbSharp=%d, Stb.Native=%d", parsed.getHeight(), parsed2.getHeight()));
+		if (parsed.getHeight() != parsed2.getHeight()) {
+			throw new Exception(String.format("Inconsistent y: StbJava=%d, Stb.Native=%d", parsed.getHeight(), parsed2.getHeight()));
 		}
 
-		if (parsed.getColorComponents() != parsed2.getColorComponents())
-		{
-			throw new Exception(String.format("Inconsistent comp: StbSharp=%d, Stb.Native=%d", parsed.getColorComponents(), parsed2.getColorComponents()));
+		if (parsed.getColorComponents() != parsed2.getColorComponents()) {
+			throw new Exception(String.format("Inconsistent comp: StbJava=%d, Stb.Native=%d", parsed.getColorComponents(), parsed2.getColorComponents()));
 		}
 
-		if (parsed.getData().length != parsed2.getData().length)
-		{
-			throw new Exception(String.format("Inconsistent parsed length: StbSharp=%d, Stb.Native=%d", parsed.getData().length, parsed2.getData().length));
+		if (parsed.getData().length != parsed2.getData().length) {
+			throw new Exception(String.format("Inconsistent parsed length: StbJava=%d, Stb.Native=%d", parsed.getData().length, parsed2.getData().length));
 		}
 
-		for (int i = 0; i < parsed.getData().length; ++i)
-		{
-			if (parsed.getData()[i] != parsed2.getData()[i])
-			{
-				throw new Exception(String.format("Inconsistent data: index=%d, StbSharp=%d, Stb.Native=%d",
+		for (int i = 0; i < parsed.getData().length; ++i) {
+			if (parsed.getData()[i] != parsed2.getData()[i]) {
+				throw new Exception(String.format("Inconsistent data: index=%d, StbJava=%d, Stb.Native=%d",
 						i,
 						(int) parsed.getData()[i],
 						(int) parsed2.getData()[i]));
 			}
 		}
-		
-		return new Passed(load1Passed, load2Passed);
 	}
 
-	private static void ThreadProc(String f)
-	{
-		try
-		{
-			if (!f.endsWith(".bmp") && !f.endsWith(".jpg") && !f.endsWith(".png") &&
-					!f.endsWith(".jpg") && !f.endsWith(".psd") && !f.endsWith(".pic") &&
-					!f.endsWith(".tga"))
-			{
-				return;
-			}
+	private static void ThreadProc(final String f) {
+		if (!f.endsWith(".bmp") && !f.endsWith(".jpg") && !f.endsWith(".png") &&
+				!f.endsWith(".jpg") && !f.endsWith(".psd") && !f.endsWith(".pic") &&
+				!f.endsWith(".tga")) {
+			return;
+		}
+
+		try {
 
 			Log("");
 			Log(String.format("%s -- #%d: Loading %s into memory", new Date().toString(), filesProcessed, f));
-			final byte[] data = Files.readAllBytes(new File(f).toPath());
 			Log("----------------------------");
 
-			Log("Loading from memory");
-
-			Passed passed = ParseTest(
-					() -> ImageResult.FromData(data, ColorComponents.RedGreenBlueAlpha),
+			ParseTest(
 					() -> {
-						int[] x = new int[1];
-						int[] y = new int[1];
-						int[] comp = new int[1];
-						ByteBuffer result = STBImage.stbi_load_from_memory(ByteBuffer.wrap(data),
+						final byte[] data = Files.readAllBytes(new File(f).toPath());
+						return ImageResult.FromData(data, ColorComponents.RedGreenBlueAlpha);
+					},
+					() -> {
+						IntBuffer x = BufferUtils.createIntBuffer(1);
+						IntBuffer y = BufferUtils.createIntBuffer(1);
+						IntBuffer comp = BufferUtils.createIntBuffer(1);
+						ByteBuffer result = STBImage.stbi_load(f,
 								x,
 								y,
 								comp,
 								4);
 
-						byte[] bytes = result.array();
-						short[] shorts = new short[bytes.length];
-						for(int i = 0; i < shorts.length; ++i)
-						{
-							shorts[i] = (short)(bytes[i] & 0xff);
+						if (result == null) {
+							throw new Exception(STBImage.stbi_failure_reason());
 						}
 
-						return new ImageResult(x[0],
-								y[0],
-								ColorComponents.fromInt(comp[0]),
+						byte[] bytes = new byte[result.remaining()];
+						result.get(bytes);
+						short[] shorts = new short[bytes.length];
+						for (int i = 0; i < shorts.length; ++i) {
+							shorts[i] = (short) (bytes[i] & 0xff);
+						}
+
+						return new ImageResult(x.get(0),
+								y.get(0),
+								ColorComponents.fromInt(comp.get(0)),
 								ColorComponents.RedGreenBlueAlpha,
 								8,
 								shorts);
 					});
 
-			stbSharpLoadingFromMemory += passed.load1;
-			stbNativeLoadingFromMemory += passed.load2;
-
-			Log(String.format("Total StbSharp Loading From Stream Time: %d ms", stbSharpLoadingFromStream));
-			Log(String.format("Total Stb.Native Loading From Stream Time: %d ms", stbNativeLoadingFromStream));
-			Log(String.format("Total StbSharp Loading From memory Time: %d ms", stbSharpLoadingFromMemory));
-			Log(String.format("Total Stb.Native Loading From memory Time: %d ms", stbNativeLoadingFromMemory));
-
-			++filesProcessed;
-			Log(new Date().toString() + " -- " + " Files processed: " + filesProcessed);
-
-		}
-		catch (Exception ex)
-		{
+			++filesMatches;
+		} catch (Exception ex) {
 			Log("Error: " + ex.getMessage());
-		}
-		finally
-		{
+		} finally {
+			++filesProcessed;
 			--tasksStarted;
+
+			Log(String.format("Total StbJava Loading From memory Time: %d ms", stbJavaLoadingFromMemory));
+			Log(String.format("Total Stb.Native Loading From memory Time: %d ms", stbNativeLoadingFromMemory));
+			Log(String.format("Files matches/processed: %d/%d", filesMatches, filesProcessed));
 		}
 	}
 
-	public static int main(String[] args) {
+	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
 
 		try {
 			boolean res = RunTests();
-			int passed = (int)(System.currentTimeMillis()- start);
+			int passed = (int) (System.currentTimeMillis() - start);
 			Log(String.format("Span: %d ms", passed));
 			Log(new Date().toString() + " -- " + (res ? "Success" : "Failure"));
-
-			return res ? 1 : 0;
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
-			return 0;
 		}
 	}
 }
