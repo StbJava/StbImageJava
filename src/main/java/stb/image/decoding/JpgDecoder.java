@@ -493,12 +493,10 @@ public class JpgDecoder extends Decoder {
 	}
 
 	private static short stbi__clamp(int x) {
-		if (x > 255) {
-			if (x < 0)
-				return 0;
-			if (x > 255)
-				return (short) 255;
-		}
+		if (x < 0)
+			return 0;
+		if (x > 255)
+			return (short) 255;
 
 		return (short) x;
 	}
@@ -582,7 +580,7 @@ public class JpgDecoder extends Decoder {
 				v.setAt(32, (x3 - t0) >> 10);
 			}
 
-		for (i = 0, v = new FakePtr<Integer>(val), o = _out_; i < 8; ++i, v.move(8), o.move(out_stride)) {
+		for (i = 0, v = new FakePtr<Integer>(val), o = _out_.clone(); i < 8; ++i, v.move(8), o.move(out_stride)) {
 			int t0 = 0;
 			int t1 = 0;
 			int t2 = 0;
@@ -750,9 +748,6 @@ public class JpgDecoder extends Decoder {
 						if (stbi__jpeg_decode_block_prog_dc(data, huff_dc[img_comp[n].hd], n) == 0)
 							return 0;
 					} else {
-						if (i == 6 && j == 0) {
-							int k = 5;
-						}
 						int ha = img_comp[n].ha;
 						if (stbi__jpeg_decode_block_prog_ac(data, huff_ac[ha], fast_ac[ha]) == 0)
 							return 0;
@@ -1275,30 +1270,10 @@ public class JpgDecoder extends Decoder {
 			r >>= 20;
 			g >>= 20;
 			b >>= 20;
-			if ((long) r > 255) {
-				if (r < 0)
-					r = 0;
-				else
-					r = 255;
-			}
 
-			if ((long) g > 255) {
-				if (g < 0)
-					g = 0;
-				else
-					g = 255;
-			}
-
-			if ((long) b > 255) {
-				if (b < 0)
-					b = 0;
-				else
-					b = 255;
-			}
-
-			_out_.setAt(0, (short) r);
-			_out_.setAt(1, (short) g);
-			_out_.setAt(2, (short) b);
+			_out_.setAt(0, stbi__clamp(r));
+			_out_.setAt(1, stbi__clamp(g));
+			_out_.setAt(2, stbi__clamp(b));
 			_out_.setAt(3, (short) 255);
 			_out_.move(step);
 		}
@@ -1359,7 +1334,8 @@ public class JpgDecoder extends Decoder {
 			r.ystep = r.vs >> 1;
 			r.w_lores = (img_x + r.hs - 1) / r.hs;
 			r.ypos = 0;
-			r.line0 = r.line1 = img_comp[k].data;
+			r.line0 = img_comp[k].data.clone();
+			r.line1 = img_comp[k].data.clone();
 			if (r.hs == 1 && r.vs == 1)
 				r.resample = (a, b, c, d, e) -> resample_row_1(a, b, c, d, e);
 			else if (r.hs == 1 && r.vs == 2)
@@ -1386,7 +1362,7 @@ public class JpgDecoder extends Decoder {
 						r.w_lores, r.hs));
 				if (++r.ystep >= r.vs) {
 					r.ystep = 0;
-					r.line0 = r.line1;
+					r.line0 = r.line1.clone();
 					if (++r.ypos < img_comp[k].y)
 						r.line1.move(img_comp[k].w2);
 				}
@@ -1483,7 +1459,6 @@ public class JpgDecoder extends Decoder {
 		out_y = img_y;
 		comp = img_n >= 3 ? 3 : 1;
 
-		Utility.clampResult(output);
 		return new ImageResult(out_x,
 				out_y,
 				ColorComponents.fromInt(comp),

@@ -355,7 +355,6 @@ public class BmpDecoder extends Decoder {
 		if (requiredComponents != null && (int) requiredComponents.getValue() != target)
 			_out_ = Utility.stbi__convert_format(_out_, target, requiredComponents.getValue(), img_x, img_y);
 
-		Utility.clampResult(_out_);
 		return new ImageResult(
 				img_x,
 				img_y,

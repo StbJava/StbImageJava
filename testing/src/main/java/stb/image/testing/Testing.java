@@ -23,7 +23,7 @@ public class Testing {
 	private static int stbJavaLoadingFromMemory;
 	private static int stbNativeLoadingFromMemory;
 
-	private static final ExecutorService pool = Executors.newFixedThreadPool(2);
+	private static final ExecutorService pool = Executors.newFixedThreadPool(1);
 
 	private static final int LoadTries = 10;
 
@@ -38,7 +38,10 @@ public class Testing {
 		String imagesPath = "D:/Projects/TestImages";
 
 		File folder = new File(imagesPath);
+
 		final File[] files = folder.listFiles();
+/*		final File[] files = new File[1];
+		files[0] = new File("D:/Projects/TestImages/DefaultChartPanel.jpg");*/
 		Log("Files count: " + files.length);
 
 		for (int i = 0; i < files.length; ++i) {
@@ -109,7 +112,7 @@ public class Testing {
 
 		for (int i = 0; i < parsed.getData().length; ++i) {
 
-			if (Math.abs(parsed.getData()[i] - parsed2.getData()[i]) > 5) {
+			if (Math.abs(parsed.getData()[i] - parsed2.getData()[i]) > 0) {
 				throw new Exception(String.format("Inconsistent data: index=%d, StbJava=%d, Stb.Native=%d",
 						i,
 						(int) parsed.getData()[i],
@@ -122,6 +125,7 @@ public class Testing {
 		if (!f.endsWith(".bmp") && !f.endsWith(".jpg") && !f.endsWith(".png") &&
 				!f.endsWith(".jpg") && !f.endsWith(".psd") && !f.endsWith(".pic") &&
 				!f.endsWith(".tga")) {
+			--tasksStarted;
 			return;
 		}
 
@@ -175,6 +179,7 @@ public class Testing {
 			Log(String.format("Total StbJava Loading From memory Time: %d ms", stbJavaLoadingFromMemory));
 			Log(String.format("Total Stb.Native Loading From memory Time: %d ms", stbNativeLoadingFromMemory));
 			Log(String.format("Files matches/processed: %d/%d", filesMatches, filesProcessed));
+			Log(String.format("Tasks left: %d", tasksStarted));
 		}
 	}
 

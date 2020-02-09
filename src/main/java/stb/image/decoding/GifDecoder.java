@@ -399,7 +399,6 @@ public class GifDecoder extends Decoder {
 		if (requiredComponents != null && requiredComponents != ColorComponents.RedGreenBlueAlpha)
 			data = Utility.stbi__convert_format(data, 4, ColorComponents.toReqComp(requiredComponents), w, h);
 
-		Utility.clampResult(data);
 		return new ImageResult(w,
 				h,
 				ColorComponents.fromInt(u.value2),

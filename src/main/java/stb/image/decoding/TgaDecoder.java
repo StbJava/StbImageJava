@@ -167,9 +167,7 @@ public class TgaDecoder extends Decoder {
 		int req_comp = ColorComponents.toReqComp(requiredComponents);
 		if (req_comp != 0 && req_comp != tga_comp)
 			tga_data = Utility.stbi__convert_format(tga_data, tga_comp, req_comp, tga_width, tga_height);
-		tga_palette_start = tga_palette_len = tga_palette_bits = tga_x_origin = tga_y_origin = 0;
 
-		Utility.clampResult(tga_data);
 		return new ImageResult(tga_width,
 				tga_height,
 				ColorComponents.fromInt(tga_comp),

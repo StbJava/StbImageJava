@@ -173,7 +173,6 @@ public class PsdDecoder extends Decoder {
 				_out_ = Utility.stbi__convert_format(_out_, 4, req_comp, w, h);
 		}
 
-		Utility.clampResult(_out_);
 		return new ImageResult(w,
 				h,
 				ColorComponents.RedGreenBlueAlpha,

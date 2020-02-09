@@ -778,7 +778,6 @@ public class PngDecoder extends Decoder {
 				img_out_n = req_comp;
 			}
 
-			Utility.clampResult(result);
 			return new ImageResult(img_x,
 					img_y,
 					ColorComponents.fromInt(img_n),

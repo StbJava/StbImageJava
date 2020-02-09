@@ -178,23 +178,6 @@ class Utility
 		return good;*/
 	}
 
-	public static void clampResult(short[] data)
-	{
-		for(int i = 0; i < data.length; ++i)
-		{
-			short v = data[i];
-			if (v < 0)
-			{
-				data[i] = 0;
-			}
-
-			if (v > 255)
-			{
-				data[i] = 255;
-			}
-		}
-	}
-
 	public static short[] stbi__convert_format(short[] data, int img_n, int req_comp, int x, int y) throws Exception
 	{
 		int i = 0;
