@@ -72,7 +72,7 @@ class Utility
 
 	public static short[] stbi__convert_format16(short[] data, int img_n, int req_comp, long x, long y)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("16-bit images are not supported yet");
 /*			int i = 0;
 		int j = 0;
 		if ((req_comp) == (img_n))
@@ -315,7 +315,7 @@ class Utility
 
 	public static short[] stbi__convert_16_to_8(short[] orig, int w, int h, int channels)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("16-bit images are not supported yet");
 
 /*			int i = 0;
 		int img_len = (int)(w * h * channels);

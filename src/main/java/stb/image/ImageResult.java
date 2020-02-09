@@ -86,7 +86,7 @@ public	class ImageResult
 /*		if (use8BitsPerChannel && result.bitsPerChannel != 8)
 		{
 			result.data = Utility.stbi__convert_16_to_8(result.data, result.width, result.height, (int)result.colorComponents);
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("16-bit images are not supported yet");
 		}*/
 
 		return result;

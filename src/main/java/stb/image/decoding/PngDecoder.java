@@ -318,7 +318,7 @@ public class PngDecoder extends Decoder {
 				}
 			}
 		else if (depth == 16)
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("16-bit images are not supported yet");
 		/*				ShortFakePtr cur = ptr;
 						int* cur16 = (int*)(cur);
 						for (i = (long)(0); (i) < (x * y * out_n); ++i, cur16++, cur.move(2))
@@ -426,7 +426,7 @@ public class PngDecoder extends Decoder {
 	}
 
 	private int stbi__compute_transparency16(int[] tc, int out_n) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("16-bit images are not supported yet");
 
 		/*			long i = 0;
 					long pixel_count = (long)(img_x * img_y);
@@ -703,6 +703,7 @@ public class PngDecoder extends Decoder {
 					Pair<short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
 
 					expanded = pair.value1;
+					raw_len = pair.value2;
 					if (expanded == null)
 						return 0;
 					idata = null;

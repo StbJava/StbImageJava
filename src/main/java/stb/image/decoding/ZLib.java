@@ -133,8 +133,7 @@ class ZLib {
 	}
 
 	private int stbi__parse_huffman_block() throws Exception {
-		ShortFakePtr zoutClone = this.zout.clone();
-		ShortFakePtr zout = zoutClone;
+		ShortFakePtr zout = this.zout.clone();
 		for (; ; ) {
 			int z = stbi__zhuffman_decode(z_length);
 			if (z < 256) {
@@ -143,7 +142,7 @@ class ZLib {
 				if (zout.offset >= zout_end.offset) {
 					if (stbi__zexpand(zout, 1) == 0)
 						return 0;
-					zout = zoutClone;
+					zout = this.zout.clone();
 				}
 
 				zout.setAndIncrease((short) z);
@@ -170,7 +169,7 @@ class ZLib {
 				if (zout.offset + len > zout_end.offset) {
 					if (stbi__zexpand(zout, len) == 0)
 						return 0;
-					zout = zoutClone;
+					zout = this.zout.clone();
 				}
 
 				if (dist == 1) {

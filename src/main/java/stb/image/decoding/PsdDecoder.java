@@ -106,7 +106,7 @@ public class PsdDecoder extends Decoder {
 			for (channel = 0; channel < 4; channel++)
 				if (channel >= channelCount) {
 					if (bitdepth == 16 && bpc == 16)
-						throw new UnsupportedOperationException();
+						throw new UnsupportedOperationException("16-bit images are not supported yet");
 					/*							int* q = ((int*)(ptr)) + channel;
 												int val = (int)((channel) == (3) ? 65535 : 0);
 												for (i = (int)(0); (i) < (pixelCount); i++, q += 4)
@@ -119,7 +119,7 @@ public class PsdDecoder extends Decoder {
 					for (i = 0; i < pixelCount; i++, p.move(4)) p.set(val);
 				} else {
 					if (bits_per_channel == 16)
-						throw new UnsupportedOperationException();
+						throw new UnsupportedOperationException("16-bit images are not supported yet");
 					/*							int* q = ((int*)(ptr)) + channel;
 												for (i = (int)(0); (i) < (pixelCount); i++, q += 4)
 												{
@@ -138,7 +138,7 @@ public class PsdDecoder extends Decoder {
 
 		if (channelCount >= 4) {
 			if (bits_per_channel == 16)
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException("16-bit images are not supported yet");
 			/*					for (i = (int)(0); (i) < (w * h); ++i)
 								{
 									int* pixel = (int*)(ptr) + 4 * i;
