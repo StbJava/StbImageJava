@@ -11,7 +11,6 @@ allprojects {
     apply plugin: 'idea'
 
     group = "stb.image"
-    version = "0.5"
     sourceCompatibility = 1.8
 }
 
@@ -23,8 +22,8 @@ subprojects {
 
 project(':sample'){
     dependencies {
-        compile rootProject
+        implementation rootProject
         // https://mvnrepository.com/artifact/com.intellij/forms_rt
-        compile group: 'com.intellij', name: 'forms_rt', version: '7.0.3'
+        implementation group: 'com.intellij', name: 'forms_rt', version: '7.0.3'
     }
 }

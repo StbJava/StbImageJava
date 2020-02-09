@@ -1,0 +1,16 @@
+version: 0.5.0.{build}
+build_script:
+- cmd: >-
+    gradle -Pversion=$(appveyor_build_version) jar
+artifacts:
+  - path: stb_image.$(appveyor_build_version).jar
+    name: Jar
+deploy:
+  - provider: GitHub
+    release: $(appveyor_build_version)
+    description: $(appveyor_build_version)
+    auth_token:
+      secure: nIpZ5N6iQIXVV8/kK/Y6BqY4KYD+y7HYdq+vTKv+LqZBbxHE9BuEgZAHGVDvmJKh
+    artifact: Jar
+    draft: false
+    prerelease: false

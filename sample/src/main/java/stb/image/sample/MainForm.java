@@ -8,8 +8,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
@@ -17,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MainForm extends JFrame {
-	class MyPanel extends JPanel {
+	private static class MyPanel extends JPanel {
 		BufferedImage img;
 
 		@Override
@@ -30,10 +28,9 @@ public class MainForm extends JFrame {
 		}
 	}
 
-	MyPanel panel;
+	private MyPanel panel;
 
-
-	public MainForm() {
+	private MainForm() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setSize(1200, 800);
@@ -46,12 +43,7 @@ public class MainForm extends JFrame {
 
 		// Open
 		JMenuItem menuItemOpen = new JMenuItem("Open");
-		menuItemOpen.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				MainForm.this.onOpen();
-			}
-		});
+		menuItemOpen.addActionListener(e -> MainForm.this.onOpen());
 		menuFile.add(menuItemOpen);
 		mainMenu.add(menuFile);
 		setJMenuBar(mainMenu);
@@ -74,8 +66,6 @@ public class MainForm extends JFrame {
 	}
 
 	private void onOpen() {
-		String filePath = null;
-
 		JFileChooser fc = new JFileChooser();
 
 		fc.setAcceptAllFileFilterUsed(false);
@@ -115,7 +105,7 @@ public class MainForm extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+	public static void main(String[] args) {
 		MainForm frame = new MainForm();
 		Swing.centreWindow(frame);
 		frame.setVisible(true);
