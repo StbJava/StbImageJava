@@ -1,6 +1,6 @@
-package stb.image;
+package org.nothings.stb.image;
 
-import stb.image.decoding.*;
+import org.nothings.stb.image.decoding.*;
 
 public	class ImageResult
 {
@@ -38,7 +38,7 @@ public	class ImageResult
 		return colorComponents;
 	}
 
-	public stb.image.ColorComponents getSourceComponents() {
+	public ColorComponents getSourceComponents() {
 		return sourceComponents;
 	}
 

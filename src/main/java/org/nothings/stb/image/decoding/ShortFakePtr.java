@@ -1,4 +1,4 @@
-package stb.image.decoding;
+package org.nothings.stb.image.decoding;
 
 import java.util.Arrays;
 

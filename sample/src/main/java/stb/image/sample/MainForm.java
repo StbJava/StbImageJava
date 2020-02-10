@@ -1,7 +1,7 @@
 package stb.image.sample;
 
-import stb.image.ColorComponents;
-import stb.image.ImageResult;
+import org.nothings.stb.image.ColorComponents;
+import org.nothings.stb.image.ImageResult;
 import stb.image.sample.utility.Swing;
 
 import javax.swing.*;

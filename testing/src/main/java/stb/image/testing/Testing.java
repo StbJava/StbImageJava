@@ -2,8 +2,8 @@ package stb.image.testing;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
-import stb.image.ColorComponents;
-import stb.image.ImageResult;
+import org.nothings.stb.image.ColorComponents;
+import org.nothings.stb.image.ImageResult;
 
 import java.io.File;
 import java.nio.ByteBuffer;

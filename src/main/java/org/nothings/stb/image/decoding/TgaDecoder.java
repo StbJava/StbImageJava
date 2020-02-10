@@ -1,8 +1,8 @@
-package stb.image.decoding;
+package org.nothings.stb.image.decoding;
 
-import stb.image.ColorComponents;
-import stb.image.ImageInfo;
-import stb.image.ImageResult;
+import org.nothings.stb.image.ColorComponents;
+import org.nothings.stb.image.ImageInfo;
+import org.nothings.stb.image.ImageResult;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

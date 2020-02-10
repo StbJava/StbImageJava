@@ -1,6 +1,6 @@
-package stb.image;
+package org.nothings.stb.image;
 
-import stb.image.decoding.*;
+import org.nothings.stb.image.decoding.*;
 
 import java.io.IOException;
 import java.io.InputStream;

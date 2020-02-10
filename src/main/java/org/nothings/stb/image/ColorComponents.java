@@ -1,4 +1,4 @@
-package stb.image;
+package org.nothings.stb.image;
 
 public enum ColorComponents {
 	Grey(1),
