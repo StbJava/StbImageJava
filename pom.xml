@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>stb</groupId>
     <artifactId>image</artifactId>
-    <version>2.22.1</version>
+    <version>2.22.14</version>
     <name>Java port of stb_image.h</name>
 
     <properties>
