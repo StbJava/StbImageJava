@@ -23,7 +23,7 @@ public class Testing {
 	private static int stbJavaLoadingFromMemory;
 	private static int stbNativeLoadingFromMemory;
 
-	private static final ExecutorService pool = Executors.newFixedThreadPool(1);
+	private static final ExecutorService pool = Executors.newFixedThreadPool(3);
 
 	private static final int LoadTries = 10;
 
@@ -34,10 +34,11 @@ public class Testing {
 		System.out.println(Thread.currentThread().getId() + " -- " + message);
 	}
 
-	public static boolean RunTests() throws Exception {
-		String imagesPath = "D:/Projects/TestImages";
-
+	public static boolean RunTests(String imagesPath) throws Exception {
 		File folder = new File(imagesPath);
+		if (!folder.exists()) {
+			throw new Exception(String.format("Could not find folder '%s'", imagesPath));
+		}
 
 		final File[] files = folder.listFiles();
 /*		final File[] files = new File[1];
@@ -184,10 +185,15 @@ public class Testing {
 	}
 
 	public static void main(String[] args) {
-		long start = System.currentTimeMillis();
-
 		try {
-			boolean res = RunTests();
+			if (args == null || args.length < 1) {
+				System.out.println("Usage: java -jar testing.jar <path_to_directory_with_images>");
+				return;
+			}
+
+			long start = System.currentTimeMillis();
+
+			boolean res = RunTests(args[0]);
 			int passed = (int) (System.currentTimeMillis() - start);
 			Log(String.format("Span: %d ms", passed));
 			Log(new Date().toString() + " -- " + (res ? "Success" : "Failure"));
