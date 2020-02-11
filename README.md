@@ -21,9 +21,11 @@ Following code loads image from byte array and converts it to 32-bit RGBA:
 # Reliability & Performance
 This repo contains special app that was written to measure reliability & performance of StbImageJava in comparison to the original stb_image.h: https://github.com/StbJava/StbImageJava/blob/master/testing/src/main/java/stb/image/testing/Testing.java
 
-It could be built through command `gradlew jar`(jar will appear in the folder testing/build/libs) and ran through - `java -jar testing-1.0.jar <path_to_folder_with_images>`(i.e. `java -jar testing-1.0.jar D:/Projects/TestImages`).
+It could be built through command `gradlew jar`(jar will appear in the folder testing/build/libs) and ran through:
 
-It goes through every image file in the specified folder and tries to load it 10 times with StbImageJava, then 10 times with ljwgl-stb(which is JNI wrapper over native stb_image.h). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
+`java -jar testing-1.0.jar <path_to_folder_with_images>`(i.e. `java -jar testing-1.0.jar D:/Projects/TestImages`).
+
+It goes through every image file in the specified folder and tries to load it 10 times with StbImageJava, then 10 times with ljwgl-stb(which is JNI wrapper over original stb_image.h). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 The byte-wise comprarison results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
