@@ -28,8 +28,10 @@ It goes through every image file in the specified folder and tries to load it 10
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 The results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
 And performance comparison result is:
-12 -- Total StbJava Loading From memory Time: 14178 ms
-12 -- Total Stb.Native Loading From memory Time: 11182 ms
+```
+13 -- Total StbJava Loading From memory Time: 23915 ms
+13 -- Total Stb.Native Loading From memory Time: 18547 ms
+```
 
 # License
 Public Domain
