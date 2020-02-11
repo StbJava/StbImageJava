@@ -4,7 +4,7 @@
 StbImageJava is Java port of stb_image.h 2.22. Or - in other words - it's a Java library that can load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
 
 # Adding Reference
-StbImageJava is available at bintray/jcenter: https://bintray.com/rds1983/maven/stb.image
+StbImageJava is available at bintray/jcenter: https://bintray.com/rds1983/maven/stb.image/_latestVersion
 
 # Usage
 Following code loads image from byte array and converts it to 32-bit RGBA:
