@@ -26,8 +26,8 @@ It could be built through command `gradlew jar`(jar will appear in the folder te
 It goes through every image file in the specified folder and tries to load it 10 times with StbImageJava, then 10 times with ljwgl-stb(which is JNI wrapper over native stb_image.h). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
 I've used it over following set of images: https://github.com/StbSharp/TestImages
-The results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
-And performance comparison result is:
+The byte-wise comprarison results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
+And performance comparison results are:
 ```
 13 -- Total StbJava Loading From memory Time: 23915 ms
 13 -- Total Stb.Native Loading From memory Time: 18547 ms
