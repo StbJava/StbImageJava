@@ -13,6 +13,11 @@ Following code loads image from byte array and converts it to 32-bit RGBA:
   ImageResult image = ImageResult.FromData(bytes, ColorComponents.RedGreenBlueAlpha);
 ```
 
+# Building from Source
+1. Clone this repo.
+2. `gradlew idea`
+3. Open generated project in the Intellij IDEA.
+
 # License
 Public Domain
 
