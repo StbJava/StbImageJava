@@ -1198,7 +1198,7 @@ public class JpgDecoder extends Decoder {
 		int i = 0;
 		ShortFakePtr input = in_near;
 		if (w == 1) {
-			Short value = input.getAt(0);
+			short value = input.getAt(0);
 			_out_.setAt(0, value);
 			_out_.setAt(1, value);
 			return _out_;
@@ -1405,7 +1405,7 @@ public class JpgDecoder extends Decoder {
 					}
 				} else {
 					for (i = 0; i < img_x; ++i) {
-						Short v = y.getAt(i);
+						short v = y.getAt(i);
 						_out_.setAt(0, v);
 						_out_.setAt(1, v);
 						_out_.setAt(2, v);

@@ -197,6 +197,7 @@ public class Testing {
 			int passed = (int) (System.currentTimeMillis() - start);
 			Log(String.format("Span: %d ms", passed));
 			Log(new Date().toString() + " -- " + (res ? "Success" : "Failure"));
+			System.exit(0);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

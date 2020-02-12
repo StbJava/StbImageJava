@@ -493,7 +493,7 @@ public class PngDecoder extends Decoder {
 		ShortFakePtr p = new ShortFakePtr(_out_);
 		if (img_out_n == 3) {
 			for (i = 0; i < pixel_count; ++i) {
-				Short t = p.getAt(0);
+				short t = p.getAt(0);
 				p.setAt(0, p.getAt(2));
 				p.setAt(2, t);
 				p.move(3);
@@ -501,8 +501,8 @@ public class PngDecoder extends Decoder {
 		} else {
 			if (stbi__unpremultiply_on_load != 0)
 				for (i = 0; i < pixel_count; ++i) {
-					Short a = p.getAt(3);
-					Short t = p.getAt(0);
+					short a = p.getAt(3);
+					short t = p.getAt(0);
 					if (a != 0) {
 						short half = (short) (a / 2);
 						p.setAt(0, (short) ((p.getAt(2) * 255 + half) / a));
@@ -517,7 +517,7 @@ public class PngDecoder extends Decoder {
 				}
 			else
 				for (i = 0; i < pixel_count; ++i) {
-					Short t = p.getAt(0);
+					short t = p.getAt(0);
 					p.setAt(0, p.getAt(2));
 					p.setAt(2, t);
 					p.move(4);

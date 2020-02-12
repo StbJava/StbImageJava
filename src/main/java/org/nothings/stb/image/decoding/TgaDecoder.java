@@ -145,7 +145,7 @@ public class TgaDecoder extends Decoder {
 					int index1 = j * tga_width * tga_comp;
 					int index2 = (tga_height - 1 - j) * tga_width * tga_comp;
 					for (i = tga_width * tga_comp; i > 0; --i) {
-						Short temp = tga_data[index1];
+						short temp = tga_data[index1];
 						tga_data[index1] = tga_data[index2];
 						tga_data[index2] = temp;
 						++index1;
@@ -157,7 +157,7 @@ public class TgaDecoder extends Decoder {
 		if (tga_comp >= 3 && tga_rgb16 == 0) {
 			ShortFakePtr tga_pixel = new ShortFakePtr(tga_data);
 			for (i = 0; i < tga_width * tga_height; ++i) {
-				Short temp = tga_pixel.getAt(0);
+				short temp = tga_pixel.getAt(0);
 				tga_pixel.setAt(0, tga_pixel.getAt(2));
 				tga_pixel.setAt(2, temp);
 				tga_pixel.move(tga_comp);
