@@ -173,7 +173,7 @@ public class TgaDecoder extends Decoder {
 				ColorComponents.fromInt(tga_comp),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(tga_comp),
 				8,
-				tga_data);
+				Utility.toByteArray(tga_data));
 	}
 
 	public static boolean Test(byte[] data) {

@@ -361,7 +361,7 @@ public class BmpDecoder extends Decoder {
 				ColorComponents.fromInt(img_n),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 				8,
-				_out_
+				Utility.toByteArray(_out_)
 		);
 	}
 

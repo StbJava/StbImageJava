@@ -404,7 +404,7 @@ public class GifDecoder extends Decoder {
 				ColorComponents.fromInt(u.value2),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(u.value2),
 				8,
-				data);
+				Utility.toByteArray(data));
 	}
 
 	private static boolean InternalTest(InputStream stream) throws Exception {

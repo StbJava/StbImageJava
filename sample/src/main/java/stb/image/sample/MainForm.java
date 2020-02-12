@@ -87,7 +87,7 @@ public class MainForm extends JFrame {
 			panel.img = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			int i = 0;
 
-			short[] data = image.getData();
+			byte[] data = image.getData();
 			for (int y = 0; y < image.getHeight(); y++) {
 				for (int x = 0; x < image.getWidth(); x++) {
 					int col = new Color(data[i],

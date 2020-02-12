@@ -328,6 +328,17 @@ class Utility
 		return enlarged;
 	}
 
+	public static byte[] toByteArray(short[] data)
+	{
+		byte[] result = new byte[data.length];
+		for(int i = 0; i < result.length; ++i)
+		{
+			result[i] = (byte)data[i];
+		}
+
+		return result;
+	}
+
 /*	public static void stbi__vertical_flip(short[] image, int w, int h, int shorts_per_pixel)
 	{
 		int row = 0;

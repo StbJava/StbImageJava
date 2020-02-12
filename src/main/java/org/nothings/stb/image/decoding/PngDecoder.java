@@ -783,7 +783,7 @@ public class PngDecoder extends Decoder {
 					ColorComponents.fromInt(img_n),
 					requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 					bits_per_channel,
-					result);
+					Utility.toByteArray(result));
 		} finally {
 			_out_ = null;
 			expanded = null;

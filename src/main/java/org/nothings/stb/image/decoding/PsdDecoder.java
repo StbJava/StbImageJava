@@ -180,7 +180,7 @@ public class PsdDecoder extends Decoder {
 						? requiredComponents
 						: ColorComponents.RedGreenBlueAlpha,
 				bits_per_channel,
-				_out_
+				Utility.toByteArray(_out_)
 		);
 	}
 

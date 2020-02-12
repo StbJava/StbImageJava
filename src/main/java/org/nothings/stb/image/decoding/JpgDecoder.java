@@ -1464,7 +1464,7 @@ public class JpgDecoder extends Decoder {
 				ColorComponents.fromInt(comp),
 				req_comp != null ? req_comp : ColorComponents.fromInt(comp),
 				8,
-				output);
+				Utility.toByteArray(output));
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {

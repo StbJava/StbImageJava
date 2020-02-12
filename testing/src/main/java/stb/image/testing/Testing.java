@@ -157,17 +157,13 @@ public class Testing {
 
 						byte[] bytes = new byte[result.remaining()];
 						result.get(bytes);
-						short[] shorts = new short[bytes.length];
-						for (int i = 0; i < shorts.length; ++i) {
-							shorts[i] = (short) (bytes[i] & 0xff);
-						}
 
 						return new ImageResult(x.get(0),
 								y.get(0),
 								ColorComponents.fromInt(comp.get(0)),
 								ColorComponents.RedGreenBlueAlpha,
 								8,
-								shorts);
+								bytes);
 					});
 
 			++filesMatches;
