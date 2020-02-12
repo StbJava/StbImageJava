@@ -31,8 +31,8 @@ The byte-wise comprarison results are similar for both methods(except a few 16-b
 
 And performance comparison results are:
 ```
-13 -- Total StbJava Loading From memory Time: 28356 ms
-13 -- Total Stb.Native Loading From memory Time: 16386 ms
+14 -- Total StbJava Loading From memory Time: 20052 ms
+14 -- Total Stb.Native Loading From memory Time: 11541 ms
 ```
 
 # License
