@@ -188,8 +188,8 @@ class Utility
 		short[] good = new short[req_comp * x * y];
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
 		{
-			ShortFakePtr src = new ShortFakePtr(data, (int) (j * x * img_n));
-			ShortFakePtr dest = new ShortFakePtr(good, (int) (j * x * req_comp));
+			FakePtrShort src = new FakePtrShort(data, (int) (j * x * img_n));
+			FakePtrShort dest = new FakePtrShort(good, (int) (j * x * req_comp));
 			switch (((img_n) * 8 + (req_comp)))
 			{
 				case ((1) * 8 + (2)):

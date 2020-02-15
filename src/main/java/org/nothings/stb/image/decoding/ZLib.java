@@ -54,10 +54,10 @@ class ZLib {
 	private int z_expandable;
 	private final stbi__zhuffman z_length = new stbi__zhuffman();
 
-	private ShortFakePtr zbuffer;
-	private ShortFakePtr zbuffer_end;
-	private ShortFakePtr zout;
-	private ShortFakePtr zout_end;
+	private FakePtrShort zbuffer;
+	private FakePtrShort zbuffer_end;
+	private FakePtrShort zout;
+	private FakePtrShort zout_end;
 	private short[] zout_start;
 
 	private short stbi__zget8() {
@@ -115,7 +115,7 @@ class ZLib {
 		return stbi__zhuffman_decode_slowpath(z);
 	}
 
-	private int stbi__zexpand(ShortFakePtr zout, int n) throws Exception {
+	private int stbi__zexpand(FakePtrShort zout, int n) throws Exception {
 		int cur = 0;
 		int limit = 0;
 		int old_limit = 0;
@@ -127,13 +127,13 @@ class ZLib {
 		while (cur + n > limit) limit *= 2;
 
 		zout_start = Arrays.copyOf(zout_start, limit);
-		this.zout = new ShortFakePtr(zout_start, cur);
-		zout_end = new ShortFakePtr(zout_start, limit);
+		this.zout = new FakePtrShort(zout_start, cur);
+		zout_end = new FakePtrShort(zout_start, limit);
 		return 1;
 	}
 
 	private int stbi__parse_huffman_block() throws Exception {
-		ShortFakePtr zout = this.zout.clone();
+		FakePtrShort zout = this.zout.clone();
 		for (; ; ) {
 			int z = stbi__zhuffman_decode(z_length);
 			if (z < 256) {
@@ -179,7 +179,7 @@ class ZLib {
 					}
 				} else {
 					if (len > 0) {
-						ShortFakePtr p = new ShortFakePtr(zout, -dist);
+						FakePtrShort p = new FakePtrShort(zout, -dist);
 						do {
 							zout.setAndIncrease(p.getAndIncrease());
 						} while (--len != 0);
@@ -190,7 +190,7 @@ class ZLib {
 		}
 	}
 
-	private static int stbi__zbuild_huffman(stbi__zhuffman z, ShortFakePtr sizelist, int num) throws Exception {
+	private static int stbi__zbuild_huffman(stbi__zhuffman z, FakePtrShort sizelist, int num) throws Exception {
 		int i = 0;
 		int k = 0;
 		int code = 0;
@@ -256,7 +256,7 @@ class ZLib {
 			codelength_sizes[length_dezigzag[i]] = (short) s;
 		}
 
-		if (stbi__zbuild_huffman(z_codelength, new ShortFakePtr(codelength_sizes), 19) == 0)
+		if (stbi__zbuild_huffman(z_codelength, new FakePtrShort(codelength_sizes), 19) == 0)
 			return 0;
 		n = 0;
 		while (n < ntot) {
@@ -288,9 +288,9 @@ class ZLib {
 
 		if (n != ntot)
 			Decoder.stbi__err("bad codelengths");
-		if (stbi__zbuild_huffman(z_length, new ShortFakePtr(lencodes), hlit) == 0)
+		if (stbi__zbuild_huffman(z_length, new FakePtrShort(lencodes), hlit) == 0)
 			return 0;
-		if (stbi__zbuild_huffman(z_distance, new ShortFakePtr(lencodes, hlit), hdist) == 0)
+		if (stbi__zbuild_huffman(z_distance, new FakePtrShort(lencodes, hlit), hdist) == 0)
 			return 0;
 		return 1;
 	}
@@ -356,9 +356,9 @@ class ZLib {
 				return 0;
 			} else {
 				if (type == 1) {
-					if (stbi__zbuild_huffman(z_length, new ShortFakePtr(stbi__zdefault_length), 288) == 0)
+					if (stbi__zbuild_huffman(z_length, new FakePtrShort(stbi__zdefault_length), 288) == 0)
 						return 0;
-					if (stbi__zbuild_huffman(z_distance, new ShortFakePtr(stbi__zdefault_distance), 32) == 0)
+					if (stbi__zbuild_huffman(z_distance, new FakePtrShort(stbi__zdefault_distance), 32) == 0)
 						return 0;
 				} else {
 					if (stbi__compute_huffman_codes() == 0)
@@ -375,8 +375,8 @@ class ZLib {
 
 	private int stbi__do_zlib(short[] obuf, int olen, int exp, int parse_header) throws Exception {
 		zout_start = obuf;
-		zout = new ShortFakePtr(obuf);
-		zout_end = new ShortFakePtr(obuf, olen);
+		zout = new FakePtrShort(obuf);
+		zout_end = new FakePtrShort(obuf, olen);
 		z_expandable = exp;
 		return stbi__parse_zlib(parse_header);
 	}
@@ -385,8 +385,8 @@ class ZLib {
 																					  int initial_size, int parse_header) throws Exception {
 		ZLib a = new ZLib();
 		short[] p = new short[initial_size];
-		a.zbuffer = new ShortFakePtr(buffer);
-		a.zbuffer_end = new ShortFakePtr(buffer, +len);
+		a.zbuffer = new FakePtrShort(buffer);
+		a.zbuffer_end = new FakePtrShort(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0) {
 			return new Pair<>(a.zout_start, a.zout.offset);
 		}

@@ -340,10 +340,10 @@ public class BmpDecoder extends Decoder {
 				_out_[i] = (short) 255;
 		if (flip_vertically != 0) {
 			short t = 0;
-			ShortFakePtr ptr = new ShortFakePtr(_out_);
+			FakePtrShort ptr = new FakePtrShort(_out_);
 			for (j = 0; j < img_y >> 1; ++j) {
-				ShortFakePtr p1 = ptr.cloneAdd(j * img_x * target);
-				ShortFakePtr p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
+				FakePtrShort p1 = ptr.cloneAdd(j * img_x * target);
+				FakePtrShort p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
 				for (i = 0; i < img_x * target; ++i) {
 					t = p1.getAt(i);
 					p1.setAt(i, p2.getAt(i));

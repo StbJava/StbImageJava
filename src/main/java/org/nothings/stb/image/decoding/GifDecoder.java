@@ -92,9 +92,9 @@ public class GifDecoder extends Decoder {
 			return;
 		idx = cur_x + cur_y;
 		history[idx / 4] = 1;
-		ShortFakePtr c = new ShortFakePtr(color_table, codes[code].suffix * 4);
+		FakePtrShort c = new FakePtrShort(color_table, codes[code].suffix * 4);
 		if (c.getAt(3) > 128) {
-			ShortFakePtr p = new ShortFakePtr(_out_, idx);
+			FakePtrShort p = new FakePtrShort(_out_, idx);
 			p.setAt(0, c.getAt(2));
 			p.setAt(1, c.getAt(1));
 			p.setAt(2, c.getAt(0));
@@ -193,7 +193,7 @@ public class GifDecoder extends Decoder {
 			}
 	}
 
-	private Pair<short[], Integer> stbi__gif_load_next(ShortFakePtr two_back) throws Exception {
+	private Pair<short[], Integer> stbi__gif_load_next(FakePtrShort two_back) throws Exception {
 		int dispose = 0;
 		int first_frame = 0;
 		int pi = 0;
@@ -214,23 +214,23 @@ public class GifDecoder extends Decoder {
 			Arrays.fill(history, (short) 0);
 			first_frame = 1;
 		} else {
-			ShortFakePtr ptr = new ShortFakePtr(_out_);
+			FakePtrShort ptr = new FakePtrShort(_out_);
 			dispose = (eflags & 0x1C) >> 2;
 			pcount = w * h;
 			if (dispose == 3 && two_back == null) dispose = 2;
 			if (dispose == 3) {
 				for (pi = 0; pi < pcount; ++pi) {
 					if (history[pi] != 0) {
-						new ShortFakePtr(ptr, pi * 4).memcpy(new ShortFakePtr(two_back, pi * 4), 4);
+						new FakePtrShort(ptr, pi * 4).memcpy(new FakePtrShort(two_back, pi * 4), 4);
 					}
 				}
 			} else if (dispose == 2) {
 				for (pi = 0; pi < pcount; ++pi)
 					if (history[pi] != 0)
-						new ShortFakePtr(ptr, pi * 4).memcpy(new ShortFakePtr(background, pi * 4), 4);
+						new FakePtrShort(ptr, pi * 4).memcpy(new FakePtrShort(background, pi * 4), 4);
 			}
 
-			new ShortFakePtr(background).memcpy(ptr, 4 * w * h);
+			new FakePtrShort(background).memcpy(ptr, 4 * w * h);
 		}
 
 		Arrays.fill(history, 0, w * h, (short) 0);
@@ -285,7 +285,7 @@ public class GifDecoder extends Decoder {
 						for (pi = 0; pi < pcount; ++pi)
 							if (history[pi] == 0) {
 								pal[bgindex * 4 + 3] = 255;
-								new ShortFakePtr(_out_, pi * 4).memcpy(new ShortFakePtr(pal, bgindex), 4);
+								new FakePtrShort(_out_, pi * 4).memcpy(new FakePtrShort(pal, bgindex), 4);
 							}
 
 					return new Pair<>(o, comp);

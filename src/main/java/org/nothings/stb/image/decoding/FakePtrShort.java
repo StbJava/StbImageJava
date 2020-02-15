@@ -2,21 +2,21 @@ package org.nothings.stb.image.decoding;
 
 import java.util.Arrays;
 
-class ShortFakePtr {
+class FakePtrShort {
 	private short[] array;
 	public int offset;
 
-	public ShortFakePtr(ShortFakePtr ptr, int offset) {
+	public FakePtrShort(FakePtrShort ptr, int offset) {
 		array = ptr.array;
 		this.offset = ptr.offset + offset;
 	}
 
-	public ShortFakePtr(short[] data, int offset) {
+	public FakePtrShort(short[] data, int offset) {
 		array = data;
 		this.offset = offset;
 	}
 
-	public ShortFakePtr(short[] data) {
+	public FakePtrShort(short[] data) {
 		this(data, 0);
 	}
 
@@ -59,12 +59,12 @@ class ShortFakePtr {
 		++offset;
 	}
 
-	public ShortFakePtr cloneAdd(int offset) {
-		return new ShortFakePtr(array, this.offset + offset);
+	public FakePtrShort cloneAdd(int offset) {
+		return new FakePtrShort(array, this.offset + offset);
 	}
 
-	public ShortFakePtr clone() {
-		return new ShortFakePtr(array, offset);
+	public FakePtrShort clone() {
+		return new FakePtrShort(array, offset);
 	}
 
 	public void fill(short value, int count) {
@@ -76,11 +76,11 @@ class ShortFakePtr {
 		offset += count;
 	}
 
-	public void memcpy(ShortFakePtr b, int count) {
+	public void memcpy(FakePtrShort b, int count) {
 		System.arraycopy(b.array, b.offset, array, offset, count);
 	}
 
-	public void memcpyAndIncrease(ShortFakePtr b, int count) {
+	public void memcpyAndIncrease(FakePtrShort b, int count) {
 		memcpy(b, count);
 		offset += count;
 	}

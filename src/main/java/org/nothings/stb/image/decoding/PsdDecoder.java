@@ -12,8 +12,8 @@ public class PsdDecoder extends Decoder {
 		super(stream);
 	}
 
-	private int stbi__psd_decode_rle(ShortFakePtr po, int pixelCount) throws Exception {
-		ShortFakePtr p = po.clone();
+	private int stbi__psd_decode_rle(FakePtrShort po, int pixelCount) throws Exception {
+		FakePtrShort p = po.clone();
 		int count = 0;
 		int nleft = 0;
 		int len = 0;
@@ -91,11 +91,11 @@ public class PsdDecoder extends Decoder {
 
 		pixelCount = w * h;
 
-		ShortFakePtr ptr = new ShortFakePtr(_out_);
+		FakePtrShort ptr = new FakePtrShort(_out_);
 		if (compression != 0) {
 			stbi__skip(h * channelCount * 2);
 			for (channel = 0; channel < 4; channel++) {
-				ShortFakePtr p = new ShortFakePtr(ptr, channel);
+				FakePtrShort p = new FakePtrShort(ptr, channel);
 				if (channel >= channelCount) {
 					for (i = 0; i < pixelCount; i++, p.move(4)) p.set((short) (channel == 3 ? 255 : 0));
 				} else {
@@ -114,7 +114,7 @@ public class PsdDecoder extends Decoder {
 													*q = (int)(val);
 												}*/
 
-					ShortFakePtr p = new ShortFakePtr(ptr, channel);
+					FakePtrShort p = new FakePtrShort(ptr, channel);
 					short val = (short) (channel == 3 ? 255 : 0);
 					for (i = 0; i < pixelCount; i++, p.move(4)) p.set(val);
 				} else {
@@ -126,7 +126,7 @@ public class PsdDecoder extends Decoder {
 													*q = ((int)(stbi__get16be()));
 												}*/
 
-					ShortFakePtr p = new ShortFakePtr(ptr, channel);
+					FakePtrShort p = new FakePtrShort(ptr, channel);
 					if (bitdepth == 16)
 						for (i = 0; i < pixelCount; i++, p.move(4))
 							p.set((short) (stbi__get16be() >> 8));
@@ -153,7 +153,7 @@ public class PsdDecoder extends Decoder {
 									}
 								}*/
 			for (i = 0; i < w * h; ++i) {
-				ShortFakePtr pixel = new ShortFakePtr(ptr, 4 * i);
+				FakePtrShort pixel = new FakePtrShort(ptr, 4 * i);
 				if (pixel.getAt(3) != 0 && pixel.getAt(3) != 255) {
 					float a = pixel.getAt(3) / 255.0f;
 					float ra = 1.0f / a;
