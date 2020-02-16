@@ -34,9 +34,9 @@ public class PngDecoder extends Decoder {
 
 	private int stbi__de_iphone_flag;
 
-	private short[] idata;
-	private short[] expanded;
-	private short[] _out_;
+	private byte[] idata;
+	private byte[] expanded;
+	private byte[] _out_;
 	private int depth;
 
 	private PngDecoder(InputStream stream) {
@@ -71,9 +71,9 @@ public class PngDecoder extends Decoder {
 		return c;
 	}
 
-	private int stbi__create_png_image_raw(FakePtrShort rawOriginal, long raw_len, int out_n,
+	private int stbi__create_png_image_raw(FakePtrByte rawOriginal, long raw_len, int out_n,
 										   int x, int y, int depth, int color) throws Exception {
-		FakePtrShort raw = rawOriginal.clone();
+		FakePtrByte raw = rawOriginal.clone();
 		int shorts = depth == 16 ? 2 : 1;
 		int i = 0;
 		int j = 0;
@@ -84,15 +84,15 @@ public class PngDecoder extends Decoder {
 		int output_shorts = out_n * shorts;
 		int filter_shorts = img_n * shorts;
 		int width = (int) x;
-		_out_ = new short[x * y * output_shorts];
+		_out_ = new byte[x * y * output_shorts];
 		img_width_shorts = ((img_n * x * depth + 7) >> 3);
 		img_len = (img_width_shorts + 1) * y;
 		if (raw_len < img_len)
 			stbi__err("not enough pixels");
-		FakePtrShort ptr = new FakePtrShort(_out_);
+		FakePtrByte ptr = new FakePtrByte(_out_);
 		for (j = 0; j < y; ++j) {
-			FakePtrShort cur = new FakePtrShort(ptr, stride * j);
-			FakePtrShort prior;
+			FakePtrByte cur = new FakePtrByte(ptr, stride * j);
+			FakePtrByte prior;
 			int filter = raw.getAndIncrease();
 			if (filter > 4)
 				stbi__err("invalid filter");
@@ -102,7 +102,7 @@ public class PngDecoder extends Decoder {
 				width = (int) img_width_shorts;
 			}
 
-			prior = new FakePtrShort(cur, -stride);
+			prior = new FakePtrByte(cur, -stride);
 			if (j == 0)
 				filter = first_row_filter[filter];
 			for (k = 0; k < filter_shorts; ++k)
@@ -114,13 +114,13 @@ public class PngDecoder extends Decoder {
 						cur.setAt(k, raw.getAt(k));
 						break;
 					case STBI__F_up:
-						cur.setAt(k, (short) ((raw.getAt(k) + prior.getAt(k)) & 255));
+						cur.setAt(k, ((raw.getAt(k) + prior.getAt(k)) & 255));
 						break;
 					case STBI__F_avg:
-						cur.setAt(k, (short) ((raw.getAt(k) + (prior.getAt(k) >> 1)) & 255));
+						cur.setAt(k, ((raw.getAt(k) + (prior.getAt(k) >> 1)) & 255));
 						break;
 					case STBI__F_paeth:
-						cur.setAt(k, (short) ((raw.getAt(k) + stbi__paeth(0, prior.getAt(k), 0)) & 255));
+						cur.setAt(k, ((raw.getAt(k) + stbi__paeth(0, prior.getAt(k), 0)) & 255));
 						break;
 					case STBI__F_avg_first:
 						cur.setAt(k, raw.getAt(k));
@@ -132,14 +132,14 @@ public class PngDecoder extends Decoder {
 
 			if (depth == 8) {
 				if (img_n != out_n)
-					cur.setAt(img_n, (short) 255);
+					cur.setAt(img_n, 255);
 				raw.move(img_n);
 				cur.move(out_n);
 				prior.move(out_n);
 			} else if (depth == 16) {
 				if (img_n != out_n) {
-					cur.setAt(filter_shorts, (short) 255);
-					cur.setAt(filter_shorts + 1, (short) 255);
+					cur.setAt(filter_shorts, 255);
+					cur.setAt(filter_shorts + 1, 255);
 				}
 
 				raw.move(filter_shorts);
@@ -159,27 +159,27 @@ public class PngDecoder extends Decoder {
 						break;
 					case STBI__F_sub:
 						for (k = 0; k < nk; ++k)
-							cur.setAt(k, (short) ((raw.getAt(k) + cur.getAt(k - filter_shorts)) & 255));
+							cur.setAt(k, ((raw.getAt(k) + cur.getAt(k - filter_shorts)) & 255));
 						break;
 					case STBI__F_up:
-						for (k = 0; k < nk; ++k) cur.setAt(k, (short) ((raw.getAt(k) + prior.getAt(k)) & 255));
+						for (k = 0; k < nk; ++k) cur.setAt(k, ((raw.getAt(k) + prior.getAt(k)) & 255));
 						break;
 					case STBI__F_avg:
 						for (k = 0; k < nk; ++k)
-							cur.setAt(k, (short) ((raw.getAt(k) + ((prior.getAt(k) + cur.getAt(k - filter_shorts)) >> 1)) & 255));
+							cur.setAt(k, ((raw.getAt(k) + ((prior.getAt(k) + cur.getAt(k - filter_shorts)) >> 1)) & 255));
 						break;
 					case STBI__F_paeth:
 						for (k = 0; k < nk; ++k)
-							cur.setAt(k, (short) ((raw.getAt(k) + stbi__paeth(cur.getAt(k - filter_shorts), prior.getAt(k),
+							cur.setAt(k, ((raw.getAt(k) + stbi__paeth(cur.getAt(k - filter_shorts), prior.getAt(k),
 									prior.getAt(k - filter_shorts))) & 255));
 						break;
 					case STBI__F_avg_first:
 						for (k = 0; k < nk; ++k)
-							cur.setAt(k, (short) ((raw.getAt(k) + (cur.getAt(k - filter_shorts) >> 1)) & 255));
+							cur.setAt(k, ((raw.getAt(k) + (cur.getAt(k - filter_shorts) >> 1)) & 255));
 						break;
 					case STBI__F_paeth_first:
 						for (k = 0; k < nk; ++k)
-							cur.setAt(k, (short) ((raw.getAt(k) + stbi__paeth(cur.getAt(k - filter_shorts), 0, 0)) & 255));
+							cur.setAt(k, ((raw.getAt(k) + stbi__paeth(cur.getAt(k - filter_shorts), 0, 0)) & 255));
 						break;
 				}
 
@@ -189,128 +189,128 @@ public class PngDecoder extends Decoder {
 					case STBI__F_none:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
 								cur.setAt(k, raw.getAt(k));
 						break;
 					case STBI__F_sub:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + cur.getAt(k - output_shorts)) & 255));
+								cur.setAt(k, ((raw.getAt(k) + cur.getAt(k - output_shorts)) & 255));
 						break;
 					case STBI__F_up:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + prior.getAt(k)) & 255));
+								cur.setAt(k, ((raw.getAt(k) + prior.getAt(k)) & 255));
 						break;
 					case STBI__F_avg:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + ((prior.getAt(k) + cur.getAt(k - output_shorts)) >> 1)) & 255));
+								cur.setAt(k, ((raw.getAt(k) + ((prior.getAt(k) + cur.getAt(k - output_shorts)) >> 1)) & 255));
 						break;
 					case STBI__F_paeth:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + stbi__paeth(cur.getAt(k - output_shorts), prior.getAt(k),
+								cur.setAt(k, ((raw.getAt(k) + stbi__paeth(cur.getAt(k - output_shorts), prior.getAt(k),
 										prior.getAt(k - output_shorts))) & 255));
 						break;
 					case STBI__F_avg_first:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + (cur.getAt(k - output_shorts) >> 1)) & 255));
+								cur.setAt(k, ((raw.getAt(k) + (cur.getAt(k - output_shorts) >> 1)) & 255));
 						break;
 					case STBI__F_paeth_first:
 						for (i = x - 1;
 							 i >= 1;
-							 --i, cur.setAt(filter_shorts, (short) 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
+							 --i, cur.setAt(filter_shorts, 255), raw.move(filter_shorts), cur.move(output_shorts), prior.move(output_shorts))
 							for (k = 0; k < filter_shorts; ++k)
-								cur.setAt(k, (short) ((raw.getAt(k) + stbi__paeth(cur.getAt(k - output_shorts), 0, 0)) & 255));
+								cur.setAt(k, ((raw.getAt(k) + stbi__paeth(cur.getAt(k - output_shorts), 0, 0)) & 255));
 						break;
 				}
 
 				if (depth == 16) {
-					cur = new FakePtrShort(ptr, stride * j);
-					for (i = 0; i < x; ++i, cur.move(output_shorts)) cur.setAt(filter_shorts + 1, (short) 255);
+					cur = new FakePtrByte(ptr, stride * j);
+					for (i = 0; i < x; ++i, cur.move(output_shorts)) cur.setAt(filter_shorts + 1, 255);
 				}
 			}
 		}
 
 		if (depth < 8)
 			for (j = 0; j < y; ++j) {
-				FakePtrShort cur = new FakePtrShort(ptr, stride * j);
-				FakePtrShort _in_ = new FakePtrShort(ptr, stride * j + x * out_n - img_width_shorts);
-				short scale = (short) (color == 0 ? stbi__depth_scale_table[depth] : 1);
+				FakePtrByte cur = new FakePtrByte(ptr, stride * j);
+				FakePtrByte _in_ = new FakePtrByte(ptr, stride * j + x * out_n - img_width_shorts);
+				short scale = (color == 0 ? stbi__depth_scale_table[depth] : 1);
 				if (depth == 4) {
 					for (k = (int) (x * img_n); k >= 2; k -= 2, _in_.increase()) {
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 4)));
-						cur.setAndIncrease((short) (scale * (_in_.get() & 0x0f)));
+						cur.setAndIncrease((scale * (_in_.get() >> 4)));
+						cur.setAndIncrease((scale * (_in_.get() & 0x0f)));
 					}
 
 					if (k > 0)
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 4)));
+						cur.setAndIncrease((scale * (_in_.get() >> 4)));
 				} else if (depth == 2) {
 					for (k = (int) (x * img_n); k >= 4; k -= 4, _in_.increase()) {
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 6)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 4) & 0x03)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 2) & 0x03)));
-						cur.setAndIncrease((short) (scale * (_in_.get() & 0x03)));
+						cur.setAndIncrease((scale * (_in_.get() >> 6)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 4) & 0x03)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x03)));
+						cur.setAndIncrease((scale * (_in_.get() & 0x03)));
 					}
 
 					if (k > 0)
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 6)));
+						cur.setAndIncrease((scale * (_in_.get() >> 6)));
 					if (k > 1)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 4) & 0x03)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 4) & 0x03)));
 					if (k > 2)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 2) & 0x03)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x03)));
 				} else if (depth == 1) {
 					for (k = (int) (x * img_n); k >= 8; k -= 8, _in_.increase()) {
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 7)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 6) & 0x01)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 5) & 0x01)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 4) & 0x01)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 3) & 0x01)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 2) & 0x01)));
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 1) & 0x01)));
-						cur.setAndIncrease((short) (scale * (_in_.get() & 0x01)));
+						cur.setAndIncrease((scale * (_in_.get() >> 7)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 6) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 5) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 4) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 3) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 1) & 0x01)));
+						cur.setAndIncrease((scale * (_in_.get() & 0x01)));
 					}
 
 					if (k > 0)
-						cur.setAndIncrease((short) (scale * (_in_.get() >> 7)));
+						cur.setAndIncrease((scale * (_in_.get() >> 7)));
 					if (k > 1)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 6) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 6) & 0x01)));
 					if (k > 2)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 5) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 5) & 0x01)));
 					if (k > 3)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 4) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 4) & 0x01)));
 					if (k > 4)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 3) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 3) & 0x01)));
 					if (k > 5)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 2) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x01)));
 					if (k > 6)
-						cur.setAndIncrease((short) (scale * ((_in_.get() >> 1) & 0x01)));
+						cur.setAndIncrease((scale * ((_in_.get() >> 1) & 0x01)));
 				}
 
 				if (img_n != out_n) {
 					int q = 0;
-					cur = new FakePtrShort(ptr, stride * j);
+					cur = new FakePtrByte(ptr, stride * j);
 					if (img_n == 1)
 						for (q = (int) (x - 1); q >= 0; --q) {
-							cur.setAt(q * 2 + 1, (short) 255);
+							cur.setAt(q * 2 + 1, 255);
 							cur.setAt(q * 2 + 0, cur.getAt(q));
 						}
 					else
 						for (q = (int) (x - 1); q >= 0; --q) {
-							cur.setAt(q * 4 + 3, (short) 255);
+							cur.setAt(q * 4 + 3, 255);
 							cur.setAt(q * 4 + 2, cur.getAt(q * 3 + 2));
 							cur.setAt(q * 4 + 1, cur.getAt(q * 3 + 1));
 							cur.setAt(q * 4 + 0, cur.getAt(q * 3 + 0));
@@ -329,15 +329,15 @@ public class PngDecoder extends Decoder {
 		return 1;
 	}
 
-	private int stbi__create_png_image(FakePtrShort image_dataOriginal, long image_data_len, int out_n, int depth,
+	private int stbi__create_png_image(FakePtrByte image_dataOriginal, long image_data_len, int out_n, int depth,
 									   int color, int interlaced) throws Exception {
-		FakePtrShort image_data = image_dataOriginal.clone();
+		FakePtrByte image_data = image_dataOriginal.clone();
 		int shorts = depth == 16 ? 2 : 1;
 		int out_shorts = out_n * shorts;
 		int p = 0;
 		if (interlaced == 0)
 			return stbi__create_png_image_raw(image_data, image_data_len, out_n, img_x, img_y, depth, color);
-		short[] _final_ = new short[img_x * img_y * out_shorts];
+		byte[] _final_ = new byte[img_x * img_y * out_shorts];
 		int[] xorig = new int[7];
 		int[] yorig = new int[7];
 		int[] xspc = new int[7];
@@ -386,14 +386,14 @@ public class PngDecoder extends Decoder {
 				if (stbi__create_png_image_raw(image_data, image_data_len, out_n, x, y, depth,
 						color) == 0) return 0;
 
-				FakePtrShort finalPtr = new FakePtrShort(_final_);
-				FakePtrShort outPtr = new FakePtrShort(_out_);
+				FakePtrByte finalPtr = new FakePtrByte(_final_);
+				FakePtrByte outPtr = new FakePtrByte(_out_);
 				for (j = 0; j < y; ++j)
 					for (i = 0; i < x; ++i) {
 						int out_y = j * yspc[p] + yorig[p];
 						int out_x = i * xspc[p] + xorig[p];
-						FakePtrShort ptr1 = new FakePtrShort(finalPtr, out_y * img_x * out_shorts + out_x * out_shorts);
-						FakePtrShort ptr2 = new FakePtrShort(outPtr, (j * x + i) * out_shorts);
+						FakePtrByte ptr1 = new FakePtrByte(finalPtr, out_y * img_x * out_shorts + out_x * out_shorts);
+						FakePtrByte ptr2 = new FakePtrByte(outPtr, (j * x + i) * out_shorts);
 						ptr1.memcpy(ptr2, out_shorts);
 					}
 
@@ -409,16 +409,16 @@ public class PngDecoder extends Decoder {
 	private int stbi__compute_transparency(short[] tc, int out_n) {
 		long i = 0;
 		long pixel_count = (long) (img_x * img_y);
-		FakePtrShort p = new FakePtrShort(_out_);
+		FakePtrByte p = new FakePtrByte(_out_);
 		if (out_n == 2)
 			for (i = 0; i < pixel_count; ++i) {
-				p.setAt(1, (short) (p.getAt(0) == tc[0] ? 0 : 255));
+				p.setAt(1, (p.getAt(0) == tc[0] ? 0 : 255));
 				p.move(2);
 			}
 		else
 			for (i = 0; i < pixel_count; ++i) {
 				if (p.getAt(0) == tc[0] && p.getAt(1) == tc[1] && p.getAt(2) == tc[2])
-					p.setAt(3, (short) 0);
+					p.setAt(3, 0);
 				p.move(4);
 			}
 
@@ -455,12 +455,12 @@ public class PngDecoder extends Decoder {
 	private int stbi__expand_png_palette(short[] palette, int len, int pal_img_n) {
 		int i = 0;
 		int pixel_count = img_x * img_y;
-		short[] orig = _out_;
-		_out_ = new short[pixel_count * pal_img_n];
-		FakePtrShort p = new FakePtrShort(_out_);
+		FakePtrByte orig = new FakePtrByte(_out_);
+		_out_ = new byte[pixel_count * pal_img_n];
+		FakePtrByte p = new FakePtrByte(_out_);
 		if (pal_img_n == 3)
 			for (i = 0; i < pixel_count; ++i) {
-				int n = orig[i] * 4;
+				int n = orig.getAt(i) * 4;
 				p.setAt(0, palette[n]);
 				p.setAt(1, palette[n + 1]);
 				p.setAt(2, palette[n + 2]);
@@ -468,7 +468,7 @@ public class PngDecoder extends Decoder {
 			}
 		else
 			for (i = 0; i < pixel_count; ++i) {
-				int n = orig[i] * 4;
+				int n = orig.getAt(i) * 4;
 				p.setAt(0, palette[n]);
 				p.setAt(1, palette[n + 1]);
 				p.setAt(2, palette[n + 2]);
@@ -490,10 +490,10 @@ public class PngDecoder extends Decoder {
 	private void stbi__de_iphone() {
 		long i = 0;
 		long pixel_count = (long) (img_x * img_y);
-		FakePtrShort p = new FakePtrShort(_out_);
+		FakePtrByte p = new FakePtrByte(_out_);
 		if (img_out_n == 3) {
 			for (i = 0; i < pixel_count; ++i) {
-				short t = p.getAt(0);
+				int t = p.getAt(0);
 				p.setAt(0, p.getAt(2));
 				p.setAt(2, t);
 				p.move(3);
@@ -501,13 +501,13 @@ public class PngDecoder extends Decoder {
 		} else {
 			if (stbi__unpremultiply_on_load != 0)
 				for (i = 0; i < pixel_count; ++i) {
-					short a = p.getAt(3);
-					short t = p.getAt(0);
+					int a = p.getAt(3);
+					int t = p.getAt(0);
 					if (a != 0) {
-						short half = (short) (a / 2);
-						p.setAt(0, (short) ((p.getAt(2) * 255 + half) / a));
-						p.setAt(1, (short) ((p.getAt(1) * 255 + half) / a));
-						p.setAt(2, (short) ((t * 255 + half) / a));
+						int half = (a / 2);
+						p.setAt(0, ((p.getAt(2) * 255 + half) / a));
+						p.setAt(1, ((p.getAt(1) * 255 + half) / a));
+						p.setAt(2, ((t * 255 + half) / a));
 					} else {
 						p.setAt(0, p.getAt(2));
 						p.setAt(2, t);
@@ -517,7 +517,7 @@ public class PngDecoder extends Decoder {
 				}
 			else
 				for (i = 0; i < pixel_count; ++i) {
-					short t = p.getAt(0);
+					int t = p.getAt(0);
 					p.setAt(0, p.getAt(2));
 					p.setAt(2, t);
 					p.move(4);
@@ -677,7 +677,7 @@ public class PngDecoder extends Decoder {
 						while (ioff + c.length > idata_limit) idata_limit *= 2;
 
 						if (idata == null) {
-							idata = new short[idata_limit];
+							idata = new byte[idata_limit];
 						} else {
 							idata = Arrays.copyOf(idata, idata_limit);
 						}
@@ -700,10 +700,11 @@ public class PngDecoder extends Decoder {
 					bpl = (long) ((img_x * depth + 7) / 8);
 					raw_len = (int) (bpl * img_y * img_n + img_y);
 
-					Pair<short[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
 
-					expanded = pair.value1;
-					raw_len = pair.value2;
+					Pair<byte[], Integer> pair = ZLib.stbi_zlib_decode_malloc_guesssize_headerflag(idata, ioff, raw_len, is_iphone != 0 ? 0 : 1);
+
+					expanded = pair.first;
+					raw_len = pair.second;
 					if (expanded == null)
 						return 0;
 					idata = null;
@@ -711,7 +712,7 @@ public class PngDecoder extends Decoder {
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtrShort(expanded), (long) raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new FakePtrByte(expanded), (long) raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0) {
@@ -768,13 +769,14 @@ public class PngDecoder extends Decoder {
 				bits_per_channel = 8;
 			else
 				bits_per_channel = depth;
-			short[] result = _out_;
+			byte[] result = _out_;
 			_out_ = null;
 			if (req_comp != 0 && req_comp != img_out_n) {
 				if (bits_per_channel == 8)
 					result = Utility.stbi__convert_format(result, img_out_n, req_comp, img_x, img_y);
-				else
+				else {
 					result = Utility.stbi__convert_format16(result, img_out_n, req_comp, img_x, img_y);
+				}
 				img_out_n = req_comp;
 			}
 
@@ -783,7 +785,7 @@ public class PngDecoder extends Decoder {
 					ColorComponents.fromInt(img_n),
 					requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 					bits_per_channel,
-					Utility.toByteArray(result));
+					result);
 		} finally {
 			_out_ = null;
 			expanded = null;
@@ -819,8 +821,7 @@ public class PngDecoder extends Decoder {
 		return decoder.InternalDecode(requiredComponents);
 	}
 
-	public static ImageResult Decode(byte[] data) throws Exception
-	{
+	public static ImageResult Decode(byte[] data) throws Exception {
 		return Decode(data, null);
 	}
 }

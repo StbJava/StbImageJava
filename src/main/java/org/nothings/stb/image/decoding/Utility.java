@@ -70,7 +70,7 @@ class Utility
 		return (int)(((r * 77) + (g * 150) + (29 * b)) >> 8);
 	}
 
-	public static short[] stbi__convert_format16(short[] data, int img_n, int req_comp, long x, long y)
+	public static byte[] stbi__convert_format16(byte[] data, int img_n, int req_comp, long x, long y)
 	{
 		throw new UnsupportedOperationException("16-bit images are not supported yet");
 /*			int i = 0;
@@ -178,18 +178,18 @@ class Utility
 		return good;*/
 	}
 
-	public static short[] stbi__convert_format(short[] data, int img_n, int req_comp, int x, int y) throws Exception
+	public static byte[] stbi__convert_format(byte[] data, int img_n, int req_comp, int x, int y) throws Exception
 	{
 		int i = 0;
 		int j = 0;
 		if ((req_comp) == (img_n))
 			return data;
 
-		short[] good = new short[req_comp * x * y];
+		byte[] good = new byte[req_comp * x * y];
 		for (j = (int)(0); (j) < ((int)(y)); ++j)
 		{
-			FakePtrShort src = new FakePtrShort(data, (int) (j * x * img_n));
-			FakePtrShort dest = new FakePtrShort(good, (int) (j * x * req_comp));
+			FakePtrByte src = new FakePtrByte(data, (int) (j * x * img_n));
+			FakePtrByte dest = new FakePtrByte(good, (int) (j * x * req_comp));
 			switch (((img_n) * 8 + (req_comp)))
 			{
 				case ((1) * 8 + (2)):
@@ -202,7 +202,7 @@ class Utility
 				case ((1) * 8 + (3)):
 					for (i = (int)(x - 1); (i) >= (0); --i, src.increase(), dest.move(3))
 					{
-						short val = src.getAt(0);
+						int val = src.getAt(0);
 						dest.setAt(0, val);
 						dest.setAt(1, val);
 						dest.setAt(2, val);
@@ -211,7 +211,7 @@ class Utility
 				case ((1) * 8 + (4)):
 					for (i = (int)(x - 1); (i) >= (0); --i, src.increase(), dest.move(4))
 					{
-						short val = src.getAt(0);
+						int val = src.getAt(0);
 						dest.setAt(0, val);
 						dest.setAt(1, val);
 						dest.setAt(2, val);
@@ -221,14 +221,14 @@ class Utility
 				case ((2) * 8 + (1)):
 					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(1))
 					{
-						short val = src.getAt(0);
+						int val = src.getAt(0);
 						dest.setAt(0, val);
 					}
 					break;
 				case ((2) * 8 + (3)):
 					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(3))
 					{
-						short val = src.getAt(0);
+						int val = src.getAt(0);
 						dest.setAt(0, val);
 						dest.setAt(1, val);
 						dest.setAt(2, val);
@@ -237,7 +237,7 @@ class Utility
 				case ((2) * 8 + (4)):
 					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(4))
 					{
-						short val = src.getAt(0);
+						int val = src.getAt(0);
 						dest.setAt(0, val);
 						dest.setAt(1, val);
 						dest.setAt(2, val);
@@ -296,6 +296,7 @@ class Utility
 		return good;
 	}
 
+
 	public static short[] stbi__convert_16_to_8(short[] orig, int w, int h, int channels)
 	{
 		throw new UnsupportedOperationException("16-bit images are not supported yet");
@@ -326,17 +327,6 @@ class Utility
 		}
 
 		return enlarged;
-	}
-
-	public static byte[] toByteArray(short[] data)
-	{
-		byte[] result = new byte[data.length];
-		for(int i = 0; i < result.length; ++i)
-		{
-			result[i] = (byte)data[i];
-		}
-
-		return result;
 	}
 
 /*	public static void stbi__vertical_flip(short[] image, int w, int h, int shorts_per_pixel)

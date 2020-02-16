@@ -71,23 +71,7 @@ public class FakePtrInt {
 		Arrays.fill(array, offset, offset + count, value);
 	}
 
-	public void fillAndIncrease(int value, int count) {
-		fill(value, count);
-		offset += count;
-	}
-
 	public void memcpy(FakePtrInt b, int count) {
 		System.arraycopy(b.array, b.offset, array, offset, count);
-	}
-
-	public void memcpyAndIncrease(FakePtrInt b, int count) {
-		memcpy(b, count);
-		offset += count;
-	}
-
-	public void memcpy(int[] b, int count) {
-		for (int i = 0; i < count; ++i) {
-			setAt(i, b[i]);
-		}
 	}
 }

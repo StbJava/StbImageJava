@@ -159,13 +159,13 @@ public class BmpDecoder extends Decoder {
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
-		short[] _out_;
+		byte[] _out_;
 		long mr = 0;
 		long mg = 0;
 		long mb = 0;
 		long ma = 0;
 		long all_a = 0;
-		short[] pal = new short[256 * 4];
+		byte[] pal = new byte[256 * 4];
 		int psize = 0;
 		int i = 0;
 		int j = 0;
@@ -196,17 +196,17 @@ public class BmpDecoder extends Decoder {
 			target = (int) requiredComponents.getValue();
 		else
 			target = img_n;
-		_out_ = new short[target * img_x * img_y];
+		_out_ = new byte[target * img_x * img_y];
 		if (info.bpp < 16) {
 			int z = 0;
 			if (psize == 0 || psize > 256) stbi__err("invalid");
 			for (i = 0; i < psize; ++i) {
-				pal[i * 4 + 2] = (short) stbi__get8();
-				pal[i * 4 + 1] = (short) stbi__get8();
-				pal[i * 4 + 0] = (short) stbi__get8();
+				pal[i * 4 + 2] = (byte) stbi__get8();
+				pal[i * 4 + 1] = (byte) stbi__get8();
+				pal[i * 4 + 0] = (byte) stbi__get8();
 				if (info.hsz != 12)
 					stbi__get8();
-				pal[i * 4 + 3] = (short) 255;
+				pal[i * 4 + 3] = (byte) 255;
 			}
 
 			stbi__skip(info.offset - 14 - info.hsz - psize * (info.hsz == 12 ? 3 : 4));
@@ -229,7 +229,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[color * 4 + 1];
 						_out_[z++] = pal[color * 4 + 2];
 						if (target == 4)
-							_out_[z++] = (short) 255;
+							_out_[z++] = (byte) 255;
 						if (i + 1 == img_x)
 							break;
 						if (--bit_offset < 0) {
@@ -254,7 +254,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[v * 4 + 1];
 						_out_[z++] = pal[v * 4 + 2];
 						if (target == 4)
-							_out_[z++] = (short) 255;
+							_out_[z++] = (byte) 255;
 						if (i + 1 == img_x)
 							break;
 						v = info.bpp == 8 ? stbi__get8() : v2;
@@ -262,7 +262,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = pal[v * 4 + 1];
 						_out_[z++] = pal[v * 4 + 2];
 						if (target == 4)
-							_out_[z++] = (short) 255;
+							_out_[z++] = (byte) 255;
 					}
 
 					stbi__skip(pad);
@@ -306,12 +306,12 @@ public class BmpDecoder extends Decoder {
 			for (j = 0; j < img_y; ++j) {
 				if (easy != 0) {
 					for (i = 0; i < img_x; ++i) {
-						short a = 0;
-						_out_[z + 2] = (short) stbi__get8();
-						_out_[z + 1] = (short) stbi__get8();
-						_out_[z + 0] = (short) stbi__get8();
+						byte a = 0;
+						_out_[z + 2] = (byte) stbi__get8();
+						_out_[z + 1] = (byte) stbi__get8();
+						_out_[z + 0] = (byte) stbi__get8();
 						z += 3;
-						a = (short) (easy == 2 ? stbi__get8() : 255);
+						a = (byte) (easy == 2 ? stbi__get8() : 255);
 						all_a |= a;
 						if (target == 4)
 							_out_[z++] = a;
@@ -321,13 +321,13 @@ public class BmpDecoder extends Decoder {
 					for (i = 0; i < img_x; ++i) {
 						long v = bpp == 16 ? (long) stbi__get16le() : stbi__get32le();
 						long a = 0;
-						_out_[z++] = (short) (stbi__shiftsigned(v & mr, rshift, rcount) & 255);
-						_out_[z++] = (short) (stbi__shiftsigned(v & mg, gshift, gcount) & 255);
-						_out_[z++] = (short) (stbi__shiftsigned(v & mb, bshift, bcount) & 255);
+						_out_[z++] = (byte) (stbi__shiftsigned(v & mr, rshift, rcount) & 255);
+						_out_[z++] = (byte) (stbi__shiftsigned(v & mg, gshift, gcount) & 255);
+						_out_[z++] = (byte) (stbi__shiftsigned(v & mb, bshift, bcount) & 255);
 						a = (long) (ma != 0 ? stbi__shiftsigned(v & ma, ashift, acount) : 255);
 						all_a |= a;
 						if (target == 4)
-							_out_[z++] = (short) (a & 255);
+							_out_[z++] = (byte) (a & 255);
 					}
 				}
 
@@ -337,13 +337,13 @@ public class BmpDecoder extends Decoder {
 
 		if (target == 4 && all_a == 0)
 			for (i = 4 * img_x * img_y - 1; i >= 0; i -= 4)
-				_out_[i] = (short) 255;
+				_out_[i] = (byte) 255;
 		if (flip_vertically != 0) {
-			short t = 0;
-			FakePtrShort ptr = new FakePtrShort(_out_);
+			int t = 0;
+			FakePtrByte ptr = new FakePtrByte(_out_);
 			for (j = 0; j < img_y >> 1; ++j) {
-				FakePtrShort p1 = ptr.cloneAdd(j * img_x * target);
-				FakePtrShort p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
+				FakePtrByte p1 = ptr.cloneAdd(j * img_x * target);
+				FakePtrByte p2 = ptr.cloneAdd((img_y - 1 - j) * img_x * target);
 				for (i = 0; i < img_x * target; ++i) {
 					t = p1.getAt(i);
 					p1.setAt(i, p2.getAt(i));
@@ -361,7 +361,7 @@ public class BmpDecoder extends Decoder {
 				ColorComponents.fromInt(img_n),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(img_n),
 				8,
-				Utility.toByteArray(_out_)
+				_out_
 		);
 	}
 

@@ -21,7 +21,7 @@ class FakePtrShort {
 	}
 
 	public void clear(int count) {
-		Arrays.fill(array, offset, offset + count, (short)0);
+		Arrays.fill(array, offset, offset + count, (short) 0);
 	}
 
 	public short get() {
@@ -71,23 +71,7 @@ class FakePtrShort {
 		Arrays.fill(array, offset, offset + count, value);
 	}
 
-	public void fillAndIncrease(short value, int count) {
-		fill(value, count);
-		offset += count;
-	}
-
 	public void memcpy(FakePtrShort b, int count) {
 		System.arraycopy(b.array, b.offset, array, offset, count);
 	}
-
-	public void memcpyAndIncrease(FakePtrShort b, int count) {
-		memcpy(b, count);
-		offset += count;
-	}
-
-	public void memcpy(short[] b, int count) {
-		for (int i = 0; i < count; ++i) {
-			setAt(i, b[i]);
-		}
-	}	
 }

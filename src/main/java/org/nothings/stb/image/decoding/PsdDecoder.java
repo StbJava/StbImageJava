@@ -12,8 +12,8 @@ public class PsdDecoder extends Decoder {
 		super(stream);
 	}
 
-	private int stbi__psd_decode_rle(FakePtrShort po, int pixelCount) throws Exception {
-		FakePtrShort p = po.clone();
+	private int stbi__psd_decode_rle(FakePtrByte po, int pixelCount) throws Exception {
+		FakePtrByte p = po.clone();
 		int count = 0;
 		int nleft = 0;
 		int len = 0;
@@ -58,7 +58,7 @@ public class PsdDecoder extends Decoder {
 		int bitdepth = 0;
 		int w = 0;
 		int h = 0;
-		short[] _out_;
+		byte[] _out_;
 		if (stbi__get32be() != 0x38425053)
 			stbi__err("not PSD");
 		if (stbi__get16be() != 1)
@@ -83,21 +83,21 @@ public class PsdDecoder extends Decoder {
 
 		int bits_per_channel = 8;
 		if (compression == 0 && bitdepth == 16 && bpc == 16) {
-			_out_ = new short[8 * w * h];
+			_out_ = new byte[8 * w * h];
 			bits_per_channel = 16;
 		} else {
-			_out_ = new short[4 * w * h];
+			_out_ = new byte[4 * w * h];
 		}
 
 		pixelCount = w * h;
 
-		FakePtrShort ptr = new FakePtrShort(_out_);
+		FakePtrByte ptr = new FakePtrByte(_out_);
 		if (compression != 0) {
 			stbi__skip(h * channelCount * 2);
 			for (channel = 0; channel < 4; channel++) {
-				FakePtrShort p = new FakePtrShort(ptr, channel);
+				FakePtrByte p = new FakePtrByte(ptr, channel);
 				if (channel >= channelCount) {
-					for (i = 0; i < pixelCount; i++, p.move(4)) p.set((short) (channel == 3 ? 255 : 0));
+					for (i = 0; i < pixelCount; i++, p.move(4)) p.set((channel == 3 ? 255 : 0));
 				} else {
 					if (stbi__psd_decode_rle(p, pixelCount) == 0) stbi__err("corrupt");
 				}
@@ -114,7 +114,7 @@ public class PsdDecoder extends Decoder {
 													*q = (int)(val);
 												}*/
 
-					FakePtrShort p = new FakePtrShort(ptr, channel);
+					FakePtrByte p = new FakePtrByte(ptr, channel);
 					short val = (short) (channel == 3 ? 255 : 0);
 					for (i = 0; i < pixelCount; i++, p.move(4)) p.set(val);
 				} else {
@@ -126,10 +126,10 @@ public class PsdDecoder extends Decoder {
 													*q = ((int)(stbi__get16be()));
 												}*/
 
-					FakePtrShort p = new FakePtrShort(ptr, channel);
+					FakePtrByte p = new FakePtrByte(ptr, channel);
 					if (bitdepth == 16)
 						for (i = 0; i < pixelCount; i++, p.move(4))
-							p.set((short) (stbi__get16be() >> 8));
+							p.set((stbi__get16be() >> 8));
 					else
 						for (i = 0; i < pixelCount; i++, p.move(4))
 							p.set(stbi__get8());
@@ -153,14 +153,14 @@ public class PsdDecoder extends Decoder {
 									}
 								}*/
 			for (i = 0; i < w * h; ++i) {
-				FakePtrShort pixel = new FakePtrShort(ptr, 4 * i);
+				FakePtrByte pixel = new FakePtrByte(ptr, 4 * i);
 				if (pixel.getAt(3) != 0 && pixel.getAt(3) != 255) {
 					float a = pixel.getAt(3) / 255.0f;
 					float ra = 1.0f / a;
 					float inv_a = 255.0f * (1 - ra);
-					pixel.setAt(0, (short) (pixel.getAt(0) * ra + inv_a));
-					pixel.setAt(1, (short) (pixel.getAt(1) * ra + inv_a));
-					pixel.setAt(2, (short) (pixel.getAt(2) * ra + inv_a));
+					pixel.setAt(0, (int) (pixel.getAt(0) * ra + inv_a));
+					pixel.setAt(1, (int) (pixel.getAt(1) * ra + inv_a));
+					pixel.setAt(2, (int) (pixel.getAt(2) * ra + inv_a));
 				}
 			}
 		}
@@ -180,7 +180,7 @@ public class PsdDecoder extends Decoder {
 						? requiredComponents
 						: ColorComponents.RedGreenBlueAlpha,
 				bits_per_channel,
-				Utility.toByteArray(_out_)
+				_out_
 		);
 	}
 

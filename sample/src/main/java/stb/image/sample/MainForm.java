@@ -90,10 +90,10 @@ public class MainForm extends JFrame {
 			byte[] data = image.getData();
 			for (int y = 0; y < image.getHeight(); y++) {
 				for (int x = 0; x < image.getWidth(); x++) {
-					int col = new Color(data[i],
-							data[i + 1],
-							data[i + 2],
-							data[i + 3]).getRGB();
+					int col = new Color(data[i] & 0xff,
+							data[i + 1] & 0xff,
+							data[i + 2] & 0xff,
+							data[i + 3] & 0xff).getRGB();
 					panel.img.setRGB(x, y, col);
 					i += 4;
 				}

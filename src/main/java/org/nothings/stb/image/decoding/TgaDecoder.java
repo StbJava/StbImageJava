@@ -30,15 +30,15 @@ public class TgaDecoder extends Decoder {
 		}
 	}
 
-	private void stbi__tga_read_rgb16(FakePtrShort _out_) throws Exception {
+	private void stbi__tga_read_rgb16(FakePtrByte _out_) throws Exception {
 		int px = (int) stbi__get16le();
 		int fiveBitMask = (int) 31;
 		int r = (px >> 10) & fiveBitMask;
 		int g = (px >> 5) & fiveBitMask;
 		int b = px & fiveBitMask;
-		_out_.setAt(0, (short) (r * 255 / 31));
-		_out_.setAt(1, (short) (g * 255 / 31));
-		_out_.setAt(2, (short) (b * 255 / 31));
+		_out_.setAt(0, r * 255 / 31);
+		_out_.setAt(1, g * 255 / 31);
+		_out_.setAt(2, b * 255 / 31);
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
@@ -57,11 +57,11 @@ public class TgaDecoder extends Decoder {
 		int tga_comp = 0;
 		int tga_rgb16 = 0;
 		int tga_inverted = (int) stbi__get8();
-		short[] tga_data;
-		short[] tga_palette = null;
+		byte[] tga_data;
+		byte[] tga_palette = null;
 		int i = 0;
 		int j = 0;
-		short[] raw_data = new short[4];
+		byte[] raw_data = new byte[4];
 		raw_data[0] = 0;
 
 		int RLE_count = 0;
@@ -81,11 +81,11 @@ public class TgaDecoder extends Decoder {
 		else
 			get_comp = stbi__tga_get_comp(tga_bits_per_pixel, tga_image_type == 3 ? 1 : 0);
 
-		tga_comp = get_comp.value1;
+		tga_comp = get_comp.first;
 		if (tga_comp == 0)
 			stbi__err("bad format");
 
-		tga_data = new short[tga_width * tga_height * tga_comp];
+		tga_data = new byte[tga_width * tga_height * tga_comp];
 		stbi__skip(tga_offset);
 		if (tga_indexed == 0 && tga_is_RLE == 0 && tga_rgb16 == 0) {
 			for (i = 0; i < tga_height; ++i) {
@@ -95,9 +95,9 @@ public class TgaDecoder extends Decoder {
 		} else {
 			if (tga_indexed != 0) {
 				stbi__skip(tga_palette_start);
-				tga_palette = new short[tga_palette_len * tga_comp];
+				tga_palette = new byte[tga_palette_len * tga_comp];
 				if (tga_rgb16 != 0) {
-					FakePtrShort pal_entry = new FakePtrShort(tga_palette);
+					FakePtrByte pal_entry = new FakePtrByte(tga_palette);
 					for (i = 0; i < tga_palette_len; ++i) {
 						stbi__tga_read_rgb16(pal_entry);
 						pal_entry.move(tga_comp);
@@ -128,9 +128,9 @@ public class TgaDecoder extends Decoder {
 						pal_idx *= tga_comp;
 						for (j = 0; j < tga_comp; ++j) raw_data[j] = tga_palette[pal_idx + j];
 					} else if (tga_rgb16 != 0) {
-						stbi__tga_read_rgb16(new FakePtrShort(raw_data));
+						stbi__tga_read_rgb16(new FakePtrByte(raw_data));
 					} else {
-						for (j = 0; j < tga_comp; ++j) raw_data[j] = stbi__get8();
+						for (j = 0; j < tga_comp; ++j) raw_data[j] = (byte)stbi__get8();
 					}
 
 					read_next_pixel = 0;
@@ -145,7 +145,7 @@ public class TgaDecoder extends Decoder {
 					int index1 = j * tga_width * tga_comp;
 					int index2 = (tga_height - 1 - j) * tga_width * tga_comp;
 					for (i = tga_width * tga_comp; i > 0; --i) {
-						short temp = tga_data[index1];
+						byte temp = tga_data[index1];
 						tga_data[index1] = tga_data[index2];
 						tga_data[index2] = temp;
 						++index1;
@@ -155,9 +155,9 @@ public class TgaDecoder extends Decoder {
 		}
 
 		if (tga_comp >= 3 && tga_rgb16 == 0) {
-			FakePtrShort tga_pixel = new FakePtrShort(tga_data);
+			FakePtrByte tga_pixel = new FakePtrByte(tga_data);
 			for (i = 0; i < tga_width * tga_height; ++i) {
-				short temp = tga_pixel.getAt(0);
+				int temp = tga_pixel.getAt(0);
 				tga_pixel.setAt(0, tga_pixel.getAt(2));
 				tga_pixel.setAt(2, temp);
 				tga_pixel.move(tga_comp);
@@ -173,7 +173,7 @@ public class TgaDecoder extends Decoder {
 				ColorComponents.fromInt(tga_comp),
 				requiredComponents != null ? requiredComponents : ColorComponents.fromInt(tga_comp),
 				8,
-				Utility.toByteArray(tga_data));
+				tga_data);
 	}
 
 	public static boolean Test(byte[] data) {
@@ -265,7 +265,7 @@ public class TgaDecoder extends Decoder {
 						tga_image_type == 3 || tga_image_type == 11 ? 1 : 0);
 			}
 
-			tga_comp = get_comp.value1;
+			tga_comp = get_comp.first;
 
 			if (tga_comp == 0) return null;
 

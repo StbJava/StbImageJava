@@ -54,13 +54,13 @@ class ZLib {
 	private int z_expandable;
 	private final stbi__zhuffman z_length = new stbi__zhuffman();
 
-	private FakePtrShort zbuffer;
-	private FakePtrShort zbuffer_end;
-	private FakePtrShort zout;
-	private FakePtrShort zout_end;
-	private short[] zout_start;
+	private FakePtrByte zbuffer;
+	private FakePtrByte zbuffer_end;
+	private FakePtrByte zout;
+	private FakePtrByte zout_end;
+	private byte[] zout_start;
 
-	private short stbi__zget8() {
+	private int stbi__zget8() {
 		if (zbuffer.offset >= zbuffer_end.offset)
 			return 0;
 		return zbuffer.getAndIncrease();
@@ -115,7 +115,7 @@ class ZLib {
 		return stbi__zhuffman_decode_slowpath(z);
 	}
 
-	private int stbi__zexpand(FakePtrShort zout, int n) throws Exception {
+	private int stbi__zexpand(FakePtrByte zout, int n) throws Exception {
 		int cur = 0;
 		int limit = 0;
 		int old_limit = 0;
@@ -127,13 +127,13 @@ class ZLib {
 		while (cur + n > limit) limit *= 2;
 
 		zout_start = Arrays.copyOf(zout_start, limit);
-		this.zout = new FakePtrShort(zout_start, cur);
-		zout_end = new FakePtrShort(zout_start, limit);
+		this.zout = new FakePtrByte(zout_start, cur);
+		zout_end = new FakePtrByte(zout_start, limit);
 		return 1;
 	}
 
 	private int stbi__parse_huffman_block() throws Exception {
-		FakePtrShort zout = this.zout.clone();
+		FakePtrByte zout = this.zout.clone();
 		for (; ; ) {
 			int z = stbi__zhuffman_decode(z_length);
 			if (z < 256) {
@@ -174,12 +174,12 @@ class ZLib {
 
 				if (dist == 1) {
 					if (len > 0) {
-						short v = zout.getAt(-dist);
+						int v = zout.getAt(-dist);
 						zout.fillAndIncrease(v, len);
 					}
 				} else {
 					if (len > 0) {
-						FakePtrShort p = new FakePtrShort(zout, -dist);
+						FakePtrByte p = new FakePtrByte(zout, -dist);
 						do {
 							zout.setAndIncrease(p.getAndIncrease());
 						} while (--len != 0);
@@ -296,7 +296,7 @@ class ZLib {
 	}
 
 	private int stbi__parse_uncompressed_block() throws Exception {
-		short[] header = new short[4];
+		int[] header = new int[4];
 		int len = 0;
 		int nlen = 0;
 		int k = 0;
@@ -373,20 +373,20 @@ class ZLib {
 		return 1;
 	}
 
-	private int stbi__do_zlib(short[] obuf, int olen, int exp, int parse_header) throws Exception {
+	private int stbi__do_zlib(byte[] obuf, int olen, int exp, int parse_header) throws Exception {
 		zout_start = obuf;
-		zout = new FakePtrShort(obuf);
-		zout_end = new FakePtrShort(obuf, olen);
+		zout = new FakePtrByte(obuf);
+		zout_end = new FakePtrByte(obuf, olen);
 		z_expandable = exp;
 		return stbi__parse_zlib(parse_header);
 	}
 
-	public static Pair<short[], Integer> stbi_zlib_decode_malloc_guesssize_headerflag(short[] buffer, int len,
+	public static Pair<byte[], Integer> stbi_zlib_decode_malloc_guesssize_headerflag(byte[] buffer, int len,
 																					  int initial_size, int parse_header) throws Exception {
 		ZLib a = new ZLib();
-		short[] p = new short[initial_size];
-		a.zbuffer = new FakePtrShort(buffer);
-		a.zbuffer_end = new FakePtrShort(buffer, +len);
+		byte[] p = new byte[initial_size];
+		a.zbuffer = new FakePtrByte(buffer);
+		a.zbuffer_end = new FakePtrByte(buffer, +len);
 		if (a.stbi__do_zlib(p, initial_size, 1, parse_header) != 0) {
 			return new Pair<>(a.zout_start, a.zout.offset);
 		}

@@ -18,31 +18,31 @@ public class JpgDecoder extends Decoder {
 		public int dc_pred;
 
 		public int x, y, w2, h2;
-		public short[] raw_data;
-		public FakePtrShort data;
+		public byte[] raw_data;
+		public FakePtrByte data;
 		public short[] raw_coeff;
 		public FakePtrShort coeff; // progressive only
-		public short[] linebuf;
+		public byte[] linebuf;
 		public int coeff_w, coeff_h; // number of 8x8 coefficient blocks
 	}
 
 	private interface idct_block_kernel {
-		void Do(FakePtrShort output, int out_stride, FakePtrShort data);
+		void Do(FakePtrByte output, int out_stride, FakePtrShort data);
 	}
 
 	private interface YCbCr_to_RGB_kernel {
-		void Do(FakePtrShort output, FakePtrShort y, FakePtrShort pcb,
-				FakePtrShort pcr, int count, int step);
+		void Do(FakePtrByte output, FakePtrByte y, FakePtrByte pcb,
+				FakePtrByte pcr, int count, int step);
 	}
 
 	private interface Resampler {
-		FakePtrShort Do(FakePtrShort a, FakePtrShort b, FakePtrShort c, int d, int e);
+		FakePtrByte Do(FakePtrByte a, FakePtrByte b, FakePtrByte c, int d, int e);
 	}
 
 	private static class stbi__resample {
 		public int hs;
-		public FakePtrShort line0;
-		public FakePtrShort line1;
+		public FakePtrByte line0;
+		public FakePtrByte line1;
 		public Resampler resample;
 		public int vs;
 		public int w_lores;
@@ -492,20 +492,20 @@ public class JpgDecoder extends Decoder {
 		return 1;
 	}
 
-	private static short stbi__clamp(int x) {
+	private static int stbi__clamp(int x) {
 		if (x < 0)
 			return 0;
 		if (x > 255)
-			return (short) 255;
+			return 255;
 
-		return (short) x;
+		return x;
 	}
 
-	private static void stbi__idct_block(FakePtrShort _out_, int out_stride, FakePtrShort data) {
+	private static void stbi__idct_block(FakePtrByte _out_, int out_stride, FakePtrShort data) {
 		int i = 0;
 		int[] val = new int[64];
 		FakePtrInt v = new FakePtrInt(val);
-		FakePtrShort o;
+		FakePtrByte o;
 		FakePtrShort d = data;
 		for (i = 0; i < 8; ++i, d.increase(), v.increase())
 			if (d.getAt(8) == 0 && d.getAt(16) == 0 && d.getAt(24) == 0 && d.getAt(32) == 0 && d.getAt(40) == 0 && d.getAt(48) == 0 && d.getAt(56) == 0) {
@@ -684,7 +684,7 @@ public class JpgDecoder extends Decoder {
 						if (stbi__jpeg_decode_block(data, huff_dc[img_comp[n].hd], huff_ac[ha], fast_ac[ha], n,
 								dequant[img_comp[n].tq]) == 0)
 							return 0;
-						idct_block_kernel.Do(new FakePtrShort(img_comp[n].data, img_comp[n].w2 * j * 8 + i * 8),
+						idct_block_kernel.Do(new FakePtrByte(img_comp[n].data, img_comp[n].w2 * j * 8 + i * 8),
 								img_comp[n].w2,
 								new FakePtrShort(data));
 						if (--todo <= 0) {
@@ -716,7 +716,7 @@ public class JpgDecoder extends Decoder {
 									if (stbi__jpeg_decode_block(data, huff_dc[img_comp[n].hd], huff_ac[ha], fast_ac[ha], n,
 											dequant[img_comp[n].tq]) == 0)
 										return 0;
-									idct_block_kernel.Do(new FakePtrShort(img_comp[n].data,
+									idct_block_kernel.Do(new FakePtrByte(img_comp[n].data,
 													img_comp[n].w2 * y2 + x2), img_comp[n].w2,
 											new FakePtrShort(data));
 								}
@@ -800,7 +800,7 @@ public class JpgDecoder extends Decoder {
 		int i = 0;
 		for (i = 0; i < 64; ++i) {
 			short val = data.getAt(i);
-			val *= (short) dequant[i];
+			val *= dequant[i];
 			data.setAt(i, val);
 		}
 	}
@@ -817,7 +817,7 @@ public class JpgDecoder extends Decoder {
 					for (i = 0; i < w; ++i) {
 						FakePtrShort data = new FakePtrShort(img_comp[n].coeff, 64 * (i + j * img_comp[n].coeff_w));
 						stbi__jpeg_dequantize(data, dequant[img_comp[n].tq]);
-						idct_block_kernel.Do(new FakePtrShort(img_comp[n].data, img_comp[n].w2 * j * 8 + i * 8),
+						idct_block_kernel.Do(new FakePtrByte(img_comp[n].data, img_comp[n].w2 * j * 8 + i * 8),
 								img_comp[n].w2,
 								data);
 					}
@@ -883,7 +883,7 @@ public class JpgDecoder extends Decoder {
 						v = huff_ac[th].values;
 					}
 
-					for (i = 0; i < n; ++i) v[i] = (short) stbi__get8();
+					for (i = 0; i < n; ++i) v[i] = stbi__get8();
 					if (tc != 0)
 						stbi__build_fast_ac(fast_ac[th], huff_ac[th]);
 					L -= n;
@@ -1089,8 +1089,8 @@ public class JpgDecoder extends Decoder {
 			img_comp[i].coeff = null;
 			img_comp[i].raw_coeff = null;
 			img_comp[i].linebuf = null;
-			img_comp[i].raw_data = new short[img_comp[i].w2 * img_comp[i].h2 + 15];
-			img_comp[i].data = new FakePtrShort(img_comp[i].raw_data);
+			img_comp[i].raw_data = new byte[img_comp[i].w2 * img_comp[i].h2 + 15];
+			img_comp[i].data = new FakePtrByte(img_comp[i].raw_data);
 			if (progressive != 0) {
 				img_comp[i].coeff_w = img_comp[i].w2 / 8;
 				img_comp[i].coeff_h = img_comp[i].h2 / 8;
@@ -1178,72 +1178,71 @@ public class JpgDecoder extends Decoder {
 		return 1;
 	}
 
-	private static FakePtrShort resample_row_1(FakePtrShort _out_, FakePtrShort in_near, FakePtrShort in_far,
-											   int w, int hs) {
+	private static FakePtrByte resample_row_1(FakePtrByte _out_, FakePtrByte in_near, FakePtrByte in_far,
+											  int w, int hs) {
 		return in_near.clone();
 	}
 
-	private static FakePtrShort stbi__resample_row_v_2(FakePtrShort _out_, FakePtrShort in_near,
-													   FakePtrShort in_far, int w, int hs) {
+	private static FakePtrByte stbi__resample_row_v_2(FakePtrByte _out_, FakePtrByte in_near, FakePtrByte in_far,
+													  int w, int hs) {
 		int i = 0;
 		for (i = 0; i < w; ++i) {
-			short value = (short) ((3 * in_near.getAt(i) + in_far.getAt(i) + 2) >> 2);
+			int value = ((3 * in_near.getAt(i) + in_far.getAt(i) + 2) >> 2);
 			_out_.setAt(i, value);
 		}
 		return _out_.clone();
 	}
 
-	private static FakePtrShort stbi__resample_row_h_2(FakePtrShort _out_, FakePtrShort in_near,
-													   FakePtrShort in_far, int w, int hs) {
+	private static FakePtrByte stbi__resample_row_h_2(FakePtrByte _out_, FakePtrByte in_near, FakePtrByte in_far,
+													  int w, int hs) {
 		int i = 0;
-		FakePtrShort input = in_near;
+		FakePtrByte input = in_near;
 		if (w == 1) {
-			short value = input.getAt(0);
+			int value = input.getAt(0);
 			_out_.setAt(0, value);
 			_out_.setAt(1, value);
 			return _out_;
 		}
 
 		_out_.setAt(0, input.getAt(0));
-		_out_.setAt(1, (short) ((input.getAt(0) * 3 + input.getAt(1) + 2) >> 2));
+		_out_.setAt(1, ((input.getAt(0) * 3 + input.getAt(1) + 2) >> 2));
 		for (i = 1; i < w - 1; ++i) {
 			int n = 3 * input.getAt(i) + 2;
-			_out_.setAt(i * 2 + 0, (short) ((n + input.getAt(i - 1)) >> 2));
-			_out_.setAt(i * 2 + 1, (short) ((n + input.getAt(i + 1)) >> 2));
+			_out_.setAt(i * 2 + 0, ((n + input.getAt(i - 1)) >> 2));
+			_out_.setAt(i * 2 + 1, ((n + input.getAt(i + 1)) >> 2));
 		}
 
-		_out_.setAt(i * 2 + 0, (short) ((input.getAt(w - 2) * 3 + input.getAt(w - 1) + 2) >> 2));
+		_out_.setAt(i * 2 + 0, ((input.getAt(w - 2) * 3 + input.getAt(w - 1) + 2) >> 2));
 		_out_.setAt(i * 2 + 1, input.getAt(w - 1));
 		return _out_.clone();
 	}
 
-	private static FakePtrShort stbi__resample_row_hv_2(FakePtrShort _out_, FakePtrShort in_near,
-														FakePtrShort in_far, int w, int hs) {
+	private static FakePtrByte stbi__resample_row_hv_2(FakePtrByte _out_, FakePtrByte in_near, FakePtrByte in_far,
+													   int w, int hs) {
 		int i = 0;
 		int t0 = 0;
 		int t1 = 0;
 		if (w == 1) {
-			short value = (short) ((3 * in_near.getAt(0) + in_far.getAt(0) + 2) >> 2);
+			int value = ((3 * in_near.getAt(0) + in_far.getAt(0) + 2) >> 2);
 			_out_.setAt(0, value);
 			_out_.setAt(1, value);
 			return _out_;
 		}
 
 		t1 = 3 * in_near.getAt(0) + in_far.getAt(0);
-		_out_.setAt(0, (short) ((t1 + 2) >> 2));
+		_out_.setAt(0, ((t1 + 2) >> 2));
 		for (i = 1; i < w; ++i) {
 			t0 = t1;
 			t1 = 3 * in_near.getAt(i) + in_far.getAt(i);
-			_out_.setAt(i * 2 - 1, (short) ((3 * t0 + t1 + 8) >> 4));
-			_out_.setAt(i * 2, (short) ((3 * t1 + t0 + 8) >> 4));
+			_out_.setAt(i * 2 - 1, ((3 * t0 + t1 + 8) >> 4));
+			_out_.setAt(i * 2, ((3 * t1 + t0 + 8) >> 4));
 		}
 
-		_out_.setAt(w * 2 - 1, (short) ((t1 + 2) >> 2));
+		_out_.setAt(w * 2 - 1, ((t1 + 2) >> 2));
 		return _out_.clone();
 	}
 
-	private static FakePtrShort stbi__resample_row_generic(FakePtrShort _out_, FakePtrShort in_near,
-														   FakePtrShort in_far, int w, int hs) {
+	private static FakePtrByte stbi__resample_row_generic(FakePtrByte _out_, FakePtrByte in_near, FakePtrByte in_far, int w, int hs) {
 		int i = 0;
 		int j = 0;
 		for (i = 0; i < w; ++i)
@@ -1252,9 +1251,9 @@ public class JpgDecoder extends Decoder {
 		return _out_.clone();
 	}
 
-	private static void stbi__YCbCr_to_RGB_row(FakePtrShort out, FakePtrShort y, FakePtrShort pcb,
-											   FakePtrShort pcr, int count, int step) {
-		FakePtrShort _out_ = out.clone();
+	private static void stbi__YCbCr_to_RGB_row(FakePtrByte out, FakePtrByte y, FakePtrByte pcb,
+											   FakePtrByte pcr, int count, int step) {
+		FakePtrByte _out_ = out.clone();
 		int i = 0;
 		for (i = 0; i < count; ++i) {
 			int y_fixed = (y.getAt(i) << 20) + (1 << 19);
@@ -1274,7 +1273,7 @@ public class JpgDecoder extends Decoder {
 			_out_.setAt(0, stbi__clamp(r));
 			_out_.setAt(1, stbi__clamp(g));
 			_out_.setAt(2, stbi__clamp(b));
-			_out_.setAt(3, (short) 255);
+			_out_.setAt(3, 255);
 			_out_.move(step);
 		}
 	}
@@ -1289,9 +1288,9 @@ public class JpgDecoder extends Decoder {
 		stbi__free_jpeg_components(img_n, 0);
 	}
 
-	private static short stbi__blinn_8x8(short x, short y) {
+	private static int stbi__blinn_8x8(int x, int y) {
 		long t = (long) (x * y + 128);
-		return (short) ((t + (t >> 8)) >> 8);
+		return (int) ((t + (t >> 8)) >> 8);
 	}
 
 	private ImageResult load_jpeg_image(ColorComponents req_comp) throws Exception {
@@ -1317,18 +1316,14 @@ public class JpgDecoder extends Decoder {
 		int k = 0;
 		int i = 0;
 		int j = 0;
-		short[] output;
-		ArrayList<FakePtrShort> coutput = new ArrayList<FakePtrShort>();
-		coutput.add(null);
-		coutput.add(null);
-		coutput.add(null);
-		coutput.add(null);
+		byte[] output;
+		FakePtrByte[] coutput = new FakePtrByte[4];
 		stbi__resample[] res_comp = new stbi__resample[4];
 		for (int kkk = 0; kkk < res_comp.length; ++kkk)
 			res_comp[kkk] = new stbi__resample();
 		for (k = 0; k < decode_n; ++k) {
 			stbi__resample r = res_comp[k];
-			img_comp[k].linebuf = new short[img_x + 3];
+			img_comp[k].linebuf = new byte[img_x + 3];
 			r.hs = img_h_max / img_comp[k].h;
 			r.vs = img_v_max / img_comp[k].v;
 			r.ystep = r.vs >> 1;
@@ -1348,18 +1343,18 @@ public class JpgDecoder extends Decoder {
 				r.resample = (a, b, c, d, e) -> stbi__resample_row_generic(a, b, c, d, e);
 		}
 
-		output = new short[n * img_x * img_y];
-		FakePtrShort ptr = new FakePtrShort(output);
+		output = new byte[n * img_x * img_y];
+		FakePtrByte ptr = new FakePtrByte(output);
 		for (j = 0; j < img_y; ++j) {
-			FakePtrShort _out_ = ptr.cloneAdd(n * img_x * j);
+			FakePtrByte _out_ = ptr.cloneAdd(n * img_x * j);
 			for (k = 0; k < decode_n; ++k) {
 				stbi__resample r = res_comp[k];
 				int y_bot = r.ystep >= r.vs >> 1 ? 1 : 0;
 
-				coutput.set(k, r.resample.Do(new FakePtrShort(img_comp[k].linebuf),
+				coutput[k] = r.resample.Do(new FakePtrByte(img_comp[k].linebuf),
 						y_bot != 0 ? r.line1 : r.line0,
 						y_bot != 0 ? r.line0 : r.line1,
-						r.w_lores, r.hs));
+						r.w_lores, r.hs);
 				if (++r.ystep >= r.vs) {
 					r.ystep = 0;
 					r.line0 = r.line1.clone();
@@ -1369,47 +1364,47 @@ public class JpgDecoder extends Decoder {
 			}
 
 			if (n >= 3) {
-				FakePtrShort y = coutput.get(0);
+				FakePtrByte y = coutput[0];
 				if (img_n == 3) {
 					if (is_rgb != 0)
 						for (i = 0; i < img_x; ++i) {
 							_out_.setAt(0, y.getAt(i));
-							_out_.setAt(1, coutput.get(1).getAt(i));
-							_out_.setAt(2, coutput.get(2).getAt(i));
-							_out_.setAt(3, (short) 255);
+							_out_.setAt(1, coutput[1].getAt(i));
+							_out_.setAt(2, coutput[2].getAt(i));
+							_out_.setAt(3, 255);
 							_out_.move(n);
 						}
 					else
-						YCbCr_to_RGB_kernel.Do(_out_, y, coutput.get(1), coutput.get(2), img_x, n);
+						YCbCr_to_RGB_kernel.Do(_out_, y, coutput[1], coutput[2], img_x, n);
 				} else if (img_n == 4) {
 					if (app14_color_transform == 0) {
 						for (i = 0; i < img_x; ++i) {
-							short m = coutput.get(3).getAt(i);
-							_out_.setAt(0, stbi__blinn_8x8(coutput.get(0).getAt(i), m));
-							_out_.setAt(1, stbi__blinn_8x8(coutput.get(1).getAt(i), m));
-							_out_.setAt(2, stbi__blinn_8x8(coutput.get(2).getAt(i), m));
-							_out_.setAt(3, (short) 255);
+							int m = coutput[3].getAt(i);
+							_out_.setAt(0, stbi__blinn_8x8(coutput[0].getAt(i), m));
+							_out_.setAt(1, stbi__blinn_8x8(coutput[1].getAt(i), m));
+							_out_.setAt(2, stbi__blinn_8x8(coutput[2].getAt(i), m));
+							_out_.setAt(3, 255);
 							_out_.move(n);
 						}
 					} else if (app14_color_transform == 2) {
-						YCbCr_to_RGB_kernel.Do(_out_, y, coutput.get(1), coutput.get(2), img_x, n);
+						YCbCr_to_RGB_kernel.Do(_out_, y, coutput[1], coutput[2], img_x, n);
 						for (i = 0; i < img_x; ++i) {
-							short m = coutput.get(3).getAt(i);
-							_out_.setAt(0, stbi__blinn_8x8((short) (255 - _out_.getAt(0)), m));
-							_out_.setAt(1, stbi__blinn_8x8((short) (255 - _out_.getAt(1)), m));
-							_out_.setAt(2, stbi__blinn_8x8((short) (255 - _out_.getAt(2)), m));
+							int m = coutput[3].getAt(i);
+							_out_.setAt(0, stbi__blinn_8x8((255 - _out_.getAt(0)), m));
+							_out_.setAt(1, stbi__blinn_8x8((255 - _out_.getAt(1)), m));
+							_out_.setAt(2, stbi__blinn_8x8((255 - _out_.getAt(2)), m));
 							_out_.move(n);
 						}
 					} else {
-						YCbCr_to_RGB_kernel.Do(_out_, y, coutput.get(1), coutput.get(2), img_x, n);
+						YCbCr_to_RGB_kernel.Do(_out_, y, coutput[1], coutput[2], img_x, n);
 					}
 				} else {
 					for (i = 0; i < img_x; ++i) {
-						short v = y.getAt(i);
+						int v = y.getAt(i);
 						_out_.setAt(0, v);
 						_out_.setAt(1, v);
 						_out_.setAt(2, v);
-						_out_.setAt(3, (short) 255);
+						_out_.setAt(3, 255);
 						_out_.move(n);
 					}
 				}
@@ -1417,38 +1412,38 @@ public class JpgDecoder extends Decoder {
 				if (is_rgb != 0) {
 					if (n == 1)
 						for (i = 0; i < img_x; ++i) {
-							_out_.setAndIncrease(Utility.stbi__compute_y(coutput.get(0).getAt(i), coutput.get(1).getAt(i), coutput.get(2).getAt(i)));
+							_out_.setAndIncrease(Utility.stbi__compute_y(coutput[0].getAt(i), coutput[1].getAt(i), coutput[2].getAt(i)));
 						}
 					else
 						for (i = 0; i < img_x; ++i, _out_.move(2)) {
-							_out_.setAt(0, Utility.stbi__compute_y(coutput.get(0).getAt(i), coutput.get(1).getAt(i), coutput.get(2).getAt(i)));
-							_out_.setAt(1, (short) 255);
+							_out_.setAt(0, Utility.stbi__compute_y(coutput[0].getAt(i), coutput[1].getAt(i), coutput[2].getAt(i)));
+							_out_.setAt(1, 255);
 						}
 				} else if (img_n == 4 && app14_color_transform == 0) {
 					for (i = 0; i < img_x; ++i) {
-						short m = coutput.get(3).getAt(i);
-						short r = stbi__blinn_8x8(coutput.get(0).getAt(i), m);
-						short g = stbi__blinn_8x8(coutput.get(1).getAt(i), m);
-						short b = stbi__blinn_8x8(coutput.get(2).getAt(i), m);
+						int m = coutput[3].getAt(i);
+						int r = stbi__blinn_8x8(coutput[0].getAt(i), m);
+						int g = stbi__blinn_8x8(coutput[1].getAt(i), m);
+						int b = stbi__blinn_8x8(coutput[2].getAt(i), m);
 						_out_.setAt(0, Utility.stbi__compute_y(r, g, b));
-						_out_.setAt(1, (short) 255);
+						_out_.setAt(1, 255);
 						_out_.move(n);
 					}
 				} else if (img_n == 4 && app14_color_transform == 2) {
 					for (i = 0; i < img_x; ++i) {
-						_out_.setAt(0, stbi__blinn_8x8((short) (255 - coutput.get(0).getAt(i)), coutput.get(3).getAt(i)));
-						_out_.setAt(1, (short) 255);
+						_out_.setAt(0, stbi__blinn_8x8((255 - coutput[0].getAt(i)), coutput[3].getAt(i)));
+						_out_.setAt(1, 255);
 						_out_.move(n);
 					}
 				} else {
-					FakePtrShort y = coutput.get(0);
+					FakePtrByte y = coutput[0];
 					if (n == 1)
 						for (i = 0; i < img_x; ++i)
 							_out_.setAt(i, y.getAt(i));
 					else
 						for (i = 0; i < img_x; ++i) {
 							_out_.setAndIncrease(y.getAt(i));
-							_out_.setAndIncrease((short) 255);
+							_out_.setAndIncrease(255);
 						}
 				}
 			}
@@ -1464,7 +1459,7 @@ public class JpgDecoder extends Decoder {
 				ColorComponents.fromInt(comp),
 				req_comp != null ? req_comp : ColorComponents.fromInt(comp),
 				8,
-				Utility.toByteArray(output));
+				output);
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
