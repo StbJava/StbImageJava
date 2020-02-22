@@ -67,7 +67,7 @@ class Utility
 
 	public static int stbi__compute_y_16(int r, int g, int b)
 	{
-		return (int)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+		return ((r * 77) + (g * 150) + (29 * b)) >> 8;
 	}
 
 	public static byte[] stbi__convert_format16(byte[] data, int img_n, int req_comp, long x, long y)
@@ -186,21 +186,21 @@ class Utility
 			return data;
 
 		byte[] good = new byte[req_comp * x * y];
-		for (j = (int)(0); (j) < ((int)(y)); ++j)
+		for (j = 0; (j) < y; ++j)
 		{
-			FakePtrByte src = new FakePtrByte(data, (int) (j * x * img_n));
-			FakePtrByte dest = new FakePtrByte(good, (int) (j * x * req_comp));
+			FakePtrByte src = new FakePtrByte(data, j * x * img_n);
+			FakePtrByte dest = new FakePtrByte(good, j * x * req_comp);
 			switch (((img_n) * 8 + (req_comp)))
 			{
 				case ((1) * 8 + (2)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.increase(), dest.move(2))
+					for (i = x - 1; (i) >= (0); --i, src.increase(), dest.move(2))
 					{
 						dest.setAt(0, src.getAt(0));
 						dest.setAt(1, (short) 255);
 					}
 					break;
 				case ((1) * 8 + (3)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.increase(), dest.move(3))
+					for (i = x - 1; (i) >= (0); --i, src.increase(), dest.move(3))
 					{
 						int val = src.getAt(0);
 						dest.setAt(0, val);
@@ -209,7 +209,7 @@ class Utility
 					}
 					break;
 				case ((1) * 8 + (4)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.increase(), dest.move(4))
+					for (i = x - 1; (i) >= (0); --i, src.increase(), dest.move(4))
 					{
 						int val = src.getAt(0);
 						dest.setAt(0, val);
@@ -219,14 +219,14 @@ class Utility
 					}
 					break;
 				case ((2) * 8 + (1)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(1))
+					for (i = x - 1; (i) >= (0); --i, src.move(2), dest.move(1))
 					{
 						int val = src.getAt(0);
 						dest.setAt(0, val);
 					}
 					break;
 				case ((2) * 8 + (3)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(3))
+					for (i = x - 1; (i) >= (0); --i, src.move(2), dest.move(3))
 					{
 						int val = src.getAt(0);
 						dest.setAt(0, val);
@@ -235,7 +235,7 @@ class Utility
 					}
 					break;
 				case ((2) * 8 + (4)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(2), dest.move(4))
+					for (i = x - 1; (i) >= (0); --i, src.move(2), dest.move(4))
 					{
 						int val = src.getAt(0);
 						dest.setAt(0, val);
@@ -245,7 +245,7 @@ class Utility
 					}
 					break;
 				case ((3) * 8 + (4)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(3), dest.move(4))
+					for (i = x - 1; (i) >= (0); --i, src.move(3), dest.move(4))
 					{
 						dest.setAt(0, src.getAt(0));
 						dest.setAt(1, src.getAt(1));
@@ -254,33 +254,33 @@ class Utility
 					}
 					break;
 				case ((3) * 8 + (1)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(3), dest.move(1))
+					for (i = x - 1; (i) >= (0); --i, src.move(3), dest.move(1))
 					{
 						dest.setAt(0, stbi__compute_y(src.getAt(0), src.getAt(1), src.getAt(2)));
 					}
 					break;
 				case ((3) * 8 + (2)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(3), dest.move(2))
+					for (i = x - 1; (i) >= (0); --i, src.move(3), dest.move(2))
 					{
 						dest.setAt(0, stbi__compute_y(src.getAt(0), src.getAt(1), src.getAt(2)));
 						dest.setAt(1, (short)(255));
 					}
 					break;
 				case ((4) * 8 + (1)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(4), dest.move(1))
+					for (i = x - 1; (i) >= (0); --i, src.move(4), dest.move(1))
 					{
 						dest.setAt(0, stbi__compute_y(src.getAt(0), src.getAt(1), src.getAt(2)));
 					}
 					break;
 				case ((4) * 8 + (2)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(4), dest.move(2))
+					for (i = x - 1; (i) >= (0); --i, src.move(4), dest.move(2))
 					{
 						dest.setAt(0, stbi__compute_y(src.getAt(0), src.getAt(1), src.getAt(2)));
 						dest.setAt(1, src.getAt(3));
 					}
 					break;
 				case ((4) * 8 + (3)):
-					for (i = (int)(x - 1); (i) >= (0); --i, src.move(4), dest.move(3))
+					for (i = x - 1; (i) >= (0); --i, src.move(4), dest.move(3))
 					{
 						dest.setAt(0, src.getAt(0));
 						dest.setAt(1, src.getAt(1));
@@ -319,11 +319,11 @@ class Utility
 	public static int[] stbi__convert_8_to_16(short[] orig, int w, int h, int channels)
 	{
 		int i = 0;
-		int img_len = (int)(w * h * channels);
+		int img_len = w * h * channels;
 		int[] enlarged = new int[img_len];
-		for (i = (int)(0); (i) < (img_len); ++i)
+		for (i = 0; (i) < (img_len); ++i)
 		{
-			enlarged[i] = ((int)((orig[i] << 8) + orig[i]));
+			enlarged[i] = (orig[i] << 8) + orig[i];
 		}
 
 		return enlarged;

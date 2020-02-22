@@ -87,7 +87,7 @@ public class GifDecoder extends Decoder {
 	private void stbi__out_gif_code(int code) {
 		int idx = 0;
 		if (codes[code].prefix >= 0)
-			stbi__out_gif_code((int) codes[code].prefix);
+			stbi__out_gif_code(codes[code].prefix);
 		if (cur_y >= max_y)
 			return;
 		idx = cur_x + cur_y;
@@ -180,7 +180,7 @@ public class GifDecoder extends Decoder {
 						stbi__err("illegal code in raster");
 					}
 
-					stbi__out_gif_code((int) code);
+					stbi__out_gif_code(code);
 					if ((avail & codemask) == 0 && avail <= 0x0FFF) {
 						codesize++;
 						codemask = (1 << codesize) - 1;
@@ -235,7 +235,7 @@ public class GifDecoder extends Decoder {
 
 		Arrays.fill(history, 0, w * h, (short) 0);
 		for (; ; ) {
-			int tag = (int) stbi__get8();
+			int tag = stbi__get8();
 			switch (tag) {
 				case 0x2C: {
 					int x = 0;
@@ -292,7 +292,7 @@ public class GifDecoder extends Decoder {
 				}
 				case 0x21: {
 					int len = 0;
-					int ext = (int) stbi__get8();
+					int ext = stbi__get8();
 					if (ext == 0xF9) {
 						len = stbi__get8();
 						if (len == 4) {
@@ -415,9 +415,7 @@ public class GifDecoder extends Decoder {
 		sz = Utility.stbi__get8(stream);
 		if (sz != '9' && sz != '7')
 			return false;
-		if (Utility.stbi__get8(stream) != 'a')
-			return false;
-		return true;
+		return Utility.stbi__get8(stream) == 'a';
 	}
 
 	public static boolean Test(byte[] data) {

@@ -5,30 +5,86 @@ import org.lwjgl.stb.STBImage;
 import org.nothings.stb.image.ColorComponents;
 import org.nothings.stb.image.ImageResult;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Testing {
+	static class LoadResult {
+		public ImageResult Image;
+		public int TimeInMs;
+	}
+
+	static class LoadingTimes {
+		private final ConcurrentHashMap<String, Integer> _byExtension = new ConcurrentHashMap<String, Integer>();
+		private final ConcurrentHashMap<String, Integer> _byExtensionCount = new ConcurrentHashMap<String, Integer>();
+		private int _total, _totalCount;
+
+		public void add(String extension, int value) {
+
+			if (!_byExtension.containsKey(extension)) {
+				_byExtension.put(extension, 0);
+				_byExtensionCount.put(extension, 0);
+			}
+
+			int val = _byExtension.get(extension);
+			val += value;
+			_byExtension.put(extension, val);
+
+			val = _byExtensionCount.get(extension);
+			++val;
+			_byExtensionCount.put(extension, val);
+			_total += value;
+			++_totalCount;
+		}
+
+		public String buildString() {
+			StringBuilder sb = new StringBuilder();
+
+			for (String key : _byExtension.keySet()) {
+				sb.append(key + ": " + _byExtension.get(key) + ", ");
+			}
+
+			sb.append("Total: " + _total + " ms");
+
+			return sb.toString();
+		}
+
+		public String buildStringCount() {
+			StringBuilder sb = new StringBuilder();
+			for (String key : _byExtensionCount.keySet()) {
+				sb.append(key + ": " + _byExtensionCount.get(key) + ", ");
+			}
+
+			sb.append("Total: " + _totalCount + "");
+
+			return sb.toString();
+		}
+	}
+
+
 	interface LoadInterface {
 		ImageResult Do() throws Exception;
 	}
 
-	private static int tasksStarted;
-	private static int filesProcessed, filesMatches;
-	private static int stbJavaLoadingFromMemory;
-	private static int stbNativeLoadingFromMemory;
+	private static final AtomicInteger tasksStarted = new AtomicInteger();
+	private static final AtomicInteger filesProcessed = new AtomicInteger();
+	private static final AtomicInteger filesMatches = new AtomicInteger();
+	private static final LoadingTimes stbImageJavaLoadingTimes = new LoadingTimes();
+	private static final LoadingTimes stbNativeLoadingTimes = new LoadingTimes();
+	private static final LoadingTimes imageIoLoadingTimes = new LoadingTimes();
 
 	private static final ExecutorService pool = Executors.newFixedThreadPool(3);
 
 	private static final int LoadTries = 10;
-
-	private static final int[] JpgQualities = {1, 4, 8, 16, 25, 32, 50, 64, 72, 80, 90, 100};
-	private static final String[] FormatNames = {"BMP", "TGA", "HDR", "PNG", "JPG"};
 
 	public static void Log(String message) {
 		System.out.println(Thread.currentThread().getId() + " -- " + message);
@@ -50,13 +106,13 @@ public class Testing {
 			Runnable runnable = () -> ThreadProc(files[i2].getAbsolutePath());
 
 			pool.execute(runnable);
-			tasksStarted++;
+			tasksStarted.incrementAndGet();
 		}
 
 		while (true) {
 			Thread.sleep(1000);
 
-			if (tasksStarted == 0) {
+			if (tasksStarted.get() == 0) {
 				break;
 			}
 		}
@@ -64,83 +120,56 @@ public class Testing {
 		return true;
 	}
 
-	private static void ParseTest(LoadInterface load1, LoadInterface load2) throws Exception {
-		Log("With StbJava");
+	private static LoadResult ParseTest(String name, LoadInterface load) throws Exception {
+		Log("With " + name);
 
 		long start = System.currentTimeMillis();
 
 		ImageResult parsed = null;
 		for (int i = 0; i < LoadTries; ++i) {
-			parsed = load1.Do();
+			parsed = load.Do();
 		}
 
-		Log(String.format("x: %d, y: %d, comp: %s, size: %d", parsed.getWidth(), parsed.getHeight(), parsed.getColorComponents(), parsed.getData().length));
+		Log(String.format("x: %d, y: %d, comp: %s, size: %d", parsed.getWidth(), parsed.getHeight(),
+				parsed.getColorComponents(),
+				parsed.getData() != null ? parsed.getData().length : 0));
 
-		int load1Passed = (int) (System.currentTimeMillis() - start) / LoadTries;
+		int passed = (int) (System.currentTimeMillis() - start) / LoadTries;
 
-		Log(String.format("Span: %d ms", load1Passed));
+		Log(String.format("Span: %d ms", passed));
 
-		Log("With Stb.Native");
-		ImageResult parsed2 = null;
+		LoadResult result = new LoadResult();
+		result.Image = parsed;
+		result.TimeInMs = passed;
 
-		start = System.currentTimeMillis();
-		for (int i = 0; i < LoadTries; ++i) {
-			parsed2 = load2.Do();
-		}
-
-		Log(String.format("x: %d, y: %d, comp: %s, size: %d", parsed2.getWidth(), parsed2.getHeight(), parsed2.getColorComponents(), parsed2.getData().length));
-		int load2Passed = (int) (System.currentTimeMillis() - start) / LoadTries;
-		Log(String.format("Span: %d ms", load2Passed));
-
-		stbJavaLoadingFromMemory += load1Passed;
-		stbNativeLoadingFromMemory += load2Passed;
-
-		if (parsed.getWidth() != parsed2.getWidth()) {
-			throw new Exception(String.format("Inconsistent x: StbJava=%d, Stb.Native=%d", parsed.getWidth(), parsed2.getWidth()));
-		}
-
-		if (parsed.getHeight() != parsed2.getHeight()) {
-			throw new Exception(String.format("Inconsistent y: StbJava=%d, Stb.Native=%d", parsed.getHeight(), parsed2.getHeight()));
-		}
-
-		if (parsed.getColorComponents() != parsed2.getColorComponents()) {
-			throw new Exception(String.format("Inconsistent comp: StbJava=%d, Stb.Native=%d", parsed.getColorComponents(), parsed2.getColorComponents()));
-		}
-
-		if (parsed.getData().length != parsed2.getData().length) {
-			throw new Exception(String.format("Inconsistent parsed length: StbJava=%d, Stb.Native=%d", parsed.getData().length, parsed2.getData().length));
-		}
-
-		for (int i = 0; i < parsed.getData().length; ++i) {
-
-			if (Math.abs(parsed.getData()[i] - parsed2.getData()[i]) > 0) {
-				throw new Exception(String.format("Inconsistent data: index=%d, StbJava=%d, Stb.Native=%d",
-						i,
-						(int) parsed.getData()[i],
-						(int) parsed2.getData()[i]));
-			}
-		}
+		return result;
 	}
 
 	private static void ThreadProc(final String f) {
 		if (!f.endsWith(".bmp") && !f.endsWith(".jpg") && !f.endsWith(".png") &&
 				!f.endsWith(".jpg") && !f.endsWith(".psd") && !f.endsWith(".pic") &&
 				!f.endsWith(".tga")) {
-			--tasksStarted;
+			tasksStarted.decrementAndGet();
 			return;
 		}
 
-		try {
 
+		int i = f.lastIndexOf('.');
+		String extension = f.substring(i + 1);
+		boolean match = false;
+
+		try {
 			Log("");
-			Log(String.format("%s -- #%d: Loading %s into memory", new Date().toString(), filesProcessed, f));
+			Log(String.format("%s -- #%d: Loading %s into memory", new Date().toString(), filesProcessed.get(), f));
 			Log("----------------------------");
 
-			ParseTest(
+			LoadResult stbImageJavaResult = ParseTest("StbImageJava",
 					() -> {
 						final byte[] data = Files.readAllBytes(new File(f).toPath());
 						return ImageResult.FromData(data, ColorComponents.RedGreenBlueAlpha);
-					},
+					});
+
+			LoadResult stbNativeResult = ParseTest("Stb.Native",
 					() -> {
 						IntBuffer x = BufferUtils.createIntBuffer(1);
 						IntBuffer y = BufferUtils.createIntBuffer(1);
@@ -166,17 +195,74 @@ public class Testing {
 								bytes);
 					});
 
-			++filesMatches;
+			ImageResult parsed = stbImageJavaResult.Image;
+			ImageResult parsed2 = stbNativeResult.Image;
+
+			if (parsed.getWidth() != parsed2.getWidth()) {
+				throw new Exception(String.format("Inconsistent x: StbJava=%d, Stb.Native=%d", parsed.getWidth(), parsed2.getWidth()));
+			}
+
+			if (parsed.getHeight() != parsed2.getHeight()) {
+				throw new Exception(String.format("Inconsistent y: StbJava=%d, Stb.Native=%d", parsed.getHeight(), parsed2.getHeight()));
+			}
+
+			if (parsed.getColorComponents() != parsed2.getColorComponents()) {
+				throw new Exception(String.format("Inconsistent comp: StbJava=%d, Stb.Native=%d", parsed.getColorComponents(), parsed2.getColorComponents()));
+			}
+
+			if (parsed.getData().length != parsed2.getData().length) {
+				throw new Exception(String.format("Inconsistent parsed length: StbJava=%d, Stb.Native=%d", parsed.getData().length, parsed2.getData().length));
+			}
+
+			for (i = 0; i < parsed.getData().length; ++i) {
+
+				if (Math.abs(parsed.getData()[i] - parsed2.getData()[i]) > 0) {
+					throw new Exception(String.format("Inconsistent data: index=%d, StbJava=%d, Stb.Native=%d",
+							i,
+							(int) parsed.getData()[i],
+							(int) parsed2.getData()[i]));
+				}
+			}
+
+			if (!extension.equals("tga") && !extension.equals("psd")) {
+				LoadResult imageSharpResult = ParseTest(
+						"ImageIO",
+						() -> {
+							BufferedImage image = ImageIO.read(new File(f));
+
+							int numComp = image.getColorModel().getNumComponents();
+							ColorComponents comp = ColorComponents.fromInt(numComp);
+							return new ImageResult(image.getWidth(),
+									image.getHeight(),
+									comp,
+									comp,
+									8,
+									null);
+						});
+
+				imageIoLoadingTimes.add(extension, imageSharpResult.TimeInMs);
+			}
+
+			match = true;
+			stbImageJavaLoadingTimes.add(extension, stbImageJavaResult.TimeInMs);
+			stbNativeLoadingTimes.add(extension, stbNativeResult.TimeInMs);
+
 		} catch (Exception ex) {
 			Log("Error: " + ex.getMessage());
 		} finally {
-			++filesProcessed;
-			--tasksStarted;
+			if (match) {
+				filesMatches.incrementAndGet();
+			}
 
-			Log(String.format("Total StbJava Loading From memory Time: %d ms", stbJavaLoadingFromMemory));
-			Log(String.format("Total Stb.Native Loading From memory Time: %d ms", stbNativeLoadingFromMemory));
-			Log(String.format("Files matches/processed: %d/%d", filesMatches, filesProcessed));
-			Log(String.format("Tasks left: %d", tasksStarted));
+			filesProcessed.incrementAndGet();
+			tasksStarted.decrementAndGet();
+
+			Log(String.format("StbImageJava - %s", stbImageJavaLoadingTimes.buildString()));
+			Log(String.format("Stb.Native - %s", stbNativeLoadingTimes.buildString()));
+			Log(String.format("ImageIO - %s", imageIoLoadingTimes.buildString()));
+			Log(String.format("Total files processed - %s", stbImageJavaLoadingTimes.buildStringCount()));
+			Log(String.format("StbImageJava/Stb.Native matches/processed - %d/%d", filesMatches.get(), filesProcessed.get()));
+			Log(String.format("Tasks left - %d", tasksStarted.get()));
 		}
 	}
 

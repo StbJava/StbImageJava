@@ -20,7 +20,6 @@ public class TgaDecoder extends Decoder {
 			case 16:
 				if (bits_per_pixel == 16 && is_grey != 0)
 					return new Pair<>(2, false);
-				;
 				return new Pair<>(3, true);
 			case 24:
 			case 32:
@@ -31,8 +30,8 @@ public class TgaDecoder extends Decoder {
 	}
 
 	private void stbi__tga_read_rgb16(FakePtrByte _out_) throws Exception {
-		int px = (int) stbi__get16le();
-		int fiveBitMask = (int) 31;
+		int px = stbi__get16le();
+		int fiveBitMask = 31;
 		int r = (px >> 10) & fiveBitMask;
 		int g = (px >> 5) & fiveBitMask;
 		int b = px & fiveBitMask;
@@ -42,21 +41,21 @@ public class TgaDecoder extends Decoder {
 	}
 
 	private ImageResult InternalDecode(ColorComponents requiredComponents) throws Exception {
-		int tga_offset = (int) stbi__get8();
-		int tga_indexed = (int) stbi__get8();
-		int tga_image_type = (int) stbi__get8();
+		int tga_offset = stbi__get8();
+		int tga_indexed = stbi__get8();
+		int tga_image_type = stbi__get8();
 		int tga_is_RLE = 0;
 		int tga_palette_start = stbi__get16le();
 		int tga_palette_len = stbi__get16le();
-		int tga_palette_bits = (int) stbi__get8();
+		int tga_palette_bits = stbi__get8();
 		int tga_x_origin = stbi__get16le();
 		int tga_y_origin = stbi__get16le();
 		int tga_width = stbi__get16le();
 		int tga_height = stbi__get16le();
-		int tga_bits_per_pixel = (int) stbi__get8();
+		int tga_bits_per_pixel = stbi__get8();
 		int tga_comp = 0;
 		int tga_rgb16 = 0;
-		int tga_inverted = (int) stbi__get8();
+		int tga_inverted = stbi__get8();
 		byte[] tga_data;
 		byte[] tga_palette = null;
 		int i = 0;
@@ -110,7 +109,7 @@ public class TgaDecoder extends Decoder {
 			for (i = 0; i < tga_width * tga_height; ++i) {
 				if (tga_is_RLE != 0) {
 					if (RLE_count == 0) {
-						int RLE_cmd = (int) stbi__get8();
+						int RLE_cmd = stbi__get8();
 						RLE_count = 1 + (RLE_cmd & 127);
 						RLE_repeating = RLE_cmd >> 7;
 						read_next_pixel = 1;
@@ -181,10 +180,10 @@ public class TgaDecoder extends Decoder {
 			ByteArrayInputStream stream = new ByteArrayInputStream(data);
 
 			Utility.stbi__get8(stream);
-			int tga_color_type = (int) Utility.stbi__get8(stream);
+			int tga_color_type = Utility.stbi__get8(stream);
 			if (tga_color_type > 1)
 				return false;
-			int sz = (int) Utility.stbi__get8(stream);
+			int sz = Utility.stbi__get8(stream);
 			if (tga_color_type == 1) {
 				if (sz != 1 && sz != 9)
 					return false;
@@ -206,10 +205,7 @@ public class TgaDecoder extends Decoder {
 			sz = Utility.stbi__get8(stream);
 			if (tga_color_type == 1 && sz != 8 && sz != 16)
 				return false;
-			if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
-				return false;
-
-			return true;
+			return sz == 8 || sz == 15 || sz == 16 || sz == 24 || sz == 32;
 		} catch (Exception ex) {
 			return false;
 		}

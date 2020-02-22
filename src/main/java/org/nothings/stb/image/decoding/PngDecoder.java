@@ -83,7 +83,7 @@ public class PngDecoder extends Decoder {
 		int k = 0;
 		int output_shorts = out_n * shorts;
 		int filter_shorts = img_n * shorts;
-		int width = (int) x;
+		int width = x;
 		_out_ = new byte[x * y * output_shorts];
 		img_width_shorts = ((img_n * x * depth + 7) >> 3);
 		img_len = (img_width_shorts + 1) * y;
@@ -99,7 +99,7 @@ public class PngDecoder extends Decoder {
 			if (depth < 8) {
 				cur.move(x * out_n - img_width_shorts);
 				filter_shorts = 1;
-				width = (int) img_width_shorts;
+				width = img_width_shorts;
 			}
 
 			prior = new FakePtrByte(cur, -stride);
@@ -251,7 +251,7 @@ public class PngDecoder extends Decoder {
 				FakePtrByte _in_ = new FakePtrByte(ptr, stride * j + x * out_n - img_width_shorts);
 				short scale = (color == 0 ? stbi__depth_scale_table[depth] : 1);
 				if (depth == 4) {
-					for (k = (int) (x * img_n); k >= 2; k -= 2, _in_.increase()) {
+					for (k = x * img_n; k >= 2; k -= 2, _in_.increase()) {
 						cur.setAndIncrease((scale * (_in_.get() >> 4)));
 						cur.setAndIncrease((scale * (_in_.get() & 0x0f)));
 					}
@@ -259,7 +259,7 @@ public class PngDecoder extends Decoder {
 					if (k > 0)
 						cur.setAndIncrease((scale * (_in_.get() >> 4)));
 				} else if (depth == 2) {
-					for (k = (int) (x * img_n); k >= 4; k -= 4, _in_.increase()) {
+					for (k = x * img_n; k >= 4; k -= 4, _in_.increase()) {
 						cur.setAndIncrease((scale * (_in_.get() >> 6)));
 						cur.setAndIncrease((scale * ((_in_.get() >> 4) & 0x03)));
 						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x03)));
@@ -273,7 +273,7 @@ public class PngDecoder extends Decoder {
 					if (k > 2)
 						cur.setAndIncrease((scale * ((_in_.get() >> 2) & 0x03)));
 				} else if (depth == 1) {
-					for (k = (int) (x * img_n); k >= 8; k -= 8, _in_.increase()) {
+					for (k = x * img_n; k >= 8; k -= 8, _in_.increase()) {
 						cur.setAndIncrease((scale * (_in_.get() >> 7)));
 						cur.setAndIncrease((scale * ((_in_.get() >> 6) & 0x01)));
 						cur.setAndIncrease((scale * ((_in_.get() >> 5) & 0x01)));
@@ -301,15 +301,15 @@ public class PngDecoder extends Decoder {
 				}
 
 				if (img_n != out_n) {
-					int q = 0;
+					int q;
 					cur = new FakePtrByte(ptr, stride * j);
 					if (img_n == 1)
-						for (q = (int) (x - 1); q >= 0; --q) {
+						for (q = x - 1; q >= 0; --q) {
 							cur.setAt(q * 2 + 1, 255);
 							cur.setAt(q * 2 + 0, cur.getAt(q));
 						}
 					else
-						for (q = (int) (x - 1); q >= 0; --q) {
+						for (q = x - 1; q >= 0; --q) {
 							cur.setAt(q * 4 + 3, 255);
 							cur.setAt(q * 4 + 2, cur.getAt(q * 3 + 2));
 							cur.setAt(q * 4 + 1, cur.getAt(q * 3 + 1));
@@ -408,7 +408,7 @@ public class PngDecoder extends Decoder {
 
 	private int stbi__compute_transparency(short[] tc, int out_n) {
 		long i = 0;
-		long pixel_count = (long) (img_x * img_y);
+		long pixel_count = img_x * img_y;
 		FakePtrByte p = new FakePtrByte(_out_);
 		if (out_n == 2)
 			for (i = 0; i < pixel_count; ++i) {
@@ -489,7 +489,7 @@ public class PngDecoder extends Decoder {
 
 	private void stbi__de_iphone() {
 		long i = 0;
-		long pixel_count = (long) (img_x * img_y);
+		long pixel_count = img_x * img_y;
 		FakePtrByte p = new FakePtrByte(_out_);
 		if (img_out_n == 3) {
 			for (i = 0; i < pixel_count; ++i) {
@@ -536,7 +536,7 @@ public class PngDecoder extends Decoder {
 		int ioff = 0;
 		int idata_limit = 0;
 		int i = 0;
-		long pal_len = (long) 0;
+		long pal_len = 0;
 		int first = 1;
 		int k = 0;
 		int interlace = 0;
@@ -650,7 +650,7 @@ public class PngDecoder extends Decoder {
 						has_trans = 1;
 						if (depth == 16)
 							for (k = 0; k < img_n; ++k)
-								tc16[k] = (int) stbi__get16be();
+								tc16[k] = stbi__get16be();
 						else
 							for (k = 0; k < img_n; ++k)
 								tc[k] = (short) ((short) (stbi__get16be() & 255) * stbi__depth_scale_table[depth]);
@@ -671,7 +671,7 @@ public class PngDecoder extends Decoder {
 					if ((int) (ioff + c.length) < ioff)
 						return 0;
 					if (ioff + c.length > idata_limit) {
-						long idata_limit_old = (int) idata_limit;
+						long idata_limit_old = idata_limit;
 						if (idata_limit == 0)
 							idata_limit = (int) (c.length > 4096 ? c.length : 4096);
 						while (ioff + c.length > idata_limit) idata_limit *= 2;
@@ -697,7 +697,7 @@ public class PngDecoder extends Decoder {
 						return 1;
 					if (idata == null)
 						stbi__err("no IDAT");
-					bpl = (long) ((img_x * depth + 7) / 8);
+					bpl = (img_x * depth + 7) / 8;
 					raw_len = (int) (bpl * img_y * img_n + img_y);
 
 
@@ -712,7 +712,7 @@ public class PngDecoder extends Decoder {
 						img_out_n = img_n + 1;
 					else
 						img_out_n = img_n;
-					if (stbi__create_png_image(new FakePtrByte(expanded), (long) raw_len, img_out_n, depth, color,
+					if (stbi__create_png_image(new FakePtrByte(expanded), raw_len, img_out_n, depth, color,
 							interlace) == 0)
 						return 0;
 					if (has_trans != 0) {

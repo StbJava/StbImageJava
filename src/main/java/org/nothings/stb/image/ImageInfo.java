@@ -69,11 +69,6 @@ public class ImageInfo
 		}
 
 		info = TgaDecoder.Info(data);
-		if (info != null)
-		{
-			return info;
-		}
-
-		return null;
+		return info;
 	}
 }

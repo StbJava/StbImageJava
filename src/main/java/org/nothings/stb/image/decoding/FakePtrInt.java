@@ -21,7 +21,7 @@ public class FakePtrInt {
 	}
 
 	public void clear(int count) {
-		Arrays.fill(array, offset, offset + count, (int)0);
+		Arrays.fill(array, offset, offset + count, 0);
 	}
 
 	public int get() {

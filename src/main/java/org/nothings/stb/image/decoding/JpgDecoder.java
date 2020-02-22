@@ -157,7 +157,7 @@ public class JpgDecoder extends Decoder {
 
 		Arrays.fill(h.fast, (short) 255);
 		for (i = 0; i < k; ++i) {
-			int s = (int) h.size[i];
+			int s = h.size[i];
 			if (s <= 9) {
 				int c = h.code[i] << (9 - s);
 				int m = 1 << (9 - s);
@@ -177,12 +177,12 @@ public class JpgDecoder extends Decoder {
 				int rs = h.values[fast];
 				int run = (rs >> 4) & 15;
 				int magbits = rs & 15;
-				int len = (int) h.size[fast];
+				int len = h.size[fast];
 				if (magbits != 0 && len + magbits <= 9) {
 					int k = ((i << len) & ((1 << 9) - 1)) >> (9 - magbits);
 					int m = 1 << (magbits - 1);
 					if (k < m)
-						k += (int) ((~0 << magbits) + 1);
+						k += (~0 << magbits) + 1;
 					if (k >= -128 && k <= 127)
 						fast_ac[i] = (short) (k * 256 + run * 16 + len + magbits);
 				}
@@ -196,9 +196,9 @@ public class JpgDecoder extends Decoder {
 
 	private void stbi__grow_buffer_unsafe() throws Exception {
 		do {
-			long b = (long) (nomore != 0 ? 0 : stbi__get8());
+			long b = nomore != 0 ? 0 : stbi__get8();
 			if (b == 0xff) {
-				int c = (int) stbi__get8();
+				int c = stbi__get8();
 				while (c == 0xff) c = stbi__get8();
 				if (c != 0) {
 					marker = (short) c;
@@ -223,7 +223,7 @@ public class JpgDecoder extends Decoder {
 		c = (int) ((code_buffer >> (32 - 9)) & ((1 << 9) - 1));
 		k = h.fast[c];
 		if (k < 255) {
-			int s = (int) h.size[k];
+			int s = h.size[k];
 			if (s > code_bits)
 				return -1;
 			code_buffer <<= s;
@@ -839,7 +839,7 @@ public class JpgDecoder extends Decoder {
 			case 0xDB:
 				L = stbi__get16be() - 2;
 				while (L > 0) {
-					int q = (int) stbi__get8();
+					int q = stbi__get8();
 					int p = q >> 4;
 					int sixteen = p != 0 ? 1 : 0;
 					int t = q & 15;
@@ -850,7 +850,7 @@ public class JpgDecoder extends Decoder {
 						stbi__err("bad DQT table");
 					for (i = 0; i < 64; ++i)
 						dequant[t][stbi__jpeg_dezigzag[i]] =
-								(int) (sixteen != 0 ? stbi__get16be() : stbi__get8());
+								sixteen != 0 ? stbi__get16be() : stbi__get8();
 					L -= sixteen != 0 ? 129 : 65;
 				}
 
@@ -862,7 +862,7 @@ public class JpgDecoder extends Decoder {
 					int[] sizes = new int[16];
 					int i = 0;
 					int n = 0;
-					int q = (int) stbi__get8();
+					int q = stbi__get8();
 					int tc = q >> 4;
 					int th = q & 15;
 					if (tc > 1 || th > 3)
@@ -956,9 +956,9 @@ public class JpgDecoder extends Decoder {
 		if (Ls != 6 + 2 * scan_n)
 			stbi__err("bad SOS len");
 		for (i = 0; i < scan_n; ++i) {
-			int id = (int) stbi__get8();
+			int id = stbi__get8();
 			int which = 0;
-			int q = (int) stbi__get8();
+			int q = stbi__get8();
 			for (which = 0; which < img_n; ++which)
 				if (img_comp[which].id == id)
 					break;
@@ -1128,9 +1128,7 @@ public class JpgDecoder extends Decoder {
 		}
 
 		progressive = m == 0xc2 ? 1 : 0;
-		if (stbi__process_frame_header(scan) == 0)
-			return false;
-		return true;
+		return stbi__process_frame_header(scan) != 0;
 	}
 
 	private int stbi__decode_jpeg_image() throws Exception {
@@ -1152,7 +1150,7 @@ public class JpgDecoder extends Decoder {
 					return 0;
 				if (marker == 0xff)
 					while (!stbi__at_eof()) {
-						int x = (int) stbi__get8();
+						int x = stbi__get8();
 						if (x == 255) {
 							marker = stbi__get8();
 							break;
@@ -1160,7 +1158,7 @@ public class JpgDecoder extends Decoder {
 					}
 			} else if (m == 0xdc) {
 				int Ld = stbi__get16be();
-				long NL = (long) stbi__get16be();
+				long NL = stbi__get16be();
 				if (Ld != 4)
 					stbi__err("bad DNL len");
 				if (NL != img_y)
@@ -1263,8 +1261,8 @@ public class JpgDecoder extends Decoder {
 			int cr = pcr.getAt(i) - 128;
 			int cb = pcb.getAt(i) - 128;
 			r = y_fixed + cr * ((int) (1.40200f * 4096.0f + 0.5f) << 8);
-			g = (int) (y_fixed + cr * -((int) (0.71414f * 4096.0f + 0.5f) << 8) +
-					((cb * -((int) (0.34414f * 4096.0f + 0.5f) << 8)) & 0xffff0000));
+			g = y_fixed + cr * -((int) (0.71414f * 4096.0f + 0.5f) << 8) +
+					((cb * -((int) (0.34414f * 4096.0f + 0.5f) << 8)) & 0xffff0000);
 			b = y_fixed + cb * ((int) (1.77200f * 4096.0f + 0.5f) << 8);
 			r >>= 20;
 			g >>= 20;
@@ -1289,7 +1287,7 @@ public class JpgDecoder extends Decoder {
 	}
 
 	private static int stbi__blinn_8x8(int x, int y) {
-		long t = (long) (x * y + 128);
+		long t = x * y + 128;
 		return (int) ((t + (t >> 8)) >> 8);
 	}
 

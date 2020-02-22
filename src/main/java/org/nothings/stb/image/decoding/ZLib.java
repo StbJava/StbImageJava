@@ -77,7 +77,7 @@ class ZLib {
 		long k = 0;
 		if (num_bits < n)
 			stbi__fill_bits();
-		k = (long) (code_buffer & ((1 << n) - 1));
+		k = code_buffer & ((1 << n) - 1);
 		code_buffer >>= n;
 		num_bits -= n;
 		return k;
@@ -206,8 +206,8 @@ class ZLib {
 		code = 0;
 		for (i = 1; i < 16; ++i) {
 			next_code[i] = code;
-			z.firstcode[i] = (int) code;
-			z.firstsymbol[i] = (int) k;
+			z.firstcode[i] = code;
+			z.firstsymbol[i] = k;
 			code = code + sizes[i];
 			if (sizes[i] != 0)
 				if (code - 1 >= 1 << i)
@@ -219,12 +219,12 @@ class ZLib {
 
 		z.maxcode[16] = 0x10000;
 		for (i = 0; i < num; ++i) {
-			int s = (int) sizelist.getAt(i);
+			int s = sizelist.getAt(i);
 			if (s != 0) {
 				int c = next_code[s] - z.firstcode[s] + z.firstsymbol[s];
-				int fastv = (int) ((s << 9) | i);
+				int fastv = (s << 9) | i;
 				z.size[c] = (short) s;
-				z.value[c] = (int) i;
+				z.value[c] = i;
 				if (s <= 9) {
 					int j = Utility.stbi__bit_reverse(next_code[s], s);
 					while (j < 1 << 9) {
@@ -326,9 +326,9 @@ class ZLib {
 	}
 
 	private int stbi__parse_zlib_header() throws Exception {
-		int cmf = (int) stbi__zget8();
+		int cmf = stbi__zget8();
 		int cm = cmf & 15;
-		int flg = (int) stbi__zget8();
+		int flg = stbi__zget8();
 		if ((cmf * 256 + flg) % 31 != 0)
 			Decoder.stbi__err("bad zlib header");
 		if ((flg & 32) != 0)

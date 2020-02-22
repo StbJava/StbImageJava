@@ -192,8 +192,8 @@ public class BmpDecoder extends Decoder {
 		}
 
 		img_n = ma != 0 ? 4 : 3;
-		if (requiredComponents != null && (int) requiredComponents.getValue() >= 3)
-			target = (int) requiredComponents.getValue();
+		if (requiredComponents != null && requiredComponents.getValue() >= 3)
+			target = requiredComponents.getValue();
 		else
 			target = img_n;
 		_out_ = new byte[target * img_x * img_y];
@@ -222,7 +222,7 @@ public class BmpDecoder extends Decoder {
 			if (info.bpp == 1)
 				for (j = 0; j < img_y; ++j) {
 					int bit_offset = 7;
-					int v = (int) stbi__get8();
+					int v = stbi__get8();
 					for (i = 0; i < img_x; ++i) {
 						int color = (v >> bit_offset) & 0x1;
 						_out_[z++] = pal[color * 4 + 0];
@@ -243,7 +243,7 @@ public class BmpDecoder extends Decoder {
 			else
 				for (j = 0; j < img_y; ++j) {
 					for (i = 0; i < img_x; i += 2) {
-						int v = (int) stbi__get8();
+						int v = stbi__get8();
 						int v2 = 0;
 						if (info.bpp == 4) {
 							v2 = v & 15;
@@ -324,7 +324,7 @@ public class BmpDecoder extends Decoder {
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mr, rshift, rcount) & 255);
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mg, gshift, gcount) & 255);
 						_out_[z++] = (byte) (stbi__shiftsigned(v & mb, bshift, bcount) & 255);
-						a = (long) (ma != 0 ? stbi__shiftsigned(v & ma, ashift, acount) : 255);
+						a = ma != 0 ? stbi__shiftsigned(v & ma, ashift, acount) : 255;
 						all_a |= a;
 						if (target == 4)
 							_out_[z++] = (byte) (a & 255);
@@ -352,7 +352,7 @@ public class BmpDecoder extends Decoder {
 			}
 		}
 
-		if (requiredComponents != null && (int) requiredComponents.getValue() != target)
+		if (requiredComponents != null && requiredComponents.getValue() != target)
 			_out_ = Utility.stbi__convert_format(_out_, target, requiredComponents.getValue(), img_x, img_y);
 
 		return new ImageResult(
