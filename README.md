@@ -19,20 +19,24 @@ Following code loads image from byte array and converts it to 32-bit RGBA:
 3. Open generated project in the Intellij IDEA.
 
 # Reliability & Performance
-This repo contains special app that was written to measure reliability & performance of StbImageJava in comparison to the original stb_image.h: https://github.com/StbJava/StbImageJava/blob/master/testing/src/main/java/stb/image/testing/Testing.java
+There is special app to measure reliability & performance of StbImageSharp in comparison to the original stb_image.h: https://github.com/StbJava/StbImageJava/blob/master/testing/src/main/java/stb/image/testing/Testing.java
 
 It could be built through command `gradlew jar`(jar will appear in the folder testing/build/libs) and ran through: `java -jar testing-1.0.jar <path_to_folder_with_images>`(i.e. `java -jar testing-1.0.jar D:/Projects/TestImages`).
 
 It goes through every image file in the specified folder and tries to load it 10 times with StbImageJava, then 10 times with ljwgl-stb(which is JNI wrapper over original stb_image.h). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
+Moreover ImageIO is included in the testing too.
+
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 
-The byte-wise comprarison results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
+The byte-wise comprarison results are similar for StbImageSharp and Stb.Native(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageJava).
 
-And performance comparison results are:
+And performance comparison results are(times are total loading times):
 ```
-12 -- Total StbJava Loading From memory Time: 23002 ms
-12 -- Total Stb.Native Loading From memory Time: 16759 ms
+13 -- StbImageJava - jpg: 2890, psd: 9, bmp: 101, png: 12785, tga: 830, Total: 16615 ms
+13 -- Stb.Native - jpg: 846, psd: 0, bmp: 35, png: 9350, tga: 587, Total: 10818 ms
+13 -- ImageIO - jpg: 2161, bmp: 17, png: 14760, Total: 16938 ms
+13 -- Total files processed - jpg: 170, psd: 1, bmp: 7, png: 564, tga: 41, Total: 783
 ```
 
 # License
